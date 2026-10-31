@@ -41,6 +41,7 @@
     isActive: (code) => !quiz.dim || pool.has(code) || !pool.size,
     // The cursor label shows the country to find, never the one under the pointer.
     labelFor: () => (game.state === 'playing' ? game.current : null),
+    labelCaption: 'Find',
     onClick: onCountryClick,
   });
   map.focus(quiz.codes);

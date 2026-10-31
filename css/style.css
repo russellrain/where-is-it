@@ -104,6 +104,12 @@ button, input, select { font: inherit; color: inherit; }
   background: rgba(31, 41, 51, 0.92); color: #fff; border-radius: 8px; font-weight: 600; font-size: 0.95rem;
   white-space: nowrap; box-shadow: var(--shadow);
 }
+/* Game mode: the label is the target to find, not the hovered country, so make it read as a prompt. */
+.map-tooltip.has-caption { background: var(--accent); padding-left: 6px; }
+.map-tooltip-caption {
+  padding: 2px 6px; border-radius: 5px; background: rgba(255, 255, 255, 0.22);
+  font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+}
 
 .zoom-controls {
   position: absolute; right: 14px; bottom: 14px; display: flex; flex-direction: column; gap: 6px; z-index: 5;

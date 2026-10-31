@@ -4,6 +4,7 @@
 //     rotate: 0,                         // central meridian offset in degrees
 //     isActive: (code) => true,          // can this country be hovered/clicked?
 //     labelFor: (hovered) => hovered,    // country to show next to the cursor (or null)
+//     labelCaption: null,                // optional small caption before the name, e.g. 'Find'
 //     onClick: (code) => {},
 //   });
 //
@@ -21,7 +22,7 @@
   class GeoMap {
     constructor(container, opts) {
       this.opts = Object.assign(
-        { rotate: 0, isActive: () => true, labelFor: (hovered) => hovered, onClick: null },
+        { rotate: 0, isActive: () => true, labelFor: (hovered) => hovered, labelCaption: null, onClick: null },
         opts,
       );
       this.container = container;
@@ -285,7 +286,18 @@
         const code = inside ? this.opts.labelFor(hovered) : null;
         if (code !== shown) {
           shown = code;
-          if (code) tip.replaceChildren(WhereIsIt.flagImg(code), document.createTextNode(WhereIsIt.byCode.get(code).name));
+          if (code) {
+            const parts = [WhereIsIt.flagImg(code), document.createTextNode(WhereIsIt.byCode.get(code).name)];
+            const caption = this.opts.labelCaption;
+            if (caption) {
+              const c = document.createElement('span');
+              c.className = 'map-tooltip-caption';
+              c.textContent = caption;
+              parts.unshift(c);
+            }
+            tip.replaceChildren(...parts);
+            tip.classList.toggle('has-caption', !!caption);
+          }
         }
         tip.hidden = !code;
         place();
