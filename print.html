@@ -1,28 +1,30 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-quiz-lang>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Printable Worksheet · Where Is It</title>
+  <title data-i18n="printPageTitle">Printable Worksheet · Where Is It</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 0 32 32'><path fill='%23e0483e' d='M12 0C5.37 0 0 5.37 0 12c0 8.4 10.2 18.6 11.2 19.6a1.1 1.1 0 0 0 1.6 0C13.8 30.6 24 20.4 24 12 24 5.37 18.63 0 12 0z'/><circle cx='12' cy='12' r='4.6' fill='white'/></svg>">
   <link rel="stylesheet" href="css/style.css">
   <style id="page-size">@page { size: landscape; margin: 0.4in; }</style>
+  <script src="js/i18n.js"></script>
   <script src="js/theme.js"></script>
 </head>
 <body class="print-page">
   <div class="print-toolbar">
-    <a class="icon-btn" id="back" title="Back to quiz setup" aria-label="Back to quiz setup"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-    <strong class="print-heading">Printable worksheet</strong>
-    <span class="print-warning" id="crowded" hidden>Some numbers are crowded together on the map. Splitting this into smaller worksheets (e.g. one per region) will be easier to read.</span>
-    <label>Page
+    <a class="icon-btn" id="back" title="Back to quiz setup" aria-label="Back to quiz setup" data-i18n-title="backToSetup" data-i18n-aria-label="backToSetup"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <strong class="print-heading" data-i18n="printableWorksheet">Printable worksheet</strong>
+    <span class="print-warning" id="crowded" data-i18n="crowded" hidden>Some numbers are crowded together on the map. Splitting this into smaller worksheets (e.g. one per region) will be easier to read.</span>
+    <label><span data-i18n="page">Page</span>
       <select id="orientation">
-        <option value="auto">Auto</option>
-        <option value="landscape">Landscape</option>
-        <option value="portrait">Portrait</option>
+        <option value="auto" data-i18n="orientAuto">Auto</option>
+        <option value="landscape" data-i18n="orientLandscape">Landscape</option>
+        <option value="portrait" data-i18n="orientPortrait">Portrait</option>
       </select>
     </label>
-    <label class="check"><input type="checkbox" id="answer-key"> Answer key page</label>
-    <button type="button" class="btn primary" id="print"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 9V3.5h11V9"/><path d="M6.5 17.5H5a2 2 0 0 1-2-2V11a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4.5a2 2 0 0 1-2 2h-1.5"/><rect x="6.5" y="14" width="11" height="6.5" rx="1"/></svg>Print</button>
+    <label class="check"><input type="checkbox" id="answer-key"> <span data-i18n="answerKeyPage">Answer key page</span></label>
+    <button type="button" class="btn primary" id="print"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 9V3.5h11V9"/><path d="M6.5 17.5H5a2 2 0 0 1-2-2V11a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4.5a2 2 0 0 1-2 2h-1.5"/><rect x="6.5" y="14" width="11" height="6.5" rx="1"/></svg><span data-i18n="print">Print</span></button>
+    <select class="lang-select" aria-label="Language" hidden></select>
     <button type="button" class="icon-btn theme-toggle" aria-label="Switch theme"><svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z" fill="currentColor"/></svg><svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
   </div>
   <div class="sheets" id="sheets"></div>
@@ -31,6 +33,7 @@
   <script src="vendor/topojson-client.min.js"></script>
   <script src="js/data/world.js"></script>
   <script src="js/data/countries.js"></script>
+  <script src="js/data/country-names.js"></script>
   <script src="js/common.js"></script>
   <script src="js/map.js"></script>
   <script src="js/print.js"></script>

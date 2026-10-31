@@ -20,7 +20,8 @@
   function apply(theme) {
     root.dataset.theme = theme;
     document.querySelectorAll('.theme-toggle').forEach((btn) => {
-      const label = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+      const key = theme === 'dark' ? 'themeToLight' : 'themeToDark';
+      const label = window.I18N ? I18N.t(key) : theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
       btn.title = label;
       btn.setAttribute('aria-label', label);
     });
@@ -31,6 +32,8 @@
   media.addEventListener('change', (e) => {
     if (!saved()) apply(e.matches ? 'dark' : 'light');
   });
+
+  document.addEventListener('langchange', () => apply(root.dataset.theme));
 
   document.addEventListener('DOMContentLoaded', () => {
     apply(root.dataset.theme);

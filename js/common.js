@@ -28,6 +28,7 @@
       count: int('n'), // ask this many (random subset); null = all
       guesses: Math.min(int('g') || DEFAULTS.guesses, 10),
       dim: bool('d', DEFAULTS.dim),
+      langs: I18N.parseLangs(p.get('l')), // languages students may use; null = all
     };
   }
 
@@ -39,8 +40,19 @@
     if (q.count && q.count < q.codes.length) p.set('n', q.count);
     if (q.guesses && q.guesses !== DEFAULTS.guesses) p.set('g', q.guesses);
     if (q.dim === false) p.set('d', '0');
+    if (q.langs && q.langs.length < I18N.CODES.length) p.set('l', q.langs.join(','));
     // Keep commas readable in the link.
     return '?' + p.toString().replace(/%2C/g, ',');
+  }
+
+  /** Country name in the current language (falls back to English). */
+  function countryName(code) {
+    return (window.GEO_COUNTRY_NAMES || {})[I18N.lang]?.[code] || byCode.get(code).name;
+  }
+
+  /** Lowercase without accents, for forgiving search ("peru" finds "Perú"). */
+  function fold(s) {
+    return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   }
 
   function pageUrl(page, query) {
@@ -117,12 +129,11 @@
   }
 
   const PIN_SVG = '<svg class="pin" viewBox="0 0 24 32" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 8.4 10.2 18.6 11.2 19.6a1.1 1.1 0 0 0 1.6 0C13.8 30.6 24 20.4 24 12 24 5.37 18.63 0 12 0z"/><circle cx="12" cy="12" r="4.6"/></svg>';
-  const TAGLINE = 'The country-finding game';
-
   /** The "WHERE IS IT 📍" logo. opts.tagline adds the subtitle; opts.large for hero size. */
   function wordmark(opts = {}) {
     const w = el('span', { class: `wordmark${opts.large ? ' large' : ''}`, role: 'img', 'aria-label': 'Where Is It' });
-    w.innerHTML = `<span class="wm-name">Where Is It${PIN_SVG}</span>` + (opts.tagline ? `<span class="wm-tag">${TAGLINE}</span>` : '');
+    w.innerHTML = `<span class="wm-name">Where Is It${PIN_SVG}</span>` + (opts.tagline ? '<span class="wm-tag"></span>' : '');
+    if (opts.tagline) w.querySelector('.wm-tag').textContent = I18N.t('tagline');
     return w;
   }
 
@@ -148,7 +159,8 @@
     flagImg,
     wordmark,
     pinIcon,
-    TAGLINE,
+    countryName,
+    fold,
     formatTime,
     shuffle,
     copyText,

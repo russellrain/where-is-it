@@ -38,6 +38,7 @@ All libraries, map data and flags are bundled locally. Nothing uses ES modules o
 | `n` | Ask this many (random subset of `c`) each game | all |
 | `g` | Guesses per country before the hint | 3 |
 | `d` | Grey out and disable countries that aren't in the quiz | 1 |
+| `l` | Languages students may use, e.g. `es` or `en,es`. With more than one, students get a language picker. | all |
 
 `setup.html` accepts the same parameters. The **✎ Customize** link on a quiz's start and results screens opens it in `setup.html` so anyone can change it and get their own link.
 
@@ -48,6 +49,7 @@ index.html, setup.html   pages
 privacy.html             privacy policy (linked from both footers)
 css/style.css            all styles
 js/common.js             URL parsing, helpers
+js/i18n.js               translations (English, Spanish), language picker
 js/map.js                GeoMap: D3 map with pan/zoom, cursor label, tiny-country dots
 js/game.js               student game
 js/setup.js              teacher setup
@@ -58,6 +60,12 @@ tools/build-data.mjs     regenerates js/data, assets/flags, vendor from npm pack
 ```
 
 To regenerate data (for example after upgrading a package): `npm install && npm run build-data`.
+
+## Languages
+
+The game, setup page and worksheet are available in English and Spanish. Students start in the language they last picked, or their device language, as long as the quiz allows it (`l` above). The setup page's own language is separate from the quiz's student languages. The privacy policy is English only.
+
+To add a language: add it to `LANGUAGES` in `js/i18n.js` along with its `STRINGS` and `REGIONS` tables, add it to `TRANSLATIONS` in `tools/build-data.mjs` (and any name fixes to `RENAME_I18N`), then run `npm run build-data` to regenerate `js/data/country-names.js`.
 
 ## Credits & licenses
 

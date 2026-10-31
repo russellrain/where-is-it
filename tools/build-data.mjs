@@ -4,6 +4,7 @@
 // Outputs (committed to the repo so the site runs with no build step):
 //   js/data/world.js      window.GEO_WORLD     - TopoJSON country shapes, ids = ISO alpha-2 codes
 //   js/data/countries.js  window.GEO_COUNTRIES - names, regions, sovereignty, capital, lat/lng
+//   js/data/country-names.js  window.GEO_COUNTRY_NAMES - country names in other app languages
 //   assets/flags/*.svg    flag images for every country on the map
 //   vendor/*.js           d3 + topojson-client
 //
@@ -81,7 +82,48 @@ const countries = [...groups.keys()]
   })
   .sort((a, b) => a.name.localeCompare(b.name));
 
+// Country names in other app languages: app language code -> world-countries translation key.
+const TRANSLATIONS = { es: 'spa' };
+// Fixes for translated names that are awkward, outdated or too long for the game (by country code).
+const RENAME_I18N = {
+  es: {
+    AX: 'Islas Åland',
+    BH: 'Baréin',
+    BN: 'Brunéi',
+    BW: 'Botsuana',
+    CD: 'República Democrática del Congo',
+    CG: 'República del Congo',
+    DJ: 'Yibuti',
+    FO: 'Islas Feroe',
+    GD: 'Granada',
+    GS: 'Georgia del Sur',
+    IR: 'Irán',
+    KG: 'Kirguistán',
+    MF: 'San Martín',
+    SH: 'Santa Elena',
+    SK: 'Eslovaquia',
+    SL: 'Sierra Leona',
+    SZ: 'Esuatini',
+    TC: 'Islas Turcas y Caicos',
+    TF: 'Tierras Australes Francesas',
+    VG: 'Islas Vírgenes Británicas',
+    ZA: 'Sudáfrica',
+  },
+};
+const countryNames = {};
+for (const [lang, key] of Object.entries(TRANSLATIONS)) {
+  countryNames[lang] = {};
+  for (const { code } of countries) {
+    const name = RENAME_I18N[lang]?.[code] ?? byAlpha2.get(code).translations?.[key]?.common;
+    if (name) countryNames[lang][code] = name;
+  }
+}
+
 fs.mkdirSync(path.join(root, 'js', 'data'), { recursive: true });
+fs.writeFileSync(
+  path.join(root, 'js', 'data', 'country-names.js'),
+  `window.GEO_COUNTRY_NAMES=${JSON.stringify(countryNames).replace(/\},"/g, '},\n"')};\n`,
+);
 fs.writeFileSync(path.join(root, 'js', 'data', 'world.js'), `window.GEO_WORLD=${JSON.stringify(world)};\n`);
 fs.writeFileSync(
   path.join(root, 'js', 'data', 'countries.js'),

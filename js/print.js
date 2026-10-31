@@ -5,7 +5,8 @@
 // the map is drawn after layout so it can fill whatever space the word bank leaves.
 (function () {
   'use strict';
-  const { byCode, el } = WhereIsIt;
+  const { el, countryName } = WhereIsIt;
+  const { t } = I18N;
   const $ = (id) => document.getElementById(id);
   const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -67,7 +68,7 @@
     return list.map((x, i) => ({ ...x, n: i + 1 }));
   })();
   let crowded = 0; // how many numbers ended up far from their country on the last map drawn
-  const byName = numbered.slice().sort((a, b) => byCode.get(a.code).name.localeCompare(byCode.get(b.code).name));
+  const byName = () => numbered.slice().sort((a, b) => I18N.compare(countryName(a.code), countryName(b.code)));
 
   // ---------------------------------------------------------------- layout
 
@@ -91,7 +92,7 @@
     sheets.replaceChildren();
     if (!codes.length) {
       sheets.append(
-        el('div', { class: 'print-empty' }, 'No countries selected. ', el('a', { href: $('back').href }, 'Choose some countries'), ' first.'),
+        el('div', { class: 'print-empty' }, `${t('printEmpty')} `, el('a', { href: $('back').href }, t('printEmptyLink')), ` ${t('printEmptyAfter')}`),
       );
       $('print').disabled = true;
       return;
@@ -106,7 +107,7 @@
       sheets.append(s);
       return s;
     };
-    const title = quiz.title || 'Find the Countries';
+    const title = quiz.title || t('findTheCountries');
 
     // Worksheet: header, map, word bank.
     const sheet = newSheet();
@@ -115,7 +116,7 @@
         'header',
         { class: 'sheet-head' },
         el('h1', {}, title),
-        el('div', { class: 'name-line' }, 'Name', el('span')),
+        el('div', { class: 'name-line' }, t('nameLine'), el('span')),
       ),
     );
     const mapBox = el('div', { class: 'sheet-map' });
@@ -126,24 +127,24 @@
     // A long word bank would squeeze the map; move it onto its own page(s) instead.
     if (bank.offsetHeight > sheet.clientHeight * 0.42) {
       bank.remove();
-      flowList(newSheet, `${title} · Word bank`, () => wordBank([]), bankItems());
+      flowList(newSheet, t('wordBankHeading', { title }), () => wordBank([]), bankItems());
     }
     const scale = drawMap(mapBox);
 
     if ($('answer-key').checked) {
-      const keyItems = numbered.map(({ code, n }) => el('li', {}, el('b', {}, String(n)), byCode.get(code).name));
-      flowList(newSheet, `${title} · Answer key`, () => el('ol', { class: 'key-list' }), keyItems);
+      const keyItems = numbered.map(({ code, n }) => el('li', {}, el('b', {}, String(n)), countryName(code)));
+      flowList(newSheet, t('answerKeyHeading', { title }), () => el('ol', { class: 'key-list' }), keyItems);
     }
     return scale;
   }
 
-  const bankItems = () => byName.map(({ code }) => el('li', {}, el('span', { class: 'blank' }), byCode.get(code).name));
+  const bankItems = () => byName().map(({ code }) => el('li', {}, el('span', { class: 'blank' }), countryName(code)));
 
   function wordBank(items = bankItems()) {
     return el(
       'div',
       { class: 'word-bank' },
-      el('h2', {}, 'Write the number from the map next to each country.'),
+      el('h2', {}, t('wordBankInstructions')),
       el('ul', {}, items),
     );
   }
@@ -159,7 +160,7 @@
       const sheet = newSheet();
       const list = makeList();
       const ul = list.matches('ul, ol') ? list : list.querySelector('ul, ol');
-      sheet.append(el('header', { class: 'sheet-head' }, el('h1', {}, page ? `${heading} (continued)` : heading)), list);
+      sheet.append(el('header', { class: 'sheet-head' }, el('h1', {}, page ? t('continued', { heading }) : heading)), list);
       const start = i;
       for (; i < items.length; i++) {
         ul.append(items[i]);
@@ -263,5 +264,6 @@
 
   $('orientation').onchange = render;
   $('answer-key').onchange = render;
+  document.addEventListener('langchange', render);
   render();
 })();

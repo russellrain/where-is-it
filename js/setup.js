@@ -1,7 +1,8 @@
 // Teacher setup: choose countries and options, produce a shareable quiz link.
 (function () {
   'use strict';
-  const { byCode, el, flagImg } = WhereIsIt;
+  const { byCode, el, flagImg, countryName, fold } = WhereIsIt;
+  const { t } = I18N;
   const $ = (id) => document.getElementById(id);
 
   const initial = WhereIsIt.parseQuiz(location.search);
@@ -19,6 +20,18 @@
   opt.count.value = initial.count || '';
   opt.guesses.value = String(initial.guesses);
   opt.dim.checked = initial.dim;
+
+  // Student languages: one checkbox per language; all checked = no restriction (param left out).
+  const langBoxes = I18N.CODES.map((code) => {
+    const box = el('input', { type: 'checkbox', value: code });
+    box.checked = !initial.langs || initial.langs.includes(code);
+    box.addEventListener('change', () => {
+      if (!langBoxes.some((b) => b.checked)) box.checked = true; // keep at least one
+      updateLink();
+    });
+    $('opt-langs').append(el('label', { lang: code }, box, I18N.LANGUAGES[code]));
+    return box;
+  });
   $('territories').checked = includeTerritories;
 
   const visible = (c) => includeTerritories || c.sovereign;
@@ -66,11 +79,11 @@
     for (const r of regionNames) {
       if (!membersOf(r).length) continue;
       const rKey = r;
-      const rRow = groupRow('region', rKey, r, () => membersOf(r));
+      const rRow = groupRow('region', rKey, I18N.region(r), () => membersOf(r));
       const rBody = el('div', { hidden: !expanded.has(rKey) });
       tree.append(rRow, rBody);
 
-      const subNames = [...groups.get(r).keys()].sort();
+      const subNames = [...groups.get(r).keys()].sort((a, b) => I18N.compare(I18N.region(a), I18N.region(b)));
       const flat = subNames.length === 1; // e.g. Antarctica
       for (const s of subNames) {
         const members = membersOf(r, s);
@@ -79,19 +92,21 @@
         if (!flat) {
           const sKey = `${r}|${s}`;
           const sBody = el('div', { hidden: !expanded.has(sKey) });
-          rBody.append(groupRow('sub', sKey, s, () => membersOf(r, s)), sBody);
+          rBody.append(groupRow('sub', sKey, I18N.region(s), () => membersOf(r, s)), sBody);
           target = sBody;
         }
-        for (const c of members.sort((a, b) => a.name.localeCompare(b.name))) {
+        for (const c of members.sort((a, b) => I18N.compare(countryName(a.code), countryName(b.code)))) {
           const box = el('input', { type: 'checkbox', onchange: () => toggle([c.code], box.checked) });
-          const zoom = el('button', { class: 'zoom-to', type: 'button', title: 'Show on map', onclick: () => zoomTo([c.code]) }, '⌖');
+          const zoom = el('button', { class: 'zoom-to', type: 'button', title: t('showOnMap'), onclick: () => zoomTo([c.code]) }, '⌖');
+          const name = countryName(c.code);
           const row = el(
             'div',
             { class: 'row country' },
-            el('label', {}, box, flagImg(c.code), el('span', { class: 'name' }, c.name), c.sovereign ? null : el('span', { class: 'terr' }, 'territory')),
+            el('label', {}, box, flagImg(c.code), el('span', { class: 'name' }, name), c.sovereign ? null : el('span', { class: 'terr' }, t('territory'))),
             zoom,
           );
-          row.dataset.name = c.name.toLowerCase();
+          // Search matches the English name too, so either works whatever language the page is in.
+          row.dataset.name = fold(name === c.name ? name : `${name}|${c.name}`);
           target.append(row);
           countryRows.push({ row, box, c });
         }
@@ -101,10 +116,10 @@
   }
 
   function groupRow(kind, key, label, members) {
-    const caret = el('button', { class: `caret${expanded.has(key) ? ' open' : ''}`, type: 'button', 'aria-label': 'Expand' }, '▶');
+    const caret = el('button', { class: `caret${expanded.has(key) ? ' open' : ''}`, type: 'button', 'aria-label': t('expand') }, '▶');
     const box = el('input', { type: 'checkbox' });
     const count = el('span', { class: 'count' });
-    const zoom = el('button', { class: 'zoom-to', type: 'button', title: 'Show on map', onclick: () => zoomTo(members().map((c) => c.code)) }, '⌖');
+    const zoom = el('button', { class: 'zoom-to', type: 'button', title: t('showOnMap'), onclick: () => zoomTo(members().map((c) => c.code)) }, '⌖');
     const row = el('div', { class: `row ${kind}` }, caret, el('label', {}, box, el('span', { class: 'name' }, label)), zoom, count);
     caret.onclick = () => {
       const body = row.nextElementSibling;
@@ -144,7 +159,7 @@
   // ---------------------------------------------------------------- search & filters
 
   $('search').addEventListener('input', (e) => {
-    const q = e.target.value.trim().toLowerCase();
+    const q = fold(e.target.value.trim());
     for (const { row } of countryRows) row.hidden = q && !row.dataset.name.includes(q);
     // Show/expand groups that contain matches while searching.
     for (const body of tree.querySelectorAll('div:not(.row)')) {
@@ -170,6 +185,13 @@
 
   for (const input of Object.values(opt)) input.addEventListener('input', updateLink);
 
+  // The page's own language (header picker) is separate from the quiz's student languages.
+  document.addEventListener('langchange', () => {
+    buildTree();
+    $('search').dispatchEvent(new Event('input'));
+    map.refreshTooltip(true);
+  });
+
   // ---------------------------------------------------------------- link
 
   function currentQuiz() {
@@ -181,6 +203,7 @@
       count: Number.isFinite(count) && count > 0 ? count : null,
       guesses: parseInt(opt.guesses.value, 10),
       dim: opt.dim.checked,
+      langs: langBoxes.filter((b) => b.checked).map((b) => b.value),
     };
   }
 
@@ -190,8 +213,8 @@
     opt.count.max = n || '';
     const asked = q.count ? Math.min(q.count, n) : n;
     $('summary').textContent = n
-      ? `${n} ${n === 1 ? 'country' : 'countries'} selected${asked < n ? ` · ${asked} asked per game` : ''}`
-      : 'No countries selected';
+      ? t('nSelected', { n }) + (asked < n ? t('askedPerGame', { n: asked }) : '')
+      : t('noneSelected');
     const query = WhereIsIt.quizQuery(q);
     const url = n ? WhereIsIt.pageUrl('index.html', query) : '';
     $('link').value = url;
@@ -214,8 +237,8 @@
   $('copy-link').onclick = async () => {
     const label = $('copy-link').querySelector('.label');
     const ok = await WhereIsIt.copyText($('link').value);
-    label.textContent = ok ? 'Copied ✓' : 'Copy failed';
-    setTimeout(() => (label.textContent = 'Copy link'), 2000);
+    label.textContent = t(ok ? 'copied' : 'copyFailed');
+    setTimeout(() => (label.textContent = t('copyLink')), 2000);
   };
   $('link').addEventListener('focus', (e) => e.target.select());
 

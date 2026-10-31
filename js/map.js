@@ -287,7 +287,7 @@
         if (code !== shown) {
           shown = code;
           if (code) {
-            const parts = [WhereIsIt.flagImg(code), document.createTextNode(WhereIsIt.byCode.get(code).name)];
+            const parts = [WhereIsIt.flagImg(code), document.createTextNode(WhereIsIt.countryName(code))];
             const caption = this.opts.labelCaption;
             if (caption) {
               const c = document.createElement('span');
@@ -346,7 +346,11 @@
         inside = false;
         setHover(null);
       };
-      this.refreshTooltip = updateTip;
+      // force: rebuild the label even if it's for the same country (e.g. after a language switch).
+      this.refreshTooltip = (force) => {
+        if (force) shown = null;
+        updateTip();
+      };
     }
   }
 

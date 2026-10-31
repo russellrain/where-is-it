@@ -206,6 +206,17 @@ input, select { background: var(--panel); }
 .icon-btn:hover { background: var(--hover-bg); }
 .icon-btn svg { width: 20px; height: 20px; }
 /* Show the moon in light mode (switch to dark) and the sun in dark mode (switch to light). */
+.lang-select {
+  flex: none; height: 40px; padding: 0 8px; border-radius: 10px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--ink); font: inherit; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+}
+.lang-select:hover { background: var(--hover-bg); }
+.lang-picker { position: relative; display: inline-flex; flex: none; }
+.lang-picker[hidden] { display: none; }
+.lang-picker .lang-select { appearance: none; -webkit-appearance: none; padding: 0 32px 0 34px; }
+.lang-picker svg { position: absolute; top: 50%; transform: translateY(-50%); pointer-events: none; }
+.lang-picker .i-translate { left: 10px; width: 19px; height: 19px; color: var(--ink-soft); }
+.lang-picker .i-chevron { right: 11px; width: 13px; height: 13px; color: var(--ink); }
 .theme-toggle .i-sun, [data-theme='dark'] .theme-toggle .i-moon { display: none; }
 [data-theme='dark'] .theme-toggle .i-sun { display: block; }
 .prompt { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 220px; }
@@ -252,6 +263,9 @@ input, select { background: var(--panel); }
   font-size: 0.85rem; color: var(--ink-soft); text-decoration: none; opacity: 0.8;
 }
 .subtle-link:hover { opacity: 1; text-decoration: underline; }
+/* Quiet footer row at the bottom of a card, for secondary links like Customize. */
+.card-foot { display: flex; justify-content: flex-end; margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--line); }
+.card-foot .subtle-link { margin-left: 0; align-self: auto; }
 .card label.field { display: block; margin-top: 16px; font-weight: 600; }
 .card label.field input {
   display: block; width: 100%; margin-top: 6px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
@@ -303,9 +317,13 @@ input, select { background: var(--panel); }
   width: 380px; flex: none; display: flex; flex-direction: column; background: var(--panel);
   border-right: 1px solid var(--line); min-height: 0;
 }
-.sidebar header { position: relative; padding: 16px 16px 8px; }
-.sidebar header .theme-toggle { position: absolute; top: 14px; right: 16px; }
-.sidebar header p { margin: 12px 0 0; color: var(--ink-soft); font-size: 0.9rem; }
+.sidebar header {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 8px; align-items: start; padding: 14px 16px 8px;
+}
+.sidebar header .wordmark { grid-area: 1 / 1; margin-top: 2px; }
+.sidebar header .wm-tag { line-height: 1.3; }
+.sidebar header .header-tools { grid-area: 1 / 2; display: flex; gap: 8px; }
+.sidebar header p { grid-column: 1 / -1; margin: 12px 0 0; color: var(--ink-soft); font-size: 0.9rem; }
 .sidebar .section { padding: 10px 16px; border-top: 1px solid var(--line); }
 .sidebar .section h3 { margin: 0 0 8px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft); }
 .tree-tools { display: flex; gap: 8px; align-items: center; }
@@ -336,11 +354,15 @@ input, select { background: var(--panel); }
   padding: 7px 9px; border-radius: 8px; border: 1px solid var(--line); width: 100%; font-weight: 400;
 }
 .options .wide { grid-column: span 2; }
+.lang-opts .opt-heading { display: block; font-weight: 600; margin-bottom: 4px; }
+.lang-opts small { display: block; margin-top: 2px; color: var(--ink-soft); font-size: 0.8rem; }
+.options .lang-checks { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.options .lang-checks label { flex-direction: row; align-items: center; gap: 6px; font-weight: 500; }
 .share { display: flex; flex-direction: column; gap: 8px; }
 .share .summary { font-weight: 700; }
 .share input { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); font-size: 0.85rem; color: var(--ink-soft); }
-.share .row-btns { display: flex; gap: 8px; }
-.share .row-btns .btn { flex: 1; }
+.share .row-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.share .row-btns .btn { flex: 1 1 auto; }
 .map-hint {
   position: absolute; left: 50%; top: 12px; transform: translateX(-50%); z-index: 5; background: var(--panel);
   padding: 6px 14px; border-radius: 999px; font-size: 0.85rem; color: var(--ink-soft); box-shadow: var(--shadow);

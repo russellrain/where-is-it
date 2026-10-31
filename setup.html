@@ -3,64 +3,73 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Create a Quiz · Where Is It</title>
+  <title data-i18n="setupPageTitle">Create a Quiz · Where Is It</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 0 32 32'><path fill='%23e0483e' d='M12 0C5.37 0 0 5.37 0 12c0 8.4 10.2 18.6 11.2 19.6a1.1 1.1 0 0 0 1.6 0C13.8 30.6 24 20.4 24 12 24 5.37 18.63 0 12 0z'/><circle cx='12' cy='12' r='4.6' fill='white'/></svg>">
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/i18n.js"></script>
   <script src="js/theme.js"></script>
 </head>
 <body>
   <div class="setup">
     <aside class="sidebar">
       <header>
-        <button type="button" class="icon-btn theme-toggle" aria-label="Switch theme"><svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z" fill="currentColor"/></svg><svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
-        <a class="wordmark" href="index.html" aria-label="Where Is It — home"><span class="wm-name">Where Is It<svg class="pin" viewBox="0 0 24 32" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 8.4 10.2 18.6 11.2 19.6a1.1 1.1 0 0 0 1.6 0C13.8 30.6 24 20.4 24 12 24 5.37 18.63 0 12 0z"/><circle cx="12" cy="12" r="4.6"/></svg></span><span class="wm-tag">The country-finding game</span></a>
-        <p>Pick regions or individual countries, or click countries on the map, then share the link with students.</p>
+        <div class="header-tools">
+          <select class="lang-select" aria-label="Language" hidden></select>
+          <button type="button" class="icon-btn theme-toggle" aria-label="Switch theme"><svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z" fill="currentColor"/></svg><svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        </div>
+        <a class="wordmark" href="index.html" aria-label="Where Is It — home"><span class="wm-name">Where Is It<svg class="pin" viewBox="0 0 24 32" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 8.4 10.2 18.6 11.2 19.6a1.1 1.1 0 0 0 1.6 0C13.8 30.6 24 20.4 24 12 24 5.37 18.63 0 12 0z"/><circle cx="12" cy="12" r="4.6"/></svg></span><span class="wm-tag" data-i18n="tagline">The country-finding game</span></a>
+        <p data-i18n="setupIntro">Pick regions or individual countries, or click countries on the map, then share the link with students.</p>
       </header>
       <div class="section">
         <div class="tree-tools">
-          <input type="search" id="search" placeholder="Search countries…" aria-label="Search countries">
-          <button type="button" class="btn" id="clear" style="padding:8px 12px">Clear</button>
+          <input type="search" id="search" placeholder="Search countries…" aria-label="Search countries" data-i18n-placeholder="searchCountries" data-i18n-aria-label="searchCountries">
+          <button type="button" class="btn" id="clear" style="padding:8px 12px" data-i18n="clear">Clear</button>
         </div>
         <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:0.9rem">
-          <input type="checkbox" id="territories"> Include territories &amp; dependencies (e.g. Greenland, Puerto Rico)
+          <input type="checkbox" id="territories"> <span data-i18n="includeTerritories">Include territories &amp; dependencies (e.g. Greenland, Puerto Rico)</span>
         </label>
       </div>
       <div class="tree" id="tree"></div>
       <div class="section">
-        <h3>Quiz options</h3>
+        <h3 data-i18n="quizOptions">Quiz options</h3>
         <div class="options">
-          <label class="wide">Quiz title
-            <input type="text" id="opt-title" maxlength="80" placeholder="e.g. Countries of Africa">
+          <label class="wide"><span data-i18n="quizTitle">Quiz title</span>
+            <input type="text" id="opt-title" maxlength="80" placeholder="e.g. Countries of Africa" data-i18n-placeholder="quizTitlePlaceholder">
           </label>
-          <label>Questions
-            <input type="number" id="opt-count" min="1" placeholder="All">
+          <label><span data-i18n="questions">Questions</span>
+            <input type="number" id="opt-count" min="1" placeholder="All" data-i18n-placeholder="all">
           </label>
-          <label>Guesses per country
+          <label><span data-i18n="guessesPerCountry">Guesses per country</span>
             <select id="opt-guesses">
               <option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option>
             </select>
           </label>
-          <label class="check"><input type="checkbox" id="opt-dim" checked> Grey out countries that aren’t in the quiz</label>
+          <label class="check"><input type="checkbox" id="opt-dim" checked> <span data-i18n="dimOthers">Grey out countries that aren’t in the quiz</span></label>
+          <div class="wide lang-opts">
+            <span class="opt-heading" data-i18n="studentLanguages">Student languages</span>
+            <div class="lang-checks" id="opt-langs"></div>
+            <small data-i18n="studentLanguagesHint">Students can switch between the languages you check.</small>
+          </div>
         </div>
       </div>
       <div class="section share">
-        <div class="summary" id="summary">No countries selected</div>
-        <input type="text" id="link" readonly aria-label="Quiz link">
+        <div class="summary" id="summary"></div>
+        <input type="text" id="link" readonly aria-label="Quiz link" data-i18n-aria-label="quizLink">
         <div class="row-btns">
-          <button type="button" class="btn primary" id="copy-link" disabled><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="12" height="12" rx="2.2"/><path d="M15.5 5.5v-.3a1.7 1.7 0 0 0-1.7-1.7H5.2a1.7 1.7 0 0 0-1.7 1.7v8.6a1.7 1.7 0 0 0 1.7 1.7h.3"/></svg><span class="label">Copy link</span></button>
-          <a class="btn" id="open-link" target="_blank" rel="noopener" aria-disabled="true">Try it ↗</a>
-          <a class="btn" id="print-link" target="_blank" rel="noopener" aria-disabled="true" title="Printable map worksheet"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 9V3.5h11V9"/><path d="M6.5 17.5H5a2 2 0 0 1-2-2V11a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4.5a2 2 0 0 1-2 2h-1.5"/><rect x="6.5" y="14" width="11" height="6.5" rx="1"/></svg>Print</a>
+          <button type="button" class="btn primary" id="copy-link" disabled><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="12" height="12" rx="2.2"/><path d="M15.5 5.5v-.3a1.7 1.7 0 0 0-1.7-1.7H5.2a1.7 1.7 0 0 0-1.7 1.7v8.6a1.7 1.7 0 0 0 1.7 1.7h.3"/></svg><span class="label" data-i18n="copyLink">Copy link</span></button>
+          <a class="btn" id="open-link" target="_blank" rel="noopener" aria-disabled="true" data-i18n="tryIt">Try it ↗</a>
+          <a class="btn" id="print-link" target="_blank" rel="noopener" aria-disabled="true" title="Printable map worksheet" data-i18n-title="printTitle"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 9V3.5h11V9"/><path d="M6.5 17.5H5a2 2 0 0 1-2-2V11a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4.5a2 2 0 0 1-2 2h-1.5"/><rect x="6.5" y="14" width="11" height="6.5" rx="1"/></svg><span data-i18n="print">Print</span></a>
         </div>
       </div>
     </aside>
     <div class="map-wrap" id="map">
-      <div class="map-hint">Click countries to add or remove them</div>
+      <div class="map-hint" data-i18n="mapHint">Click countries to add or remove them</div>
       <div class="zoom-controls">
-        <button type="button" id="zoom-in" title="Zoom in" aria-label="Zoom in">+</button>
-        <button type="button" id="zoom-out" title="Zoom out" aria-label="Zoom out">−</button>
-        <button type="button" id="zoom-reset" title="Zoom to selection" aria-label="Zoom to selection">⤢</button>
+        <button type="button" id="zoom-in" title="Zoom in" aria-label="Zoom in" data-i18n-title="zoomIn" data-i18n-aria-label="zoomIn">+</button>
+        <button type="button" id="zoom-out" title="Zoom out" aria-label="Zoom out" data-i18n-title="zoomOut" data-i18n-aria-label="zoomOut">−</button>
+        <button type="button" id="zoom-reset" title="Zoom to selection" aria-label="Zoom to selection" data-i18n-title="zoomToSelection" data-i18n-aria-label="zoomToSelection">⤢</button>
       </div>
-      <div class="attribution">Made by <a href="https://russpuppy.com" target="_blank" rel="noopener">russpuppy</a> · Map: <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a> · <a href="privacy.html" target="_blank" rel="noopener">Privacy</a></div>
+      <div class="attribution"><span data-i18n="madeBy">Made by</span> <a href="https://russpuppy.com" target="_blank" rel="noopener">russpuppy</a> · <span data-i18n="mapCredit">Map:</span> <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a> · <a href="privacy.html" target="_blank" rel="noopener" data-i18n="privacy">Privacy</a></div>
     </div>
   </div>
 
@@ -68,6 +77,7 @@
   <script src="vendor/topojson-client.min.js"></script>
   <script src="js/data/world.js"></script>
   <script src="js/data/countries.js"></script>
+  <script src="js/data/country-names.js"></script>
   <script src="js/common.js"></script>
   <script src="js/map.js"></script>
   <script src="js/setup.js"></script>
