@@ -348,14 +348,14 @@
       ? t('nSelected', { n }) + (asked < n ? t('askedPerGame', { n: asked }) : '')
       : t('noneSelected');
     const query = WhereIsIt.quizQuery(q);
-    const url = n ? WhereIsIt.pageUrl('index.html', query) : '';
+    const url = n ? WhereIsIt.pageUrl('./', query) : '';
     $('link').value = url;
     $('copy-link').disabled = !n;
     const open = $('open-link');
     const print = $('print-link');
     if (n) {
       open.href = url;
-      print.href = WhereIsIt.pageUrl('print.html', query);
+      print.href = WhereIsIt.pageUrl('print', query);
     } else {
       open.removeAttribute('href');
       print.removeAttribute('href');

@@ -57,7 +57,9 @@
     return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   }
 
+  /** Absolute URL for a page ('./', 'setup', 'print'). Extensionless on the web; .html added under file://. */
   function pageUrl(page, query) {
+    if (location.protocol === 'file:') page = page === './' ? 'index.html' : `${page}.html`;
     return new URL(page + (query || ''), location.href).href;
   }
 
@@ -131,9 +133,12 @@
   }
 
   const PIN_SVG = '<svg class="pin" viewBox="0 0 24 32" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 8.4 10.2 18.6 11.2 19.6a1.1 1.1 0 0 0 1.6 0C13.8 30.6 24 20.4 24 12 24 5.37 18.63 0 12 0z"/><circle cx="12" cy="12" r="4.6"/></svg>';
-  /** The "WHERE IS IT 📍" logo. opts.tagline adds the subtitle; opts.large for hero size. */
+  /** The "WHERE IS IT 📍" logo. opts.tagline adds the subtitle; opts.large for hero size; opts.home links it to the site root. */
   function wordmark(opts = {}) {
-    const w = el('span', { class: `wordmark${opts.large ? ' large' : ''}`, role: 'img', 'aria-label': 'Where Is It' });
+    const cls = `wordmark${opts.large ? ' large' : ''}`;
+    const w = opts.home
+      ? el('a', { class: cls, href: './', 'aria-label': 'Where Is It — home' })
+      : el('span', { class: cls, role: 'img', 'aria-label': 'Where Is It' });
     w.innerHTML = `<span class="wm-name">Where Is It${PIN_SVG}</span>` + (opts.tagline ? '<span class="wm-tag"></span>' : '');
     if (opts.tagline) w.querySelector('.wm-tag').textContent = I18N.t('tagline');
     return w;

@@ -127,7 +127,7 @@
       el('p', {}, t('welcome')),
       el('h2', {}, t('teachers')),
       el('p', {}, t('teachersBlurb')),
-      el('div', { class: 'actions', style: 'margin-top:10px' }, el('a', { class: 'btn primary', href: 'setup.html' }, t('createQuiz'))),
+      el('div', { class: 'actions', style: 'margin-top:10px' }, el('a', { class: 'btn primary', href: 'setup' }, t('createQuiz'))),
       el('h2', {}, t('quickPlay')),
       el('div', { class: 'preset-list' }, links),
     );
@@ -166,7 +166,7 @@
     map.refreshTooltip();
     map.focus(quiz.codes);
     ui.label.textContent = '';
-    ui.target.replaceChildren(wordmark());
+    ui.target.replaceChildren(wordmark({ home: true }));
     ui.guesses.replaceChildren();
     tick();
     renderStats();
@@ -428,7 +428,7 @@
   function customizeLink() {
     return el(
       'a',
-      { class: 'subtle-link', href: 'setup.html' + WhereIsIt.quizQuery(quiz), title: t('customizeTitle') },
+      { class: 'subtle-link', href: 'setup' + WhereIsIt.quizQuery(quiz), title: t('customizeTitle') },
       t('customize'),
     );
   }
