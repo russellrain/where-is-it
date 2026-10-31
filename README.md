@@ -37,7 +37,7 @@ All libraries, map data and flags are bundled locally. Nothing uses ES modules o
 | `g` | Guesses per country before the hint | 3 |
 | `d` | Grey out and disable countries that aren't in the quiz | 1 |
 
-`setup.html` accepts the same parameters, so you can edit an existing quiz by changing `index.html` to `setup.html` in its link.
+`setup.html` accepts the same parameters. The **✎ Customize** link on a quiz's start and results screens opens it in `setup.html` so anyone can change it and get their own link.
 
 ## Project layout
 

@@ -176,6 +176,12 @@ button, input, select { font: inherit; color: inherit; }
 .card h2 { margin: 18px 0 8px; font-size: 1rem; }
 .card p { margin: 6px 0; color: var(--ink-soft); line-height: 1.45; }
 .card .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+/* Low-key text link for teacher-only actions, tucked at the end of an actions row. */
+.subtle-link {
+  margin-left: auto; align-self: flex-end; padding: 4px 2px;
+  font-size: 0.85rem; color: var(--ink-soft); text-decoration: none; opacity: 0.8;
+}
+.subtle-link:hover { opacity: 1; text-decoration: underline; }
 .card label.field { display: block; margin-top: 16px; font-weight: 600; }
 .card label.field input {
   display: block; width: 100%; margin-top: 6px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);

@@ -122,7 +122,7 @@
         `You get ${quiz.guesses} ${quiz.guesses === 1 ? 'guess' : 'guesses'} before getting a hint. Countries you need a hint for are marked as missed.`,
       ),
       el('p', {}, 'Scroll or pinch to zoom, drag to move the map.'),
-      el('div', { class: 'actions' }, startBtn),
+      el('div', { class: 'actions' }, startBtn, customizeLink()),
     );
     setTimeout(() => startBtn.focus(), 50);
   }
@@ -297,6 +297,7 @@
         'View map',
       ),
     );
+    actions.push(customizeLink());
     actions.push(el('a', { class: 'btn', href: 'index.html' }, 'Home'));
 
     const ordered = game.results.slice().sort((a, b) => byCode.get(a.code).name.localeCompare(byCode.get(b.code).name));
@@ -370,6 +371,15 @@
   }
 
   // ---------------------------------------------------------------- helpers
+
+  /** Opens the setup page pre-filled with this quiz, so anyone can tweak it into their own. */
+  function customizeLink() {
+    return el(
+      'a',
+      { class: 'subtle-link', href: 'setup.html' + WhereIsIt.quizQuery(quiz), title: 'Open this quiz in the editor to change it and get your own link' },
+      '✎ Customize',
+    );
+  }
 
   function questionCount() {
     return Math.min(quiz.count || quiz.codes.length, quiz.codes.length);
