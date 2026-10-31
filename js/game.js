@@ -109,6 +109,7 @@
       ['presetOceania', (c) => c.region === 'Oceania'],
       ['presetMiddleEast', (c) => c.subregion === 'Western Asia'],
       ['presetWorld', () => true],
+      ['presetAllCountries', () => true],
     ];
     const links = presets.map(([key, fn]) => {
       const codes = WhereIsIt.COUNTRIES.filter((c) => c.sovereign && fn(c)).map((c) => c.code);

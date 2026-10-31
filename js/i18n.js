@@ -65,6 +65,7 @@
       presetOceania: 'Oceania',
       presetMiddleEast: 'Middle East',
       presetWorld: 'Whole world',
+      presetAllCountries: 'All countries',
       introFind: ({ n }) => `Find ${n} ${plural(n, 'country', 'countries')} on the map.`,
       introGuesses: ({ n }) =>
         `You get ${n} ${plural(n, 'guess', 'guesses')} before getting a hint. Countries you need a hint for are marked as missed.`,
@@ -199,6 +200,7 @@
       presetOceania: 'Oceanía',
       presetMiddleEast: 'Oriente Medio',
       presetWorld: 'Todo el mundo',
+      presetAllCountries: 'Todos los países',
       introFind: ({ n }) => `Encuentra ${n} ${plural(n, 'país', 'países')} en el mapa.`,
       introGuesses: ({ n }) =>
         `Tienes ${n} ${plural(n, 'intento', 'intentos')} antes de recibir una pista. Los países para los que necesites una pista cuentan como fallados.`,
@@ -331,6 +333,7 @@
       presetOceania: 'Océanie',
       presetMiddleEast: 'Moyen-Orient',
       presetWorld: 'Le monde entier',
+      presetAllCountries: 'Tous les pays',
       introFind: ({ n }) => `Trouve ${n} pays sur la carte.`,
       introGuesses: ({ n }) =>
         `Tu as ${n} ${plural(n, 'essai', 'essais')} avant de recevoir un indice. Les pays pour lesquels tu as besoin d’un indice comptent comme manqués.`,
