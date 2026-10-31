@@ -264,6 +264,7 @@
       let inside = false; // pointer is over the map
       let shown = null; // country currently rendered in the tooltip
       let last = null; // last pointer position
+      let mouse = false; // last pointer was a mouse (no tooltip for touch/pen)
       let hideTimer = null;
 
       const codeAt = (e) => {
@@ -283,7 +284,7 @@
       };
       // The tooltip shows whichever country opts.labelFor(hovered) returns (or nothing).
       const updateTip = () => {
-        const code = inside ? this.opts.labelFor(hovered) : null;
+        const code = inside && mouse ? this.opts.labelFor(hovered) : null;
         if (code !== shown) {
           shown = code;
           if (code) {
@@ -312,6 +313,7 @@
       };
       const track = (e) => {
         last = { x: e.clientX, y: e.clientY };
+        mouse = e.pointerType === 'mouse';
         inside = true;
         setHover(codeAt(e));
       };
@@ -329,7 +331,7 @@
         if (e.pointerType !== 'mouse') track(e);
       });
       node.addEventListener('pointerup', (e) => {
-        // Touch has no hover: show the label where the finger lands, then fade it.
+        // Touch has no hover: briefly highlight where the finger lands, then clear it.
         if (e.pointerType !== 'mouse') {
           clearTimeout(hideTimer);
           hideTimer = setTimeout(() => {
