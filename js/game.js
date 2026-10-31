@@ -53,6 +53,12 @@
     ui.overlay.hidden = false;
   };
 
+  const homeBtn = $('home');
+  homeBtn.onclick = () => {
+    if (game.state === 'playing' && game.results.length && !confirm('Go back to the start? Your progress will be lost.')) return;
+    backToIntro();
+  };
+
   if (!quiz.codes.length) showWelcome();
   else showIntro();
 
@@ -88,7 +94,7 @@
     });
     showCard(
       el('div', { class: 'hero' }, wordmark({ large: true, tagline: true })),
-      el('p', {}, 'You’ll be shown one country at a time — click it on the map. You get 3 guesses before the answer flashes.'),
+      el('p', {}, 'You’ll see one country at a time. Find it and click it on the map. If you miss 3 times, we’ll show you where it is.'),
       el('h2', {}, 'Teachers'),
       el('p', {}, 'Choose regions or individual countries and get a link to share with your class.'),
       el('div', { class: 'actions', style: 'margin-top:10px' }, el('a', { class: 'btn primary', href: 'setup.html' }, 'Create a quiz →')),
@@ -98,6 +104,7 @@
   }
 
   function showIntro() {
+    homeBtn.hidden = true;
     document.title = `${title} · Where Is It`;
     const total = questionCount();
     const startBtn = el('button', { class: 'btn primary big', type: 'button', onclick: begin }, 'Start');
@@ -111,7 +118,7 @@
         'p',
         {},
         `Find ${total} ${total === 1 ? 'country' : 'countries'} on the map. `,
-        `You get ${quiz.guesses} ${quiz.guesses === 1 ? 'guess' : 'guesses'} for each one — after that, the answer will flash and you’ll click it to move on.`,
+        `You get ${quiz.guesses} ${quiz.guesses === 1 ? 'guess' : 'guesses'} before getting a hint. Countries you need a hint for are marked as missed.`,
       ),
       el('p', {}, 'Scroll or pinch to zoom, drag to move the map.'),
       el('div', { class: 'actions' }, startBtn),
@@ -121,7 +128,27 @@
 
   // ---------------------------------------------------------------- play
 
+  function backToIntro() {
+    if (game.current) map.toggleClass(game.current, 'hint', false);
+    Object.assign(game, { state: 'intro', queue: [], index: -1, current: null, results: [], elapsed: 0, advancing: false });
+    clearInterval(game.timer);
+    clearTimeout(game.nextTimer);
+    hideSay();
+    map.clearStates();
+    map.ring(null);
+    map.refreshTooltip();
+    map.focus(quiz.codes);
+    ui.label.textContent = '';
+    ui.target.replaceChildren(wordmark());
+    ui.guesses.replaceChildren();
+    tick();
+    renderStats();
+    showIntro();
+  }
+
   function start(queue) {
+    homeBtn.hidden = false;
+    clearTimeout(game.nextTimer);
     Object.assign(game, { state: 'playing', queue, index: -1, results: [], elapsed: 0, advancing: false });
     ui.overlay.hidden = true;
     ui.showResults.hidden = true;
@@ -136,6 +163,7 @@
   }
 
   function next() {
+    if (game.state !== 'playing') return;
     if (game.current) map.toggleClass(game.current, 'hint', false);
     map.ring(null);
     game.index++;
@@ -168,13 +196,13 @@
         say('', `That’s ${clicked.name}. Keep practicing!`, code);
       }
       renderStats();
-      setTimeout(next, found ? 650 : 900);
+      game.nextTimer = setTimeout(next, found ? 650 : 900);
       return;
     }
 
     map.flash(code, 'flash-wrong');
     if (game.hint) {
-      say('hint', `That’s ${clicked.name}. Click the flashing country.`, code);
+      say('hint', `That’s ${clicked.name}. Click the highlighted country.`, code);
       return;
     }
     game.wrong++;
@@ -184,7 +212,7 @@
       map.toggleClass(target, 'hint', true);
       map.ring(target);
       map.ensureVisible(target);
-      say('hint', `That’s ${clicked.name}. ${byCode.get(target).name} is flashing — click it to continue.`, code);
+      say('hint', `That’s ${clicked.name}. Here’s ${byCode.get(target).name}. Click it to continue.`, code);
     } else {
       const left = quiz.guesses - game.wrong;
       say('bad', `That’s ${clicked.name}. ${left} ${left === 1 ? 'guess' : 'guesses'} left.`, code);
@@ -216,10 +244,9 @@
   function summary() {
     const total = game.results.length;
     const correct = game.results.filter((r) => r.found).length;
-    const first = game.results.filter((r) => r.found && r.wrong === 0).length;
     const pct = total ? Math.round((correct / total) * 100) : 0;
     const missed = game.results.filter((r) => !r.found).map((r) => r.code);
-    return { total, correct, first, pct, missed };
+    return { total, correct, pct, missed };
   }
 
   function scoreText() {
@@ -227,7 +254,6 @@
     const lines = [
       `📍 Where Is It — ${title}`,
       `Score: ${s.correct}/${s.total} (${s.pct}%)`,
-      `First try: ${s.first}/${s.total}`,
       `Time: ${formatTime(game.elapsed)}`,
       s.missed.length ? `Missed: ${s.missed.map((c) => byCode.get(c).name).join(', ')}` : 'Missed: none 🎉',
       `Completed: ${new Date().toLocaleString()}`,
@@ -238,7 +264,7 @@
   function showResults() {
     const s = summary();
     const praise =
-      s.pct === 100 ? 'Perfect score! 🎉' : s.pct >= 80 ? 'Great job!' : s.pct >= 50 ? 'Nice work — keep going!' : 'Good practice — try again!';
+      s.pct === 100 ? 'Perfect score! 🎉' : s.pct >= 80 ? 'Great job!' : s.pct >= 50 ? 'Nice work, keep going!' : 'Good practice. Try again!';
 
     const copyBtn = el('button', { class: 'btn primary', type: 'button' }, 'Copy score');
     copyBtn.onclick = async () => {
@@ -270,6 +296,7 @@
         'View map',
       ),
     );
+    actions.push(el('a', { class: 'btn', href: 'index.html' }, 'Home'));
 
     const ordered = game.results.slice().sort((a, b) => byCode.get(a.code).name.localeCompare(byCode.get(b.code).name));
     const list = el(
@@ -291,7 +318,6 @@
         'div',
         { class: 'score-big' },
         el('div', {}, el('b', {}, `${s.correct}/${s.total}`), el('small', {}, `Correct (${s.pct}%)`)),
-        el('div', {}, el('b', {}, `${s.first}`), el('small', {}, 'First try')),
         el('div', {}, el('b', {}, formatTime(game.elapsed)), el('small', {}, 'Time')),
       ),
       el('div', { class: 'actions' }, actions),

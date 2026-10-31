@@ -91,12 +91,11 @@ button, input, select { font: inherit; color: inherit; }
 }
 .geomap .ring circle {
   fill: none; stroke: var(--hint); stroke-width: 3px; vector-effect: non-scaling-stroke;
-  transform-box: fill-box; transform-origin: center; animation: ring 1.2s ease-out infinite;
+  transform-box: fill-box; transform-origin: center; animation: ring 0.9s ease-in-out infinite alternate;
 }
 @keyframes ring {
-  0% { transform: scale(1.6); opacity: 0; }
-  30% { opacity: 1; }
-  100% { transform: scale(1); opacity: 0.2; }
+  from { transform: scale(1.5); opacity: 0.35; }
+  to { transform: scale(1); opacity: 1; }
 }
 
 .map-tooltip {
@@ -126,6 +125,13 @@ button, input, select { font: inherit; color: inherit; }
   display: flex; align-items: center; gap: 16px; padding: 10px 16px; background: var(--panel);
   border-bottom: 1px solid var(--line); min-height: 64px; z-index: 10; flex-wrap: wrap;
 }
+.home-btn {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--ink); text-decoration: none;
+}
+.home-btn:hover { background: #f4f2ee; }
+.home-btn svg { width: 20px; height: 20px; }
 .prompt { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 220px; }
 .prompt .label { color: var(--ink-soft); font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.06em; }
 .prompt .target { display: flex; align-items: center; gap: 10px; font-size: 1.6rem; font-weight: 800; line-height: 1.1; }

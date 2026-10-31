@@ -5,7 +5,7 @@
 A find-the-country map game for classrooms.
 
 - **Teachers** open `setup.html` and choose regions, subregions, or individual countries (from the list or by clicking the map). Then they copy a link to share.
-- **Students** open the link and get one country at a time, with its name and flag, to find on the map. Each country allows 3 guesses (configurable). After that the answer flashes and the student clicks it to continue, but it counts as missed. A timer runs and a score screen with **Copy score** appears at the end.
+- **Students** open the link and get one country at a time, with its name and flag, to find on the map. Each country allows 3 guesses (configurable). After that the answer is revealed and the student clicks it to continue, but it counts as missed. A timer runs and a score screen with **Copy score** appears at the end.
 
 ## Running it
 
