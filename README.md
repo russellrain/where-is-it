@@ -43,6 +43,7 @@ All libraries, map data and flags are bundled locally. Nothing uses ES modules o
 
 ```
 index.html, setup.html   pages
+privacy.html             privacy policy (linked from both footers)
 css/style.css            all styles
 js/common.js             URL parsing, helpers
 js/map.js                GeoMap: D3 map with pan/zoom, cursor label, tiny-country dots

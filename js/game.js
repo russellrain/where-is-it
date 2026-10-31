@@ -34,7 +34,6 @@
     elapsed: 0,
     timer: null,
     advancing: false,
-    name: '',
   };
 
   const map = new GeoMap($('map'), {
@@ -101,18 +100,8 @@
   function showIntro() {
     document.title = `${title} · Where Is It`;
     const total = questionCount();
-    const nameInput = el('input', {
-      type: 'text',
-      autocomplete: 'name',
-      maxlength: '40',
-      placeholder: 'Your name',
-      value: loadName(),
-    });
     const startBtn = el('button', { class: 'btn primary big', type: 'button', onclick: begin }, 'Start');
-    nameInput.addEventListener('keydown', (e) => e.key === 'Enter' && begin());
     function begin() {
-      game.name = nameInput.value.trim();
-      saveName(game.name);
       start(WhereIsIt.shuffle(quiz.codes).slice(0, total));
     }
     showCard(
@@ -125,10 +114,9 @@
         `You get ${quiz.guesses} ${quiz.guesses === 1 ? 'guess' : 'guesses'} for each one — after that, the answer will flash and you’ll click it to move on.`,
       ),
       el('p', {}, 'Scroll or pinch to zoom, drag to move the map.'),
-      el('label', { class: 'field' }, 'Name (shown on your score)', nameInput),
       el('div', { class: 'actions' }, startBtn),
     );
-    setTimeout(() => (nameInput.value ? startBtn : nameInput).focus(), 50);
+    setTimeout(() => startBtn.focus(), 50);
   }
 
   // ---------------------------------------------------------------- play
@@ -238,7 +226,6 @@
     const s = summary();
     const lines = [
       `📍 Where Is It — ${title}`,
-      game.name ? `Name: ${game.name}` : null,
       `Score: ${s.correct}/${s.total} (${s.pct}%)`,
       `First try: ${s.first}/${s.total}`,
       `Time: ${formatTime(game.elapsed)}`,
@@ -365,18 +352,5 @@
     if (!codes.length) return 'Where Is It';
     const regions = new Set(codes.map((c) => byCode.get(c).region));
     return regions.size === 1 ? `${[...regions][0]} countries` : 'Countries of the world';
-  }
-
-  function loadName() {
-    try {
-      return localStorage.getItem('whereisit.name') || '';
-    } catch {
-      return '';
-    }
-  }
-  function saveName(name) {
-    try {
-      localStorage.setItem('whereisit.name', name);
-    } catch {}
   }
 })();
