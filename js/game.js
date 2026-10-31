@@ -108,7 +108,9 @@
     homeBtn.hidden = true;
     document.title = `${title} · Where Is It`;
     const total = questionCount();
-    const startBtn = el('button', { class: 'btn primary big', type: 'button', onclick: begin }, 'Start');
+    const playIcon = el('span', { class: 'btn-icon', 'aria-hidden': 'true' });
+    playIcon.innerHTML = '<svg viewBox="7.6 4.2 12.9 15.6"><path d="M8 5.5v13a1 1 0 0 0 1.52.85l10.4-6.5a1 1 0 0 0 0-1.7L9.52 4.65A1 1 0 0 0 8 5.5z" fill="currentColor"/></svg>';
+    const startBtn = el('button', { class: 'btn primary big icon-after', type: 'button', onclick: begin }, 'Start', playIcon);
     function begin() {
       start(WhereIsIt.shuffle(quiz.codes).slice(0, total));
     }

@@ -44,6 +44,10 @@ button, input, select { font: inherit; color: inherit; }
 .btn.primary:hover { filter: brightness(1.07); }
 .btn.big { padding: 14px 26px; font-size: 1.1rem; }
 .btn:disabled { opacity: 0.5; cursor: default; }
+.btn-icon { display: inline-flex; margin-left: 2px; }
+.btn-icon svg { height: 0.8em; width: auto; }
+/* A trailing triangle tapers to a point, so trim the padding on that side to look balanced. */
+.btn.big.icon-after { padding-right: 22px; }
 
 .flag {
   width: 1.5em; height: 1.125em; object-fit: cover; border-radius: 2px;
