@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GeoFindIt</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="game">
+    <div class="topbar">
+      <div class="prompt">
+        <div>
+          <div class="label" id="prompt-label">Find</div>
+          <div class="target" id="target"><span class="logo"><span class="globe">🌍</span>GeoFindIt</span></div>
+        </div>
+        <div class="guesses" id="guesses" title="Guesses left"></div>
+      </div>
+      <div class="stats">
+        <div class="stat"><b id="stat-progress">–</b><small>Country</small></div>
+        <div class="stat"><b id="stat-score">0</b><small>Correct</small></div>
+        <div class="stat"><b id="stat-time">0:00</b><small>Time</small></div>
+      </div>
+    </div>
+    <div class="progress"><div id="progress-bar"></div></div>
+    <div class="map-wrap" id="map">
+      <div class="feedback" id="feedback" hidden></div>
+      <div class="zoom-controls">
+        <button type="button" id="zoom-in" title="Zoom in" aria-label="Zoom in">+</button>
+        <button type="button" id="zoom-out" title="Zoom out" aria-label="Zoom out">−</button>
+        <button type="button" id="zoom-reset" title="Reset view" aria-label="Reset view">⤢</button>
+      </div>
+      <div class="attribution">Map: <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a></div>
+      <button type="button" class="btn primary show-results" id="show-results" hidden>Show results</button>
+      <div class="overlay" id="overlay" hidden><div class="card" id="card"></div></div>
+    </div>
+  </div>
+
+  <script src="vendor/d3.min.js"></script>
+  <script src="vendor/topojson-client.min.js"></script>
+  <script src="js/data/world.js"></script>
+  <script src="js/data/countries.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>

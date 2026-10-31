@@ -1,0 +1,139 @@
+// Shared helpers for the teacher setup page and the student game.
+(function () {
+  'use strict';
+
+  const COUNTRIES = window.GEO_COUNTRIES;
+  const byCode = new Map(COUNTRIES.map((c) => [c.code, c]));
+
+  const REGION_ORDER = ['Africa', 'Americas', 'Asia', 'Europe', 'Oceania', 'Antarctica'];
+
+  const DEFAULTS = { guesses: 3, dim: true };
+
+  /** Reads quiz settings from a query string. Unknown country codes are dropped. */
+  function parseQuiz(search) {
+    const p = new URLSearchParams(search);
+    const seen = new Set();
+    const codes = (p.get('c') || '')
+      .split(/[\s,]+/)
+      .map((s) => s.trim().toUpperCase())
+      .filter((c) => byCode.has(c) && !seen.has(c) && seen.add(c));
+    const int = (k) => {
+      const v = parseInt(p.get(k), 10);
+      return Number.isFinite(v) && v > 0 ? v : null;
+    };
+    const bool = (k, d) => (p.has(k) ? p.get(k) !== '0' : d);
+    return {
+      codes,
+      title: (p.get('t') || '').trim().slice(0, 80),
+      count: int('n'), // ask this many (random subset); null = all
+      guesses: Math.min(int('g') || DEFAULTS.guesses, 10),
+      dim: bool('d', DEFAULTS.dim),
+    };
+  }
+
+  /** Builds a query string for a quiz. Only non-default options are included to keep links short. */
+  function quizQuery(q) {
+    const p = new URLSearchParams();
+    if (q.title) p.set('t', q.title);
+    p.set('c', q.codes.join(','));
+    if (q.count && q.count < q.codes.length) p.set('n', q.count);
+    if (q.guesses && q.guesses !== DEFAULTS.guesses) p.set('g', q.guesses);
+    if (q.dim === false) p.set('d', '0');
+    // Keep commas readable in the link.
+    return '?' + p.toString().replace(/%2C/g, ',');
+  }
+
+  function pageUrl(page, query) {
+    return new URL(page + (query || ''), location.href).href;
+  }
+
+  function flagUrl(code) {
+    return `assets/flags/${code.toLowerCase()}.svg`;
+  }
+
+  function formatTime(ms) {
+    const s = Math.floor(ms / 1000);
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const ss = String(s % 60).padStart(2, '0');
+    return h ? `${h}:${String(m).padStart(2, '0')}:${ss}` : `${m}:${ss}`;
+  }
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  async function copyText(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // Fallback for insecure contexts / older browsers.
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      let ok = false;
+      try {
+        ok = document.execCommand('copy');
+      } catch {}
+      ta.remove();
+      return ok;
+    }
+  }
+
+  /** Picks a map rotation so the selected countries aren't split by the map edge. */
+  function rotationFor(codes) {
+    if (!codes.length) return 0;
+    let x = 0, y = 0;
+    for (const code of codes) {
+      const lon = (byCode.get(code).latlng[1] * Math.PI) / 180;
+      x += Math.cos(lon);
+      y += Math.sin(lon);
+    }
+    if (Math.hypot(x, y) / codes.length < 0.3) return 0; // spread around the globe
+    const mean = (Math.atan2(y, x) * 180) / Math.PI;
+    return Math.abs(mean) < 40 ? 0 : -Math.round(mean / 10) * 10;
+  }
+
+  function el(tag, attrs, ...children) {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (v == null || v === false) continue;
+      if (k === 'class') e.className = v;
+      else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+      else e.setAttribute(k, v === true ? '' : v);
+    }
+    for (const c of children.flat()) if (c != null && c !== false) e.append(c);
+    return e;
+  }
+
+  function flagImg(code, cls) {
+    return el('img', { class: cls || 'flag', src: flagUrl(code), alt: '', draggable: 'false' });
+  }
+
+  window.GeoFind = {
+    COUNTRIES,
+    byCode,
+    REGION_ORDER,
+    DEFAULTS,
+    parseQuiz,
+    quizQuery,
+    pageUrl,
+    flagUrl,
+    flagImg,
+    formatTime,
+    shuffle,
+    copyText,
+    rotationFor,
+    el,
+  };
+})();

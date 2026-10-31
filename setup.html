@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create a Quiz · GeoFindIt</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="setup">
+    <aside class="sidebar">
+      <header>
+        <a class="logo" href="index.html" style="color:inherit;text-decoration:none"><span class="globe">🌍</span>GeoFindIt</a>
+        <p>Pick regions or individual countries, or click countries on the map, then share the link with students.</p>
+      </header>
+      <div class="section">
+        <div class="tree-tools">
+          <input type="search" id="search" placeholder="Search countries…" aria-label="Search countries">
+          <button type="button" class="btn" id="clear" style="padding:8px 12px">Clear</button>
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:0.9rem">
+          <input type="checkbox" id="territories"> Include territories &amp; dependencies (e.g. Greenland, Puerto Rico)
+        </label>
+      </div>
+      <div class="tree" id="tree"></div>
+      <div class="section">
+        <h3>Quiz options</h3>
+        <div class="options">
+          <label class="wide">Quiz title
+            <input type="text" id="opt-title" maxlength="80" placeholder="e.g. Countries of Africa">
+          </label>
+          <label>Questions
+            <input type="number" id="opt-count" min="1" placeholder="All">
+          </label>
+          <label>Guesses per country
+            <select id="opt-guesses">
+              <option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option>
+            </select>
+          </label>
+          <label class="check"><input type="checkbox" id="opt-dim" checked> Grey out countries that aren’t in the quiz</label>
+        </div>
+      </div>
+      <div class="section share">
+        <div class="summary" id="summary">No countries selected</div>
+        <input type="text" id="link" readonly aria-label="Quiz link">
+        <div class="row-btns">
+          <button type="button" class="btn primary" id="copy-link" disabled>Copy link</button>
+          <a class="btn" id="open-link" target="_blank" rel="noopener" aria-disabled="true">Try it ↗</a>
+        </div>
+      </div>
+    </aside>
+    <div class="map-wrap" id="map">
+      <div class="map-hint">Click countries to add or remove them</div>
+      <div class="zoom-controls">
+        <button type="button" id="zoom-in" title="Zoom in" aria-label="Zoom in">+</button>
+        <button type="button" id="zoom-out" title="Zoom out" aria-label="Zoom out">−</button>
+        <button type="button" id="zoom-reset" title="Zoom to selection" aria-label="Zoom to selection">⤢</button>
+      </div>
+      <div class="attribution">Map: <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a></div>
+    </div>
+  </div>
+
+  <script src="vendor/d3.min.js"></script>
+  <script src="vendor/topojson-client.min.js"></script>
+  <script src="js/data/world.js"></script>
+  <script src="js/data/countries.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/setup.js"></script>
+</body>
+</html>
