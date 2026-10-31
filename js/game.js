@@ -1,9 +1,9 @@
 // Student game: find each country on the map.
 (function () {
   'use strict';
-  const { byCode, el, flagImg, formatTime } = GeoFind;
+  const { byCode, el, flagImg, formatTime, wordmark, pinIcon } = WhereIsIt;
 
-  const quiz = GeoFind.parseQuiz(location.search);
+  const quiz = WhereIsIt.parseQuiz(location.search);
   const pool = new Set(quiz.codes);
   const title = quiz.title || defaultTitle(quiz.codes);
 
@@ -38,7 +38,7 @@
   };
 
   const map = new GeoMap($('map'), {
-    rotate: GeoFind.rotationFor(quiz.codes),
+    rotate: WhereIsIt.rotationFor(quiz.codes),
     isActive: (code) => !quiz.dim || pool.has(code) || !pool.size,
     // The cursor label shows the country to find, never the one under the pointer.
     labelFor: () => (game.state === 'playing' ? game.current : null),
@@ -66,7 +66,7 @@
   }
 
   function showWelcome() {
-    document.title = 'GeoFindIt';
+    document.title = `Where Is It · ${WhereIsIt.TAGLINE}`;
     const presets = [
       ['Africa', (c) => c.region === 'Africa'],
       ['Europe', (c) => c.region === 'Europe'],
@@ -78,18 +78,17 @@
       ['Whole world', () => true],
     ];
     const links = presets.map(([name, fn]) => {
-      const codes = GeoFind.COUNTRIES.filter((c) => c.sovereign && fn(c)).map((c) => c.code);
+      const codes = WhereIsIt.COUNTRIES.filter((c) => c.sovereign && fn(c)).map((c) => c.code);
       const n = name === 'Whole world' ? 20 : null;
       return el(
         'a',
-        { class: 'btn', href: GeoFind.quizQuery({ codes, title: name, count: n }) },
+        { class: 'btn', href: WhereIsIt.quizQuery({ codes, title: name, count: n }) },
         `${name}`,
         el('small', { style: 'color:var(--ink-soft);font-weight:500;margin-left:auto' }, n ? `${n} random` : `${codes.length}`),
       );
     });
     showCard(
-      el('div', { class: 'logo' }, el('span', { class: 'globe' }, '🌍'), 'GeoFindIt'),
-      el('h1', {}, 'Find the country!'),
+      el('div', { class: 'hero' }, wordmark({ large: true, tagline: true })),
       el('p', {}, 'You’ll be shown one country at a time — click it on the map. You get 3 guesses before the answer flashes.'),
       el('h2', {}, 'Teachers'),
       el('p', {}, 'Choose regions or individual countries and get a link to share with your class.'),
@@ -100,7 +99,7 @@
   }
 
   function showIntro() {
-    document.title = `${title} · GeoFindIt`;
+    document.title = `${title} · Where Is It`;
     const total = questionCount();
     const nameInput = el('input', {
       type: 'text',
@@ -114,10 +113,10 @@
     function begin() {
       game.name = nameInput.value.trim();
       saveName(game.name);
-      start(GeoFind.shuffle(quiz.codes).slice(0, total));
+      start(WhereIsIt.shuffle(quiz.codes).slice(0, total));
     }
     showCard(
-      el('div', { class: 'logo' }, el('span', { class: 'globe' }, '🌍'), 'GeoFindIt'),
+      wordmark(),
       el('h1', {}, title),
       el(
         'p',
@@ -238,7 +237,7 @@
   function scoreText() {
     const s = summary();
     const lines = [
-      `🌍 GeoFindIt — ${title}`,
+      `📍 Where Is It — ${title}`,
       game.name ? `Name: ${game.name}` : null,
       `Score: ${s.correct}/${s.total} (${s.pct}%)`,
       `First try: ${s.first}/${s.total}`,
@@ -256,18 +255,18 @@
 
     const copyBtn = el('button', { class: 'btn primary', type: 'button' }, 'Copy score');
     copyBtn.onclick = async () => {
-      const ok = await GeoFind.copyText(scoreText());
+      const ok = await WhereIsIt.copyText(scoreText());
       copyBtn.textContent = ok ? 'Copied ✓' : 'Copy failed';
       setTimeout(() => (copyBtn.textContent = 'Copy score'), 2000);
     };
 
     const actions = [
       copyBtn,
-      el('button', { class: 'btn', type: 'button', onclick: () => start(GeoFind.shuffle(quiz.codes).slice(0, questionCount())) }, 'Play again'),
+      el('button', { class: 'btn', type: 'button', onclick: () => start(WhereIsIt.shuffle(quiz.codes).slice(0, questionCount())) }, 'Play again'),
     ];
     if (s.missed.length) {
       actions.push(
-        el('a', { class: 'btn', href: GeoFind.quizQuery({ ...quiz, codes: s.missed, count: null, title: `${title} — practice` }) }, 'Practice missed'),
+        el('a', { class: 'btn', href: WhereIsIt.quizQuery({ ...quiz, codes: s.missed, count: null, title: `${title} — practice` }) }, 'Practice missed'),
       );
     }
     actions.push(
@@ -298,7 +297,7 @@
     );
 
     showCard(
-      el('div', { class: 'logo' }, el('span', { class: 'globe' }, '🌍'), title),
+      el('div', { class: 'logo' }, pinIcon(), title),
       el('h1', {}, praise),
       game.name ? el('p', {}, game.name) : null,
       el(
@@ -363,21 +362,21 @@
   }
 
   function defaultTitle(codes) {
-    if (!codes.length) return 'GeoFindIt';
+    if (!codes.length) return 'Where Is It';
     const regions = new Set(codes.map((c) => byCode.get(c).region));
     return regions.size === 1 ? `${[...regions][0]} countries` : 'Countries of the world';
   }
 
   function loadName() {
     try {
-      return localStorage.getItem('geofindit.name') || '';
+      return localStorage.getItem('whereisit.name') || '';
     } catch {
       return '';
     }
   }
   function saveName(name) {
     try {
-      localStorage.setItem('geofindit.name', name);
+      localStorage.setItem('whereisit.name', name);
     } catch {}
   }
 })();

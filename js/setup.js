@@ -1,10 +1,10 @@
 // Teacher setup: choose countries and options, produce a shareable quiz link.
 (function () {
   'use strict';
-  const { byCode, el, flagImg } = GeoFind;
+  const { byCode, el, flagImg } = WhereIsIt;
   const $ = (id) => document.getElementById(id);
 
-  const initial = GeoFind.parseQuiz(location.search);
+  const initial = WhereIsIt.parseQuiz(location.search);
   const selected = new Set(initial.codes);
   let includeTerritories = initial.codes.some((c) => !byCode.get(c).sovereign);
   const expanded = new Set();
@@ -25,14 +25,14 @@
 
   // region -> subregion -> [country]
   const groups = new Map();
-  for (const c of GeoFind.COUNTRIES) {
+  for (const c of WhereIsIt.COUNTRIES) {
     if (!groups.has(c.region)) groups.set(c.region, new Map());
     const subs = groups.get(c.region);
     if (!subs.has(c.subregion)) subs.set(c.subregion, []);
     subs.get(c.subregion).push(c);
   }
   const regionNames = [...groups.keys()].sort(
-    (a, b) => GeoFind.REGION_ORDER.indexOf(a) - GeoFind.REGION_ORDER.indexOf(b),
+    (a, b) => WhereIsIt.REGION_ORDER.indexOf(a) - WhereIsIt.REGION_ORDER.indexOf(b),
   );
 
   const map = new GeoMap($('map'), {
@@ -192,8 +192,8 @@
     $('summary').textContent = n
       ? `${n} ${n === 1 ? 'country' : 'countries'} selected${asked < n ? ` · ${asked} asked per game` : ''}`
       : 'No countries selected';
-    const query = GeoFind.quizQuery(q);
-    const url = n ? GeoFind.pageUrl('index.html', query) : '';
+    const query = WhereIsIt.quizQuery(q);
+    const url = n ? WhereIsIt.pageUrl('index.html', query) : '';
     $('link').value = url;
     $('copy-link').disabled = !n;
     const open = $('open-link');
@@ -207,7 +207,7 @@
 
   $('copy-link').onclick = async () => {
     const btn = $('copy-link');
-    const ok = await GeoFind.copyText($('link').value);
+    const ok = await WhereIsIt.copyText($('link').value);
     btn.textContent = ok ? 'Copied ✓' : 'Copy failed';
     setTimeout(() => (btn.textContent = 'Copy link'), 2000);
   };

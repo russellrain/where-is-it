@@ -6,6 +6,7 @@
   --line: #e2ddd2;
   --accent: #2d6cdf;
   --accent-ink: #ffffff;
+  --brand: #e0483e;
 
   --ocean: #cfe6f3;
   --graticule: rgba(255, 255, 255, 0.55);
@@ -167,8 +168,23 @@ button, input, select { font: inherit; color: inherit; }
 .card label.field input {
   display: block; width: 100%; margin-top: 6px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
 }
-.logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.1rem; }
-.logo .globe { font-size: 1.4rem; }
+.logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 1.1rem; }
+
+/* Wordmark: bold caps "WHERE IS IT" with a map pin standing in for the question mark. */
+.wordmark { display: inline-flex; flex-direction: column; align-items: flex-start; font-size: 1.4rem; color: var(--ink); text-decoration: none; line-height: 1; }
+.wordmark .wm-name { font-weight: 900; text-transform: uppercase; letter-spacing: -0.015em; white-space: nowrap; }
+.wordmark .wm-tag {
+  margin-top: 0.4em; font-size: max(0.36em, 11px); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft);
+}
+.wordmark.large { font-size: 2.6rem; }
+.pin { height: 0.82em; width: auto; margin-left: 0.12em; vertical-align: baseline; overflow: visible; }
+.pin path { fill: var(--brand); }
+.pin circle { fill: #fff; }
+.pin-icon { display: inline-flex; font-size: 1.3rem; }
+.pin-icon .pin { margin: 0; }
+.hero { margin: 4px 0 14px; }
+.card > .wordmark { margin-bottom: 12px; }
+.prompt .label:empty { display: none; }
 
 .score-big { display: flex; gap: 14px; margin: 18px 0 8px; }
 .score-big div { flex: 1; background: #f6f3ec; border-radius: 12px; padding: 12px; text-align: center; }
@@ -184,7 +200,8 @@ button, input, select { font: inherit; color: inherit; }
 .result-list li.missed .mark { color: var(--missed); }
 
 .preset-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
-.preset-list a { justify-content: flex-start; }
+.preset-list a { justify-content: flex-start; white-space: normal; text-align: left; }
+.preset-list a small { white-space: nowrap; }
 
 .show-results { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 6; box-shadow: var(--shadow); }
 .toast {
@@ -199,7 +216,7 @@ button, input, select { font: inherit; color: inherit; }
   border-right: 1px solid var(--line); min-height: 0;
 }
 .sidebar header { padding: 16px 16px 8px; }
-.sidebar header p { margin: 4px 0 0; color: var(--ink-soft); font-size: 0.9rem; }
+.sidebar header p { margin: 12px 0 0; color: var(--ink-soft); font-size: 0.9rem; }
 .sidebar .section { padding: 10px 16px; border-top: 1px solid var(--line); }
 .sidebar .section h3 { margin: 0 0 8px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft); }
 .tree-tools { display: flex; gap: 8px; align-items: center; }

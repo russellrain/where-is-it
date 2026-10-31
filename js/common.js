@@ -116,11 +116,27 @@
     return e;
   }
 
+  const PIN_SVG = '<svg class="pin" viewBox="0 0 24 32" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 8.4 10.2 18.6 11.2 19.6a1.1 1.1 0 0 0 1.6 0C13.8 30.6 24 20.4 24 12 24 5.37 18.63 0 12 0z"/><circle cx="12" cy="12" r="4.6"/></svg>';
+  const TAGLINE = 'The country-finding game';
+
+  /** The "WHERE IS IT 📍" logo. opts.tagline adds the subtitle; opts.large for hero size. */
+  function wordmark(opts = {}) {
+    const w = el('span', { class: `wordmark${opts.large ? ' large' : ''}`, role: 'img', 'aria-label': 'Where Is It' });
+    w.innerHTML = `<span class="wm-name">Where Is It${PIN_SVG}</span>` + (opts.tagline ? `<span class="wm-tag">${TAGLINE}</span>` : '');
+    return w;
+  }
+
+  function pinIcon() {
+    const s = el('span', { class: 'pin-icon' });
+    s.innerHTML = PIN_SVG;
+    return s;
+  }
+
   function flagImg(code, cls) {
     return el('img', { class: cls || 'flag', src: flagUrl(code), alt: '', draggable: 'false' });
   }
 
-  window.GeoFind = {
+  window.WhereIsIt = {
     COUNTRIES,
     byCode,
     REGION_ORDER,
@@ -130,6 +146,9 @@
     pageUrl,
     flagUrl,
     flagImg,
+    wordmark,
+    pinIcon,
+    TAGLINE,
     formatTime,
     shuffle,
     copyText,

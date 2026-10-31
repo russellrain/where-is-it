@@ -1,4 +1,6 @@
-# GeoFindIt
+# Where Is It 📍
+
+*The country-finding game.*
 
 A find-the-country map game for classrooms.
 

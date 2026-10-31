@@ -285,7 +285,7 @@
         const code = inside ? this.opts.labelFor(hovered) : null;
         if (code !== shown) {
           shown = code;
-          if (code) tip.replaceChildren(GeoFind.flagImg(code), document.createTextNode(GeoFind.byCode.get(code).name));
+          if (code) tip.replaceChildren(WhereIsIt.flagImg(code), document.createTextNode(WhereIsIt.byCode.get(code).name));
         }
         tip.hidden = !code;
         place();
