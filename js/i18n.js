@@ -552,6 +552,8 @@
       sel.value = lang;
       sel.title = t('language');
       sel.setAttribute('aria-label', t('language'));
+      const code = sel.parentElement.querySelector('.lang-code');
+      if (code) code.textContent = lang.toUpperCase();
     }
   }
 
@@ -585,7 +587,7 @@
       wrap.className = 'lang-picker';
       wrap.hidden = allowed.length < 2;
       sel.replaceWith(wrap);
-      wrap.innerHTML = TRANSLATE_SVG;
+      wrap.innerHTML = TRANSLATE_SVG + '<span class="lang-code" aria-hidden="true"></span>';
       wrap.append(sel);
     }
     apply();
