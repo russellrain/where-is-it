@@ -64,3 +64,5 @@ To regenerate data (for example after upgrading a package): `npm install && npm 
 - [D3](https://d3js.org/) and [topojson-client](https://github.com/topojson/topojson-client) (ISC)
 
 License texts are in `vendor/licenses/`.
+
+The original code in this project is released under the [MIT License](LICENSE). Bundled third-party files keep their own licenses as listed in [LICENSE](LICENSE). In particular, `js/data/countries.js` is a derived database under the ODbL 1.0.
