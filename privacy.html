@@ -6,6 +6,7 @@
   <title>Privacy · Where Is It</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 0 32 32'><path fill='%23e0483e' d='M12 0C5.37 0 0 5.37 0 12c0 8.4 10.2 18.6 11.2 19.6a1.1 1.1 0 0 0 1.6 0C13.8 30.6 24 20.4 24 12 24 5.37 18.63 0 12 0z'/><circle cx='12' cy='12' r='4.6' fill='white'/></svg>">
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/theme.js"></script>
   <style>
     body.doc { overflow: auto; height: auto; }
     .doc main { width: min(720px, 100%); margin: 0 auto; padding: 32px 16px 64px; line-height: 1.55; }
@@ -18,7 +19,7 @@
     .doc .updated { margin-top: 0; font-size: 0.9rem; }
     .doc .summary { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 20px; }
     .doc .summary p { color: var(--ink); margin: 0; }
-    .doc code { background: #ece7dc; padding: 1px 5px; border-radius: 4px; font-size: 0.9em; }
+    .doc code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; font-size: 0.9em; }
   </style>
 </head>
 <body class="doc">
@@ -36,7 +37,7 @@
     <p>Nothing. The game runs entirely in the browser. It doesn't send answers, scores or anything else to me or to anyone else. I have no server and no database, so I couldn't see student data even if I wanted to.</p>
 
     <h2>No names or accounts</h2>
-    <p>The game never asks students for their name or any other information about themselves. Nothing about a student is saved on the device between games.</p>
+    <p>The game never asks students for their name or any other information about themselves. Nothing about a student is saved on the device between games. The only thing the site remembers is whether someone switched to light or dark mode, which is saved in the browser so the choice sticks. It is never sent anywhere.</p>
 
     <h2>Scores</h2>
     <p>When a student clicks <em>Copy score</em>, the score text (quiz title, score, time and missed countries) is copied to that device's clipboard. It goes only where the student pastes it, such as an assignment you set up in your own learning platform, which already knows who the student is.</p>
