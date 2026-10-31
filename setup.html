@@ -46,9 +46,13 @@
           </label>
           <label class="check"><input type="checkbox" id="opt-dim" checked> <span data-i18n="dimOthers">Grey out countries that aren’t in the quiz</span></label>
           <div class="wide lang-opts">
-            <span class="opt-heading" data-i18n="studentLanguages">Student languages</span>
-            <div class="lang-checks" id="opt-langs"></div>
-            <small data-i18n="studentLanguagesHint">Students can switch between the languages you check.</small>
+            <span class="opt-heading" id="lang-heading" data-i18n="studentLanguages">Student languages</span>
+            <button type="button" class="lang-summary" id="lang-open" aria-haspopup="true" aria-controls="lang-panel" aria-describedby="lang-heading">
+              <svg class="i-translate" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 2.5v2.2M2.5 4.7h10M10.6 4.7c-.9 4.2-3.7 7.4-8.1 9.1M4.6 7.6c1.3 2.8 3.4 4.7 6.1 5.7"/><path d="M12.6 21.5l4.2-11 4.2 11M14.2 17.6h5.2"/></svg>
+              <span class="lang-summary-text" id="lang-summary"></span>
+              <span class="lang-summary-action"><span data-i18n="changeLanguages">Change</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 6l6 6-6 6"/></svg></span>
+            </button>
+            <small data-i18n="studentLanguagesHint">Students can switch between the languages you choose.</small>
           </div>
         </div>
       </div>
@@ -61,6 +65,27 @@
           <a class="btn" id="print-link" target="_blank" rel="noopener" aria-disabled="true" title="Printable map worksheet" data-i18n-title="printTitle"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 9V3.5h11V9"/><path d="M6.5 17.5H5a2 2 0 0 1-2-2V11a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4.5a2 2 0 0 1-2 2h-1.5"/><rect x="6.5" y="14" width="11" height="6.5" rx="1"/></svg><span data-i18n="print">Print</span></a>
         </div>
       </div>
+      <!-- Student-language picker: takes over the sidebar while open (see setup.js). -->
+      <section class="sidebar-panel" id="lang-panel" aria-labelledby="lang-panel-title" hidden>
+        <div class="panel-head">
+          <button type="button" class="icon-btn" id="lang-back" title="Back" aria-label="Back" data-i18n-title="back" data-i18n-aria-label="back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <h2 id="lang-panel-title" data-i18n="studentLanguages">Student languages</h2>
+        </div>
+        <div class="panel-tools">
+          <input type="search" id="lang-search" placeholder="Search languages…" aria-label="Search languages" data-i18n-placeholder="searchLanguages" data-i18n-aria-label="searchLanguages" autocomplete="off">
+          <div class="panel-tools-row">
+            <span id="lang-count" aria-live="polite"></span>
+            <button type="button" class="link-btn" id="lang-all" data-i18n="selectAll">Select all</button>
+            <button type="button" class="link-btn" id="lang-none" data-i18n="clear">Clear</button>
+          </div>
+        </div>
+        <div class="lang-list" id="lang-list" role="group" aria-labelledby="lang-panel-title"></div>
+        <div class="panel-foot">
+          <p class="lang-warn" id="lang-warn" role="alert" hidden data-i18n="pickOneLanguage">Choose at least one language.</p>
+          <small data-i18n="studentLanguagesHint">Students can switch between the languages you choose.</small>
+          <button type="button" class="btn primary" id="lang-done" data-i18n="done">Done</button>
+        </div>
+      </section>
     </aside>
     <div class="map-wrap" id="map">
       <div class="map-hint" data-i18n="mapHint">Click countries to add or remove them</div>

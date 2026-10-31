@@ -40,7 +40,9 @@
     if (q.count && q.count < q.codes.length) p.set('n', q.count);
     if (q.guesses && q.guesses !== DEFAULTS.guesses) p.set('g', q.guesses);
     if (q.dim === false) p.set('d', '0');
-    if (q.langs && q.langs.length < I18N.CODES.length) p.set('l', q.langs.join(','));
+    // Always written when chosen, so a quiz keeps its languages as new ones are added to the app.
+    // Left out (null) only for links that never chose, which allow every language.
+    if (q.langs && q.langs.length) p.set('l', q.langs.join(','));
     // Keep commas readable in the link.
     return '?' + p.toString().replace(/%2C/g, ',');
   }

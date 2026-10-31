@@ -21,17 +21,12 @@
   opt.guesses.value = String(initial.guesses);
   opt.dim.checked = initial.dim;
 
-  // Student languages: one checkbox per language; all checked = no restriction (param left out).
-  const langBoxes = I18N.CODES.map((code) => {
-    const box = el('input', { type: 'checkbox', value: code });
-    box.checked = !initial.langs || initial.langs.includes(code);
-    box.addEventListener('change', () => {
-      if (!langBoxes.some((b) => b.checked)) box.checked = true; // keep at least one
-      updateLink();
-    });
-    $('opt-langs').append(el('label', { lang: code }, box, I18N.LANGUAGES[code]));
-    return box;
-  });
+  // Student languages, picked in a panel that takes over the sidebar. A new quiz starts with the teacher's page
+  // language (and follows it until they pick); an existing link without `l` allowed every language, so keep that.
+  let langsAuto = !initial.langs && !initial.codes.length;
+  const langs = new Set(initial.langs || (langsAuto ? [I18N.lang] : I18N.CODES));
+  const langPicker = createLangPicker();
+
   $('territories').checked = includeTerritories;
 
   const visible = (c) => includeTerritories || c.sovereign;
@@ -190,7 +185,144 @@
     buildTree();
     $('search').dispatchEvent(new Event('input'));
     map.refreshTooltip(true);
+    if (langsAuto) {
+      langs.clear();
+      langs.add(I18N.lang);
+    }
+    langPicker.render();
   });
+
+  // ---------------------------------------------------------------- student languages
+
+  function createLangPicker() {
+    const sidebar = document.querySelector('.sidebar');
+    const panel = $('lang-panel');
+    const list = $('lang-list');
+    const search = $('lang-search');
+    let before = null; // selection when the panel opened, restored if it's left with nothing chosen
+    let rows = []; // { row, box, code }
+
+    // Language name as written in another language, e.g. displayName('es', 'en') -> "Spanish".
+    function displayName(code, inLang) {
+      try {
+        return new Intl.DisplayNames([inLang], { type: 'language' }).of(code);
+      } catch {
+        return null; // older browsers: native names only
+      }
+    }
+
+    const ordered = () => I18N.CODES.slice().sort((a, b) => I18N.compare(I18N.LANGUAGES[a], I18N.LANGUAGES[b]));
+    const chosen = () => I18N.CODES.filter((c) => langs.has(c));
+
+    function render() {
+      rows = ordered().map((code) => {
+        const native = I18N.LANGUAGES[code];
+        const local = displayName(code, I18N.lang); // shown next to the native name
+        const box = el('input', { type: 'checkbox', value: code });
+        box.checked = langs.has(code);
+        box.addEventListener('change', () => {
+          box.checked ? langs.add(code) : langs.delete(code);
+          langsAuto = false;
+          sync();
+        });
+        const sub = local && fold(local) !== fold(native) ? el('span', { class: 'lang-local' }, local) : null;
+        const row = el('label', { class: 'lang-row' }, box, el('span', { class: 'lang-name', lang: code }, native), sub);
+        // Searchable by native, page-language and English name, or code.
+        row.dataset.search = fold([native, local, displayName(code, 'en'), code].join('|'));
+        return { row, box, code };
+      });
+      list.replaceChildren(...rows.map((r) => r.row), el('p', { class: 'lang-empty', id: 'lang-empty', hidden: true }));
+      filter();
+      sync();
+    }
+
+    function filter() {
+      const q = fold(search.value.trim());
+      let shown = 0;
+      for (const { row } of rows) {
+        row.hidden = Boolean(q) && !row.dataset.search.includes(q);
+        if (!row.hidden) shown++;
+      }
+      const empty = $('lang-empty');
+      empty.hidden = shown > 0;
+      empty.textContent = shown ? '' : t('noLanguagesMatch', { q: search.value.trim() });
+    }
+
+    function sync() {
+      const n = langs.size;
+      const total = I18N.CODES.length;
+      for (const { row, box, code } of rows) {
+        box.checked = langs.has(code);
+        row.classList.toggle('on', box.checked);
+      }
+      $('lang-count').textContent = t('nOfTotalSelected', { n, total });
+      $('lang-all').disabled = n === total;
+      $('lang-none').disabled = n === 0;
+      $('lang-warn').hidden = n > 0;
+      $('lang-done').disabled = n === 0;
+      const names = chosen().map((c) => I18N.LANGUAGES[c]);
+      const summary = $('lang-summary');
+      summary.textContent = n === total ? t('allLanguages', { n }) : names.join(', ');
+      $('lang-open').title = names.join(', ');
+      if (n) updateLink(); // an empty choice never reaches the link; closing restores the last one
+    }
+
+    function open() {
+      before = new Set(langs);
+      search.value = '';
+      filter();
+      sidebar.classList.add('panel-open');
+      panel.hidden = false;
+      $('lang-open').setAttribute('aria-expanded', 'true');
+      sidebar.scrollTop = 0;
+      if (window.matchMedia('(max-width: 800px)').matches) panel.scrollIntoView({ block: 'start' });
+      // Don't pop the on-screen keyboard on touch devices; desktop users can type straight away.
+      (window.matchMedia('(pointer: fine)').matches ? search : $('lang-back')).focus();
+    }
+
+    function close() {
+      if (!langs.size) {
+        for (const c of before) langs.add(c);
+        sync();
+      }
+      panel.hidden = true;
+      sidebar.classList.remove('panel-open');
+      $('lang-open').setAttribute('aria-expanded', 'false');
+      $('lang-open').focus();
+    }
+
+    $('lang-open').addEventListener('click', open);
+    $('lang-back').addEventListener('click', close);
+    $('lang-done').addEventListener('click', close);
+    $('lang-all').addEventListener('click', () => {
+      langsAuto = false;
+      for (const c of I18N.CODES) langs.add(c);
+      sync();
+    });
+    $('lang-none').addEventListener('click', () => {
+      langsAuto = false;
+      langs.clear();
+      sync();
+    });
+    search.addEventListener('input', filter);
+    search.addEventListener('keydown', (e) => {
+      // Enter toggles the only match, so "spa ⏎" picks Spanish.
+      if (e.key !== 'Enter') return;
+      const visible = rows.filter((r) => !r.row.hidden);
+      if (visible.length === 1) visible[0].box.click();
+      e.preventDefault();
+    });
+    panel.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      if (e.target === search && search.value) return; // first Escape clears the search box
+      e.preventDefault();
+      close();
+    });
+
+    $('lang-open').setAttribute('aria-expanded', 'false');
+    render();
+    return { render };
+  }
 
   // ---------------------------------------------------------------- link
 
@@ -203,7 +335,7 @@
       count: Number.isFinite(count) && count > 0 ? count : null,
       guesses: parseInt(opt.guesses.value, 10),
       dim: opt.dim.checked,
-      langs: langBoxes.filter((b) => b.checked).map((b) => b.value),
+      langs: I18N.CODES.filter((c) => langs.has(c)),
     };
   }
 

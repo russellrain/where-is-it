@@ -83,7 +83,7 @@ const countries = [...groups.keys()]
   .sort((a, b) => a.name.localeCompare(b.name));
 
 // Country names in other app languages: app language code -> world-countries translation key.
-const TRANSLATIONS = { es: 'spa' };
+const TRANSLATIONS = { es: 'spa', fr: 'fra' };
 // Fixes for translated names that are awkward, outdated or too long for the game (by country code).
 const RENAME_I18N = {
   es: {
@@ -108,6 +108,24 @@ const RENAME_I18N = {
     TF: 'Tierras Australes Francesas',
     VG: 'Islas Vírgenes Británicas',
     ZA: 'Sudáfrica',
+  },
+  fr: {
+    AX: 'Îles Åland',
+    CD: 'République démocratique du Congo',
+    CG: 'République du Congo',
+    CV: 'Cap-Vert',
+    GS: 'Géorgie du Sud',
+    MM: 'Myanmar',
+    PW: 'Palaos',
+    SH: 'Sainte-Hélène',
+    SX: 'Saint-Martin (Pays-Bas)',
+    MF: 'Saint-Martin (France)',
+    ST: 'Sao Tomé-et-Principe',
+    SZ: 'Eswatini',
+    TF: 'Terres australes françaises',
+    TL: 'Timor-Leste',
+    VA: 'Vatican',
+    VN: 'Vietnam',
   },
 };
 const countryNames = {};
