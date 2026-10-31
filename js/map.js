@@ -390,5 +390,6 @@
     return { area: total, bounds, center: pieces[0].center };
   }
 
+  GeoMap.measure = measure; // also used by the printable worksheet
   window.GeoMap = GeoMap;
 })();

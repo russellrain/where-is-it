@@ -197,8 +197,14 @@
     $('link').value = url;
     $('copy-link').disabled = !n;
     const open = $('open-link');
-    if (n) open.href = url;
-    else open.removeAttribute('href');
+    const print = $('print-link');
+    if (n) {
+      open.href = url;
+      print.href = WhereIsIt.pageUrl('print.html', query);
+    } else {
+      open.removeAttribute('href');
+      print.removeAttribute('href');
+    }
     // Keep this page's URL in sync so a refresh (or bookmark) keeps the selection.
     try {
       history.replaceState(null, '', n ? query : location.pathname);
@@ -206,10 +212,10 @@
   }
 
   $('copy-link').onclick = async () => {
-    const btn = $('copy-link');
+    const label = $('copy-link').querySelector('.label');
     const ok = await WhereIsIt.copyText($('link').value);
-    btn.textContent = ok ? 'Copied ✓' : 'Copy failed';
-    setTimeout(() => (btn.textContent = 'Copy link'), 2000);
+    label.textContent = ok ? 'Copied ✓' : 'Copy failed';
+    setTimeout(() => (label.textContent = 'Copy link'), 2000);
   };
   $('link').addEventListener('focus', (e) => e.target.select());
 
