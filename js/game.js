@@ -1,7 +1,7 @@
 // Student game: find each country on the map.
 (function () {
   'use strict';
-  const { byCode, el, flagImg, formatTime, wordmark, pinIcon, countryName } = WhereIsIt;
+  const { el, flagImg, formatTime, wordmark, pinIcon, countryName, defaultTitle } = WhereIsIt;
   const { t } = I18N;
 
   const quiz = WhereIsIt.parseQuiz(location.search);
@@ -21,6 +21,7 @@
     overlay: $('overlay'),
     card: $('card'),
     showResults: $('show-results'),
+    status: $('sr-status'),
   };
 
   const game = {
@@ -40,8 +41,9 @@
   const map = new GeoMap($('map'), {
     rotate: WhereIsIt.rotationFor(quiz.codes),
     isActive: (code) => !quiz.dim || pool.has(code) || !pool.size,
-    // The cursor label shows the country to find, never the one under the pointer.
-    labelFor: () => (game.state === 'playing' ? game.current : null),
+    // While playing, the cursor label shows the country to find, never the one under the pointer.
+    // Once finished, it names whatever is under the pointer so students can explore their results.
+    labelFor: (hovered) => (game.state === 'playing' ? game.current : game.state === 'done' ? hovered : null),
     labelCaption: t('find'),
     onClick: onCountryClick,
   });
@@ -51,9 +53,15 @@
   $('zoom-out').onclick = () => map.zoomBy(1 / 1.6);
   $('zoom-reset').onclick = () => map.resetView();
   ui.showResults.onclick = () => {
+    clearTimeout(game.ringTimer);
+    map.ring(null);
+    hideSay();
     ui.showResults.hidden = true;
     ui.overlay.hidden = false;
   };
+
+  // Some classes hide the running clock (less pressure); the time still shows on the results.
+  if (!quiz.timer) ui.time.closest('.stat').hidden = true;
 
   const homeBtn = $('home');
   homeBtn.onclick = () => {
@@ -66,7 +74,8 @@
 
   // Re-render whatever is on screen in the new language. Game progress is kept.
   document.addEventListener('langchange', () => {
-    map.opts.labelCaption = t('find');
+    map.opts.labelCaption = game.state === 'playing' ? t('find') : null;
+    map.refreshLabels();
     if (game.state === 'intro') {
       if (quiz.codes.length) showIntro();
       else showWelcome();
@@ -109,6 +118,7 @@
       ['presetOceania', (c) => c.region === 'Oceania'],
       ['presetMiddleEast', (c) => c.subregion === 'Western Asia'],
       ['presetWorld', () => true],
+      ['presetAllCountries', () => true],
     ];
     const links = presets.map(([key, fn]) => {
       const codes = WhereIsIt.COUNTRIES.filter((c) => c.sovereign && fn(c)).map((c) => c.code);
@@ -118,17 +128,17 @@
         'a',
         { class: 'btn', href: WhereIsIt.quizQuery({ codes, title: name, count: n }) },
         name,
-        el('small', { style: 'color:var(--ink-soft);font-weight:500;margin-left:auto' }, n ? t('nRandom', { n }) : `${codes.length}`),
+        el('small', { style: 'color:var(--ink-soft);font-weight:500;margin-left:auto' }, `${n ?? codes.length}`),
       );
     });
     showCard(
       el('div', { class: 'hero' }, wordmark({ large: true, tagline: true })),
-      el('p', {}, t('welcome')),
-      el('h2', {}, t('teachers')),
-      el('p', {}, t('teachersBlurb')),
-      el('div', { class: 'actions', style: 'margin-top:10px' }, el('a', { class: 'btn primary', href: 'setup.html' }, t('createQuiz'))),
+      el('p', {}, t('welcome', { n: WhereIsIt.DEFAULTS.guesses })),
       el('h2', {}, t('quickPlay')),
       el('div', { class: 'preset-list' }, links),
+      el('h2', {}, t('makeYourOwn')),
+      el('p', {}, t('makeYourOwnBlurb')),
+      el('div', { class: 'actions', style: 'margin-top:10px' }, el('a', { class: 'btn', href: 'setup' }, t('createQuiz'))),
     );
   }
 
@@ -159,13 +169,15 @@
     Object.assign(game, { state: 'intro', queue: [], index: -1, current: null, results: [], elapsed: 0, advancing: false });
     clearInterval(game.timer);
     clearTimeout(game.nextTimer);
+    clearTimeout(game.ringTimer);
     hideSay();
     map.clearStates();
     map.ring(null);
+    map.setLabels([]);
     map.refreshTooltip();
     map.focus(quiz.codes);
     ui.label.textContent = '';
-    ui.target.replaceChildren(wordmark());
+    ui.target.replaceChildren(wordmark({ home: true }));
     ui.guesses.replaceChildren();
     tick();
     renderStats();
@@ -175,6 +187,10 @@
   function start(queue) {
     homeBtn.hidden = false;
     clearTimeout(game.nextTimer);
+    clearTimeout(game.ringTimer);
+    hideSay();
+    map.setLabels([]);
+    map.opts.labelCaption = t('find');
     Object.assign(game, { state: 'playing', queue, index: -1, results: [], elapsed: 0, advancing: false });
     ui.overlay.hidden = true;
     ui.showResults.hidden = true;
@@ -192,6 +208,7 @@
     if (game.state !== 'playing') return;
     if (game.current) map.toggleClass(game.current, 'hint', false);
     map.ring(null);
+    map.setLabels([]);
     game.index++;
     game.advancing = false;
     if (game.index >= game.queue.length) return finish();
@@ -203,6 +220,11 @@
   }
 
   function onCountryClick(code) {
+    // After the game, tapping a country names it (touch screens have no hover label).
+    if (game.state === 'done') {
+      if (ui.overlay.hidden) say('', countryName(code), code);
+      return;
+    }
     if (game.state !== 'playing' || game.advancing) return;
     const target = game.current;
     const name = countryName(code);
@@ -219,10 +241,12 @@
         map.flash(code, 'flash-right', 800);
         say('good', game.wrong === 0 ? t('correct') : t('correctTries', { n: game.wrong + 1 }), code);
       } else {
+        // Leave a missed country on screen, named, long enough to take in where it is.
+        map.setLabels([code]);
         say('', t('thatsKeepPracticing', { name }), code);
       }
       renderStats();
-      game.nextTimer = setTimeout(next, found ? 650 : 900);
+      game.nextTimer = setTimeout(next, found ? 650 : 2400);
       return;
     }
 
@@ -259,7 +283,9 @@
     ui.target.replaceChildren(document.createTextNode(title()));
     ui.guesses.replaceChildren();
     renderStats();
-    map.refreshTooltip();
+    map.opts.labelCaption = null;
+    map.setLabels(summary().missed);
+    map.refreshTooltip(true);
     map.resetView();
     showResults();
   }
@@ -327,6 +353,7 @@
           onclick: () => {
             ui.overlay.hidden = true;
             ui.showResults.hidden = false;
+            ui.showResults.focus();
           },
         },
         icon('map'),
@@ -342,7 +369,17 @@
         const cls = !r.found ? 'missed' : r.wrong === 0 ? 'first' : 'ok';
         const mark = !r.found ? '✗' : r.wrong === 0 ? '✓' : `✓${r.wrong + 1}`;
         const tip = !r.found ? t('resultMissed') : r.wrong === 0 ? t('resultFirstTry') : t('resultOnTry', { n: r.wrong + 1 });
-        return el('li', { class: cls, title: tip }, flagImg(r.code), countryName(r.code), el('span', { class: 'mark' }, mark));
+        return el(
+          'li',
+          { class: cls },
+          el(
+            'button',
+            { type: 'button', title: `${tip} · ${t('showOnMap')}`, onclick: () => locate(r.code) },
+            flagImg(r.code),
+            el('span', { class: 'name' }, countryName(r.code)),
+            el('span', { class: 'mark', 'aria-label': tip }, mark),
+          ),
+        );
       }),
     );
 
@@ -358,6 +395,7 @@
       ),
       el('div', { class: 'actions' }, actions),
       el('h2', {}, t('countriesHeading')),
+      el('p', { class: 'list-hint' }, t('resultsHint')),
       list,
       el('div', { class: 'card-foot' }, customizeLink()),
     );
@@ -372,6 +410,7 @@
     renderGuesses();
     hideSay();
     map.refreshTooltip();
+    announce(`${t('find')}: ${countryName(c)}`);
   }
 
   function renderGuesses() {
@@ -398,11 +437,28 @@
     f.hidden = false;
     void f.offsetWidth;
     f.classList.add('pop');
+    announce(text);
     if (kind !== 'hint') sayTimer = setTimeout(hideSay, 2200);
   }
   function hideSay() {
     clearTimeout(sayTimer);
     ui.feedback.hidden = true;
+  }
+  /** Reads feedback out to screen readers (the visible pill comes and goes too fast to be announced). */
+  function announce(text) {
+    ui.status.textContent = text;
+  }
+
+  /** From the results list: closes the card and shows that country on the map. */
+  function locate(code) {
+    ui.overlay.hidden = true;
+    ui.showResults.hidden = false;
+    ui.showResults.focus();
+    map.fitBounds(map.boundsOf([code]), 700);
+    map.ring(code);
+    clearTimeout(game.ringTimer);
+    game.ringTimer = setTimeout(() => map.ring(null), 3000);
+    say('', countryName(code), code);
   }
 
   // ---------------------------------------------------------------- helpers
@@ -427,18 +483,12 @@
   function customizeLink() {
     return el(
       'a',
-      { class: 'subtle-link', href: 'setup.html' + WhereIsIt.quizQuery(quiz), title: t('customizeTitle') },
+      { class: 'subtle-link', href: 'setup' + WhereIsIt.quizQuery(quiz), title: t('customizeTitle') },
       t('customize'),
     );
   }
 
   function questionCount() {
     return Math.min(quiz.count || quiz.codes.length, quiz.codes.length);
-  }
-
-  function defaultTitle(codes) {
-    if (!codes.length) return 'Where Is It';
-    const regions = new Set(codes.map((c) => byCode.get(c).region));
-    return regions.size === 1 ? t('regionTitle', { region: I18N.region([...regions][0]) }) : t('worldTitle');
   }
 })();

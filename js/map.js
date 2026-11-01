@@ -18,6 +18,8 @@
   const DOT_RADIUS = 6; // screen px
   const DOT_HIDE_AREA = 90; // screen px²; hide the dot once the shape itself is this big
   const STATE_CLASSES = ['s-first', 's-ok', 's-missed', 'selected'];
+  const HATCH = 7; // screen px between the stripes on missed countries
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   class GeoMap {
     constructor(container, opts) {
@@ -36,6 +38,18 @@
 
       const svg = d3.select(container).append('svg').attr('class', 'geomap');
       this.svg = svg;
+      // Missed countries are striped as well as red, so they don't rely on red vs. green alone (colour blindness).
+      // The stripes are rescaled on zoom (see _applyTransform) to stay the same size on screen.
+      const hatch = svg
+        .append('defs')
+        .append('pattern')
+        .attr('id', 'geomap-hatch')
+        .attr('patternUnits', 'userSpaceOnUse')
+        .attr('width', HATCH)
+        .attr('height', HATCH);
+      hatch.append('rect').attr('class', 'hatch-bg').attr('width', HATCH).attr('height', HATCH);
+      hatch.append('path').attr('class', 'hatch-line').attr('d', `M0,${HATCH / 2}h${HATCH}`);
+      this.hatch = hatch;
       const vp = svg.append('g').attr('class', 'viewport');
       this.viewport = vp;
       vp.append('path').attr('class', 'sphere').attr('d', path({ type: 'Sphere' }));
@@ -43,6 +57,9 @@
       const land = vp.append('g').attr('class', 'land');
       const dots = vp.append('g').attr('class', 'dots');
       this.overlay = vp.append('g').attr('class', 'overlay');
+      this.labelLayer = vp.append('g').attr('class', 'map-labels');
+      this._labels = [];
+      this._labelCodes = [];
 
       const topo = window.GEO_WORLD;
       const features = topojson.feature(topo, topo.objects.countries).features;
@@ -139,6 +156,25 @@
       this._updateOverlay();
     }
 
+    /** Writes country names on the map (e.g. the ones a student missed). Pass [] to remove them. */
+    setLabels(codes) {
+      this._labelCodes = (codes || []).slice();
+      this.labelLayer.selectAll('*').remove();
+      this._labels = [];
+      for (const code of this._labelCodes) {
+        const c = this.countries.get(code);
+        if (!c) continue;
+        const g = this.labelLayer.append('g').attr('class', 'map-label');
+        // Tiny countries are drawn as a dot, so put their name just above it rather than over it.
+        g.append('text').attr('dy', c.dot ? '-1.1em' : '0.35em').text(WhereIsIt.countryName(code));
+        this._labels.push({ g, x: c.center[0], y: c.center[1] });
+      }
+      this._updateOverlay();
+    }
+    /** Rebuilds the labels, e.g. after a language change. */
+    refreshLabels() {
+      this.setLabels(this._labelCodes);
+    }
     // ---- camera -----------------------------------------------------------
 
     /** Union of the main-landmass bounds of the given countries. */
@@ -201,7 +237,7 @@
     }
 
     zoomBy(factor) {
-      this.svg.transition().duration(300).call(this.zoom.scaleBy, factor);
+      this.svg.transition().duration(reduceMotion.matches ? 0 : 300).call(this.zoom.scaleBy, factor);
     }
 
     // ---- internals --------------------------------------------------------
@@ -218,7 +254,7 @@
     }
 
     _goto(t, duration) {
-      if (duration) this.svg.transition().duration(duration).call(this.zoom.transform, t);
+      if (duration && !reduceMotion.matches) this.svg.transition().duration(duration).call(this.zoom.transform, t);
       else this.svg.call(this.zoom.transform, t);
     }
 
@@ -236,6 +272,7 @@
     _applyTransform(t) {
       this.transform = t;
       this.viewport.attr('transform', t);
+      this.hatch.attr('patternTransform', `rotate(45) scale(${1 / t.k})`);
       const k2 = t.k * t.k;
       for (const c of this.countries.values()) {
         if (!c.dot) continue;
@@ -246,9 +283,11 @@
     }
 
     _updateOverlay() {
+      const k = this.transform.k;
+      // Labels stay the same size on screen whatever the zoom.
+      for (const { g, x, y } of this._labels) g.attr('transform', `translate(${x},${y}) scale(${1 / k})`);
       if (!this._ring) return;
       const { g, cx, cy, r } = this._ring;
-      const k = this.transform.k;
       // Ring radius in screen px: around the country, but never smaller than 22px.
       const screenR = Math.max(r * k + 10, 22);
       g.attr('transform', `translate(${cx},${cy}) scale(${screenR / k})`);
@@ -264,6 +303,7 @@
       let inside = false; // pointer is over the map
       let shown = null; // country currently rendered in the tooltip
       let last = null; // last pointer position
+      let mouse = false; // last pointer was a mouse (no tooltip for touch/pen)
       let hideTimer = null;
 
       const codeAt = (e) => {
@@ -283,7 +323,7 @@
       };
       // The tooltip shows whichever country opts.labelFor(hovered) returns (or nothing).
       const updateTip = () => {
-        const code = inside ? this.opts.labelFor(hovered) : null;
+        const code = inside && mouse ? this.opts.labelFor(hovered) : null;
         if (code !== shown) {
           shown = code;
           if (code) {
@@ -312,6 +352,7 @@
       };
       const track = (e) => {
         last = { x: e.clientX, y: e.clientY };
+        mouse = e.pointerType === 'mouse';
         inside = true;
         setHover(codeAt(e));
       };
@@ -329,7 +370,7 @@
         if (e.pointerType !== 'mouse') track(e);
       });
       node.addEventListener('pointerup', (e) => {
-        // Touch has no hover: show the label where the finger lands, then fade it.
+        // Touch has no hover: briefly highlight where the finger lands, then clear it.
         if (e.pointerType !== 'mouse') {
           clearTimeout(hideTimer);
           hideTimer = setTimeout(() => {

@@ -20,6 +20,7 @@
   --ok: #f0b43c;
   --missed: #e2574c;
   --hint: #8e44ec;
+  --hatch-line: rgba(255, 255, 255, 0.5);
 
   --hover-bg: #f4f2ee;
   --subtle-bg: #f6f3ec;
@@ -29,9 +30,6 @@
   --ok-ink: #c98a0b;
   --code-bg: #ece7dc;
   --selected-hover: #86a9f2;
-  --flash-wrong-alt: #ffb3ad;
-  --flash-right-from: #ffffff;
-  --hint-alt: #e9d8ff;
   --attribution: rgba(31, 41, 51, 0.55);
   --scrim: rgba(31, 41, 51, 0.35);
   --tooltip-bg: rgba(31, 41, 51, 0.92);
@@ -67,6 +65,7 @@
     --ok: #d9a232;
     --missed: #d6544a;
     --hint: #9b5cf0;
+    --hatch-line: rgba(0, 0, 0, 0.35);
 
     --hover-bg: #283039;
     --subtle-bg: #262d35;
@@ -76,9 +75,6 @@
     --ok-ink: #e8b443;
     --code-bg: #2a313a;
     --selected-hover: #7ea3f2;
-    --flash-wrong-alt: #7a2d27;
-    --flash-right-from: #c9f0d2;
-    --hint-alt: #4a2d78;
     --attribution: rgba(230, 233, 236, 0.5);
     --scrim: rgba(0, 0, 0, 0.55);
     --tooltip-bg: rgba(10, 13, 16, 0.94);
@@ -138,30 +134,42 @@ input, select { background: var(--panel); }
 .geomap .selected.hover { fill: var(--selected-hover); }
 .geomap .s-first { fill: var(--first); }
 .geomap .s-ok { fill: var(--ok); }
-.geomap .s-missed { fill: var(--missed); }
+.geomap .s-missed { fill: url(#geomap-hatch); }
+.geomap .hatch-bg { fill: var(--missed); }
+.geomap .hatch-line { stroke: var(--hatch-line); stroke-width: 2.5px; }
+/* Country names written on the map (missed countries). Drawn at a fixed screen size; see GeoMap.setLabels. */
+.geomap .map-label text {
+  font: 700 12px system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; text-anchor: middle; pointer-events: none;
+  fill: var(--ink); stroke: var(--panel); stroke-width: 3px; stroke-linejoin: round; paint-order: stroke;
+}
 .geomap .s-first.hover, .geomap .s-ok.hover, .geomap .s-missed.hover { fill-opacity: 0.75; }
 
+/* Map feedback animations are deliberately soft and short, and none of them loops forever (motion sensitivity):
+   each plays a few times at most, then settles into a steady colour. */
+/* Wrong guess: a single fade from red back to the country's normal colour. */
 .geomap .flash-wrong { animation: flash-wrong 0.9s ease-out; }
 @keyframes flash-wrong {
-  0%, 40% { fill: var(--missed); }
-  20%, 60% { fill: var(--flash-wrong-alt); }
+  from { fill: var(--missed); }
 }
-.geomap .flash-right { animation: flash-right 0.8s ease-out; }
+/* Right answer: fills in from a pale green rather than flashing white. */
+.geomap .flash-right { animation: flash-right 0.6s ease-out; }
 @keyframes flash-right {
-  0% { fill: var(--flash-right-from); }
-  100% { fill: var(--first); }
+  from { fill: color-mix(in srgb, var(--first) 40%, var(--land)); }
+  to { fill: var(--first); }
 }
-.geomap .hint { animation: hint-pulse 0.9s ease-in-out infinite; }
+/* Hint: two slow pulses, then the country stays purple. */
+.geomap .hint { fill: var(--hint); animation: hint-pulse 1.4s ease-in-out 2; }
 @keyframes hint-pulse {
   0%, 100% { fill: var(--hint); }
-  50% { fill: var(--hint-alt); }
+  50% { fill: color-mix(in srgb, var(--hint) 60%, var(--land)); }
 }
+/* Ring around the hinted country: draws in gently a few times, then holds still. */
 .geomap .ring circle {
   fill: none; stroke: var(--hint); stroke-width: 3px; vector-effect: non-scaling-stroke;
-  transform-box: fill-box; transform-origin: center; animation: ring 0.9s ease-in-out infinite alternate;
+  transform-box: fill-box; transform-origin: center; animation: ring 1.1s ease-in-out 3 alternate both;
 }
 @keyframes ring {
-  from { transform: scale(1.5); opacity: 0.35; }
+  from { transform: scale(1.2); opacity: 0.45; }
   to { transform: scale(1); opacity: 1; }
 }
 
@@ -182,13 +190,16 @@ input, select { background: var(--panel); }
   position: absolute; right: 14px; bottom: 14px; display: flex; flex-direction: column; gap: 6px; z-index: 5;
 }
 .zoom-controls button {
-  width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel);
+  width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); color: var(--ink);
   font-size: 1.25rem; font-weight: 700; cursor: pointer; box-shadow: var(--shadow); line-height: 1;
+  display: inline-flex; align-items: center; justify-content: center; padding: 0;
 }
+.zoom-controls svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .zoom-controls button:hover { background: var(--hover-bg); }
 
+/* Sits above the start/results overlay (z-index 20) so "About" can always be clicked. */
 .attribution {
-  position: absolute; left: 8px; bottom: 6px; font-size: 11px; color: var(--attribution); z-index: 5;
+  position: absolute; left: 8px; bottom: 6px; font-size: 11px; color: var(--attribution); z-index: 21;
 }
 .attribution a { color: inherit; }
 
@@ -217,6 +228,7 @@ input, select { background: var(--panel); }
 .lang-picker svg { position: absolute; top: 50%; transform: translateY(-50%); pointer-events: none; }
 .lang-picker .i-translate { left: 10px; width: 19px; height: 19px; color: var(--ink-soft); }
 .lang-picker .i-chevron { right: 11px; width: 13px; height: 13px; color: var(--ink); }
+.lang-picker .lang-code { display: none; }
 .theme-toggle .i-sun, [data-theme='dark'] .theme-toggle .i-moon { display: none; }
 [data-theme='dark'] .theme-toggle .i-sun { display: block; }
 .prompt { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 220px; }
@@ -247,7 +259,7 @@ input, select { background: var(--panel); }
 
 .overlay {
   position: absolute; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center;
-  padding: 16px; background: var(--scrim); overflow: auto;
+  padding: 16px 16px 28px; background: var(--scrim); overflow: auto; /* extra bottom room keeps the card off the About link */
 }
 .card {
   background: var(--panel); border-radius: 18px; box-shadow: var(--shadow); padding: 28px;
@@ -294,14 +306,22 @@ input, select { background: var(--panel); }
 .score-big small { color: var(--ink-soft); font-weight: 600; }
 
 .result-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
-.result-list li { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px; background: var(--subtle-bg); font-size: 0.9rem; }
+.result-list li { border-radius: 8px; background: var(--subtle-bg); font-size: 0.9rem; }
+/* Each result is a button that shows the country on the map. */
+.result-list button {
+  display: flex; align-items: center; gap: 8px; width: 100%; padding: 6px 8px; border: 0; border-radius: inherit;
+  background: none; color: inherit; font: inherit; text-align: left; cursor: pointer;
+}
+.result-list button:hover { background: color-mix(in srgb, var(--ink) 7%, transparent); }
+.result-list .name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card p.list-hint { margin: -4px 0 8px; font-size: 0.85rem; }
 .result-list li .mark { margin-left: auto; font-weight: 800; }
 .result-list li.first .mark { color: var(--first); }
 .result-list li.ok .mark { color: var(--ok-ink); }
 .result-list li.missed { background: var(--missed-bg); }
 .result-list li.missed .mark { color: var(--missed); }
 
-.preset-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.preset-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); grid-auto-rows: 1fr; gap: 8px; }
 .preset-list a { justify-content: flex-start; white-space: normal; text-align: left; }
 .preset-list a small { white-space: nowrap; }
 
@@ -344,8 +364,10 @@ input, select { background: var(--panel); }
 }
 .tree .caret.open { transform: rotate(90deg); }
 .tree input[type='checkbox'] { width: 16px; height: 16px; accent-color: var(--accent); flex: none; margin: 0; }
-.tree .zoom-to { border: 0; background: none; cursor: pointer; color: var(--ink-soft); padding: 0 4px; font-size: 0.85rem; visibility: hidden; }
-.tree .row:hover .zoom-to { visibility: visible; }
+/* Faded out rather than hidden so keyboard users can still tab to it; always shown on touch screens. */
+.tree .zoom-to { border: 0; background: none; cursor: pointer; color: var(--ink-soft); padding: 0 4px; font-size: 0.85rem; opacity: 0; border-radius: 4px; }
+.tree .row:hover .zoom-to, .tree .row:focus-within .zoom-to { opacity: 1; }
+@media (hover: none) { .tree .zoom-to { opacity: 0.75; } }
 
 .options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; font-size: 0.9rem; }
 .options label { display: flex; flex-direction: column; gap: 4px; font-weight: 600; }
@@ -412,8 +434,27 @@ input, select { background: var(--panel); }
   pointer-events: none;
 }
 
+/* ---------------- QR code dialog ---------------- */
+.qr-dialog {
+  border: 0; border-radius: 18px; padding: 24px; width: min(720px, 94vw); max-height: 94vh; overflow: auto;
+  background: var(--panel); color: var(--ink); box-shadow: var(--shadow); text-align: center;
+}
+.qr-dialog::backdrop { background: rgba(10, 14, 18, 0.72); }
+.qr-dialog h2 { margin: 0; font-size: clamp(1.4rem, 3.2vw, 2.2rem); line-height: 1.15; }
+.qr-sub { margin: 4px 0 16px; color: var(--ink-soft); font-weight: 600; }
+.qr-code svg { display: block; width: min(60vh, 100%); height: auto; margin: 0 auto; border-radius: 8px; }
+.qr-link { margin: 12px 0 0; font-size: 0.8rem; color: var(--ink-soft); word-break: break-all; max-height: 3.9em; overflow: hidden; }
+.qr-actions { display: flex; justify-content: center; margin-top: 16px; }
+
 @media (max-width: 800px) {
   body { overflow: auto; }
+  /* Pin the share bar to the bottom of the screen so the link is always one tap away (setup.js sets --share-h). */
+  .setup { padding-bottom: var(--share-h, 0px); }
+  .sidebar .share {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--panel);
+    box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.14); padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  }
+  .share input { display: none; }
   .setup { flex-direction: column; height: auto; min-height: 100%; }
   .sidebar { width: 100%; border-right: 0; order: 2; }
   .tree { max-height: 50vh; }
@@ -423,6 +464,26 @@ input, select { background: var(--panel); }
   .prompt .target { font-size: 1.25rem; }
   .stats { gap: 10px; width: 100%; justify-content: space-between; order: 1; }
   .card { padding: 20px; }
+}
+
+/* Small screens: shrink the language picker to "文A EN" (the native list still shows full names)
+   and let the title give way so the header controls stay on one row. */
+@media (max-width: 600px) {
+  .prompt { min-width: 120px; }
+  .lang-picker .lang-select { width: 70px; padding: 0; color: transparent; }
+  .lang-picker .lang-select option { color: var(--ink); background: var(--panel); }
+  .lang-picker .i-chevron { display: none; }
+  .lang-picker .lang-code {
+    display: block; position: absolute; left: 34px; top: 50%; transform: translateY(-50%); pointer-events: none;
+    font-size: 0.85rem; font-weight: 700; letter-spacing: 0.02em; color: var(--ink);
+  }
+}
+
+/* Narrow phones: Print and QR code become icon-only buttons (the label stays for screen readers). */
+@media (max-width: 480px) {
+  .share .btn-text {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
 }
 
 /* ---------------- Printable worksheet ---------------- */
@@ -480,4 +541,20 @@ body.print-page { overflow: auto; height: auto; min-height: 100%; }
   .sheets { display: block; padding: 0; overflow: visible; }
   .sheet { margin: 0; box-shadow: none; break-after: page; }
   .sheet:last-child { break-after: auto; }
+}
+
+/* ---------------- Accessibility ---------------- */
+/* Visible keyboard focus everywhere (mouse clicks don't show it). */
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+/* Respect "reduce motion": no pulsing or flashing, and hints stay highlighted with a steady colour. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; }
+  .feedback.pop { animation: none; }
+  .geomap .hint { animation: none; fill: var(--hint); }
+  .geomap .ring circle { animation: none; }
+  .geomap .flash-wrong { animation: none; fill: var(--missed); }
+  .geomap .flash-right { animation: none; }
 }

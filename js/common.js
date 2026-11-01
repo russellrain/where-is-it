@@ -7,7 +7,7 @@
 
   const REGION_ORDER = ['Africa', 'Americas', 'Asia', 'Europe', 'Oceania', 'Antarctica'];
 
-  const DEFAULTS = { guesses: 3, dim: true };
+  const DEFAULTS = { guesses: 3, dim: true, timer: true };
 
   /** Reads quiz settings from a query string. Unknown country codes are dropped. */
   function parseQuiz(search) {
@@ -28,6 +28,7 @@
       count: int('n'), // ask this many (random subset); null = all
       guesses: Math.min(int('g') || DEFAULTS.guesses, 10),
       dim: bool('d', DEFAULTS.dim),
+      timer: bool('s', DEFAULTS.timer), // show the running timer while playing
       langs: I18N.parseLangs(p.get('l')), // languages students may use; null = all
     };
   }
@@ -40,6 +41,7 @@
     if (q.count && q.count < q.codes.length) p.set('n', q.count);
     if (q.guesses && q.guesses !== DEFAULTS.guesses) p.set('g', q.guesses);
     if (q.dim === false) p.set('d', '0');
+    if (q.timer === false) p.set('s', '0');
     // Always written when chosen, so a quiz keeps its languages as new ones are added to the app.
     // Left out (null) only for links that never chose, which allow every language.
     if (q.langs && q.langs.length) p.set('l', q.langs.join(','));
@@ -52,12 +54,21 @@
     return (window.GEO_COUNTRY_NAMES || {})[I18N.lang]?.[code] || byCode.get(code).name;
   }
 
+  /** Title used when a quiz doesn't set one, e.g. "Africa countries" or "Countries of the world". */
+  function defaultTitle(codes) {
+    if (!codes.length) return 'Where Is It';
+    const regions = new Set(codes.map((c) => byCode.get(c).region));
+    return regions.size === 1 ? I18N.t('regionTitle', { region: I18N.region([...regions][0]) }) : I18N.t('worldTitle');
+  }
+
   /** Lowercase without accents, for forgiving search ("peru" finds "Perú"). */
   function fold(s) {
     return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   }
 
+  /** Absolute URL for a page ('./', 'setup', 'print'). Extensionless on the web; .html added under file://. */
   function pageUrl(page, query) {
+    if (location.protocol === 'file:') page = page === './' ? 'index.html' : `${page}.html`;
     return new URL(page + (query || ''), location.href).href;
   }
 
@@ -131,9 +142,12 @@
   }
 
   const PIN_SVG = '<svg class="pin" viewBox="0 0 24 32" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 8.4 10.2 18.6 11.2 19.6a1.1 1.1 0 0 0 1.6 0C13.8 30.6 24 20.4 24 12 24 5.37 18.63 0 12 0z"/><circle cx="12" cy="12" r="4.6"/></svg>';
-  /** The "WHERE IS IT 📍" logo. opts.tagline adds the subtitle; opts.large for hero size. */
+  /** The "WHERE IS IT 📍" logo. opts.tagline adds the subtitle; opts.large for hero size; opts.home links it to the site root. */
   function wordmark(opts = {}) {
-    const w = el('span', { class: `wordmark${opts.large ? ' large' : ''}`, role: 'img', 'aria-label': 'Where Is It' });
+    const cls = `wordmark${opts.large ? ' large' : ''}`;
+    const w = opts.home
+      ? el('a', { class: cls, href: './', 'aria-label': 'Where Is It — home' })
+      : el('span', { class: cls, role: 'img', 'aria-label': 'Where Is It' });
     w.innerHTML = `<span class="wm-name">Where Is It${PIN_SVG}</span>` + (opts.tagline ? '<span class="wm-tag"></span>' : '');
     if (opts.tagline) w.querySelector('.wm-tag').textContent = I18N.t('tagline');
     return w;
@@ -162,6 +176,7 @@
     wordmark,
     pinIcon,
     countryName,
+    defaultTitle,
     fold,
     formatTime,
     shuffle,

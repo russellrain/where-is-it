@@ -6,7 +6,7 @@
 //   js/data/countries.js  window.GEO_COUNTRIES - names, regions, sovereignty, capital, lat/lng
 //   js/data/country-names.js  window.GEO_COUNTRY_NAMES - country names in other app languages
 //   assets/flags/*.svg    flag images for every country on the map
-//   vendor/*.js           d3 + topojson-client
+//   vendor/*.js           d3 + topojson-client + qrcode-generator
 //
 // Data is emitted as .js (not .json) so pages work from file:// (and in Electron) without fetch().
 
@@ -164,6 +164,14 @@ const vendor = path.join(root, 'vendor');
 fs.mkdirSync(path.join(vendor, 'licenses'), { recursive: true });
 fs.copyFileSync(nm('d3', 'dist', 'd3.min.js'), path.join(vendor, 'd3.min.js'));
 fs.copyFileSync(nm('topojson-client', 'dist', 'topojson-client.min.js'), path.join(vendor, 'topojson-client.min.js'));
+fs.copyFileSync(nm('qrcode-generator', 'qrcode.js'), path.join(vendor, 'qrcode.js'));
+// qrcode-generator has no LICENSE file; its MIT notice is in the header of qrcode.js.
+fs.writeFileSync(
+  path.join(vendor, 'licenses', 'qrcode-generator.txt'),
+  'qrcode-generator, Copyright (c) 2009 Kazuhiko Arase. Licensed under the MIT license:\n' +
+    'http://www.opensource.org/licenses/mit-license.php\n\n' +
+    'The word "QR Code" is a registered trademark of DENSO WAVE INCORPORATED.\n',
+);
 for (const pkg of ['d3', 'topojson-client', 'world-atlas', 'flag-icons', 'world-countries']) {
   const lic = ['LICENSE', 'LICENSE.md', 'LICENSE.txt'].map((f) => nm(pkg, f)).find((f) => fs.existsSync(f));
   if (lic) fs.copyFileSync(lic, path.join(vendor, 'licenses', `${pkg}.txt`));
