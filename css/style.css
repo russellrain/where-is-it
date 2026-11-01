@@ -302,7 +302,7 @@ input, select { background: var(--panel); }
 .result-list li.missed { background: var(--missed-bg); }
 .result-list li.missed .mark { color: var(--missed); }
 
-.preset-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.preset-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); grid-auto-rows: 1fr; gap: 8px; }
 .preset-list a { justify-content: flex-start; white-space: normal; text-align: left; }
 .preset-list a small { white-space: nowrap; }
 
