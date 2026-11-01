@@ -197,8 +197,9 @@ input, select { background: var(--panel); }
 .zoom-controls svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .zoom-controls button:hover { background: var(--hover-bg); }
 
+/* Sits above the start/results overlay (z-index 20) so "About" can always be clicked. */
 .attribution {
-  position: absolute; left: 8px; bottom: 6px; font-size: 11px; color: var(--attribution); z-index: 5;
+  position: absolute; left: 8px; bottom: 6px; font-size: 11px; color: var(--attribution); z-index: 21;
 }
 .attribution a { color: inherit; }
 
@@ -258,7 +259,7 @@ input, select { background: var(--panel); }
 
 .overlay {
   position: absolute; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center;
-  padding: 16px; background: var(--scrim); overflow: auto;
+  padding: 16px 16px 28px; background: var(--scrim); overflow: auto; /* extra bottom room keeps the card off the About link */
 }
 .card {
   background: var(--panel); border-radius: 18px; box-shadow: var(--shadow); padding: 28px;
