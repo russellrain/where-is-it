@@ -119,7 +119,7 @@
         'a',
         { class: 'btn', href: WhereIsIt.quizQuery({ codes, title: name, count: n }) },
         name,
-        el('small', { style: 'color:var(--ink-soft);font-weight:500;margin-left:auto' }, n ? t('nRandom', { n }) : `${codes.length}`),
+        el('small', { style: 'color:var(--ink-soft);font-weight:500;margin-left:auto' }, `${n ?? codes.length}`),
       );
     });
     showCard(
@@ -127,9 +127,9 @@
       el('p', {}, t('welcome')),
       el('h2', {}, t('quickPlay')),
       el('div', { class: 'preset-list' }, links),
-      el('h2', {}, t('customize')),
-      el('p', {}, t('customizeBlurb')),
-      el('div', { class: 'actions', style: 'margin-top:10px' }, el('a', { class: 'btn primary', href: 'setup' }, t('createQuiz'))),
+      el('h2', {}, t('makeYourOwn')),
+      el('p', {}, t('makeYourOwnBlurb')),
+      el('div', { class: 'actions', style: 'margin-top:10px' }, el('a', { class: 'btn', href: 'setup' }, t('createQuiz'))),
     );
   }
 
