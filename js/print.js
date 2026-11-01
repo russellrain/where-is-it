@@ -17,7 +17,7 @@
   const SMALL_AREA = 500; // px²; countries smaller than this get a pointer line instead of a centered number
 
   const quiz = WhereIsIt.parseQuiz(location.search);
-  $('back').href = WhereIsIt.pageUrl('setup', location.search);
+  $('back').href = WhereIsIt.pageUrl('setup.html', location.search);
   $('print').onclick = () => window.print();
 
   // ---------------------------------------------------------------- geography
