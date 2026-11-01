@@ -15,11 +15,13 @@
     count: $('opt-count'),
     guesses: $('opt-guesses'),
     dim: $('opt-dim'),
+    timer: $('opt-timer'),
   };
   opt.title.value = initial.title;
   opt.count.value = initial.count || '';
   opt.guesses.value = String(initial.guesses);
   opt.dim.checked = initial.dim;
+  opt.timer.checked = initial.timer;
 
   // Student languages, picked in a panel that takes over the sidebar. A new quiz starts with the teacher's page
   // language (and follows it until they pick); an existing link without `l` allowed every language, so keep that.
@@ -92,16 +94,18 @@
         }
         for (const c of members.sort((a, b) => I18N.compare(countryName(a.code), countryName(b.code)))) {
           const box = el('input', { type: 'checkbox', onchange: () => toggle([c.code], box.checked) });
-          const zoom = el('button', { class: 'zoom-to', type: 'button', title: t('showOnMap'), onclick: () => zoomTo([c.code]) }, '⌖');
           const name = countryName(c.code);
+          const zoom = zoomButton(name, () => zoomTo([c.code]));
           const row = el(
             'div',
             { class: 'row country' },
             el('label', {}, box, flagImg(c.code), el('span', { class: 'name' }, name), c.sovereign ? null : el('span', { class: 'terr' }, t('territory'))),
             zoom,
           );
-          // Search matches the English name too, so either works whatever language the page is in.
-          row.dataset.name = fold(name === c.name ? name : `${name}|${c.name}`);
+          // Search matches the English name too, so either works whatever language the page is in,
+          // and the subregion, so "caribbean" lists the Caribbean countries.
+          row.dataset.name = fold([name, c.name, I18N.region(c.subregion), c.subregion].join('|'));
+          row.dataset.exact = fold(name);
           target.append(row);
           countryRows.push({ row, box, c });
         }
@@ -114,7 +118,7 @@
     const caret = el('button', { class: `caret${expanded.has(key) ? ' open' : ''}`, type: 'button', 'aria-label': t('expand') }, '▶');
     const box = el('input', { type: 'checkbox' });
     const count = el('span', { class: 'count' });
-    const zoom = el('button', { class: 'zoom-to', type: 'button', title: t('showOnMap'), onclick: () => zoomTo(members().map((c) => c.code)) }, '⌖');
+    const zoom = zoomButton(label, () => zoomTo(members().map((c) => c.code)));
     const row = el('div', { class: `row ${kind}` }, caret, el('label', {}, box, el('span', { class: 'name' }, label)), zoom, count);
     caret.onclick = () => {
       const body = row.nextElementSibling;
@@ -147,6 +151,11 @@
     sync();
   }
 
+  function zoomButton(name, onclick) {
+    const label = `${t('showOnMap')}: ${name}`;
+    return el('button', { class: 'zoom-to', type: 'button', title: label, 'aria-label': label, onclick }, '⌖');
+  }
+
   function zoomTo(codes) {
     map.fitBounds(map.boundsOf(codes), 600);
   }
@@ -163,6 +172,20 @@
       head.hidden = !any;
       body.hidden = q ? !any : !head.querySelector('.caret').classList.contains('open');
     }
+  });
+
+  // Enter adds (or removes) the country being searched for, so "ken ⏎ egy ⏎" builds a quiz quickly.
+  // It picks the only match, or the one whose name is exactly what was typed ("niger" over "Nigeria").
+  $('search').addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const q = fold(e.target.value.trim());
+    if (!q) return;
+    const shown = countryRows.filter((r) => !r.row.hidden);
+    const hit = shown.length === 1 ? shown[0] : shown.find((r) => r.row.dataset.exact === q);
+    if (!hit) return;
+    toggle([hit.c.code], !selected.has(hit.c.code));
+    e.target.select(); // typing the next name replaces this one
   });
 
   $('clear').onclick = () => {
@@ -335,6 +358,7 @@
       count: Number.isFinite(count) && count > 0 ? count : null,
       guesses: parseInt(opt.guesses.value, 10),
       dim: opt.dim.checked,
+      timer: opt.timer.checked,
       langs: I18N.CODES.filter((c) => langs.has(c)),
     };
   }
@@ -351,6 +375,9 @@
     const url = n ? WhereIsIt.pageUrl('./', query) : '';
     $('link').value = url;
     $('copy-link').disabled = !n;
+    $('qr-open').disabled = !n;
+    // Show the title learners will get if this is left blank.
+    opt.title.placeholder = n ? WhereIsIt.defaultTitle(q.codes) : t('quizTitlePlaceholder');
     const open = $('open-link');
     const print = $('print-link');
     if (n) {
@@ -373,6 +400,59 @@
     setTimeout(() => (label.textContent = t('copyLink')), 2000);
   };
   $('link').addEventListener('focus', (e) => e.target.select());
+
+  // ---------------------------------------------------------------- QR code
+
+  // Big enough to scan from the back of a classroom when projected. Always black on white for reliable scanning.
+  const qrDialog = $('qr-dialog');
+  $('qr-open').onclick = () => {
+    const url = $('link').value;
+    if (!url) return;
+    $('qr-title').textContent = opt.title.value.trim() || WhereIsIt.defaultTitle(currentQuiz().codes);
+    $('qr-link').textContent = url;
+    $('qr-code').replaceChildren(qrSvg(url));
+    qrDialog.showModal();
+  };
+  // Clicking the dark backdrop closes it too.
+  qrDialog.addEventListener('click', (e) => {
+    if (e.target === qrDialog) qrDialog.close();
+  });
+
+  function qrSvg(text) {
+    let qr = null;
+    // Medium error correction scans more reliably; long links (huge quizzes) fall back to low to fit.
+    for (const level of ['M', 'L']) {
+      try {
+        qr = qrcode(0, level);
+        qr.addData(text);
+        qr.make();
+        break;
+      } catch {
+        qr = null;
+      }
+    }
+    if (!qr) return el('p', {}, text);
+    const n = qr.getModuleCount();
+    let d = '';
+    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (qr.isDark(y, x)) d += `M${x},${y}h1v1h-1z`;
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg');
+    const q = 4; // quiet zone, in modules
+    svg.setAttribute('viewBox', `${-q} ${-q} ${n + 2 * q} ${n + 2 * q}`);
+    svg.setAttribute('shape-rendering', 'crispEdges');
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', t('qrCode'));
+    svg.innerHTML = `<rect x="${-q}" y="${-q}" width="${n + 2 * q}" height="${n + 2 * q}" fill="#fff"/><path d="${d}" fill="#000"/>`;
+    return svg;
+  }
+
+  // ---------------------------------------------------------------- small screens
+
+  // On phones the share bar is pinned to the bottom of the screen; leave room for it so nothing hides behind it.
+  const shareBar = document.querySelector('.share');
+  new ResizeObserver(() => {
+    document.documentElement.style.setProperty('--share-h', `${shareBar.offsetHeight}px`);
+  }).observe(shareBar);
 
   buildTree();
 })();

@@ -34,7 +34,8 @@
         <h3 data-i18n="quizOptions">Quiz options</h3>
         <div class="options">
           <label class="wide"><span data-i18n="quizTitle">Quiz title</span>
-            <input type="text" id="opt-title" maxlength="80" placeholder="e.g. Countries of Africa" data-i18n-placeholder="quizTitlePlaceholder">
+            <!-- Placeholder is set by setup.js: the automatic title, so teachers see what learners will get. -->
+            <input type="text" id="opt-title" maxlength="80">
           </label>
           <label><span data-i18n="questions">Questions</span>
             <input type="number" id="opt-count" min="1" placeholder="All" data-i18n-placeholder="all">
@@ -45,6 +46,7 @@
             </select>
           </label>
           <label class="check"><input type="checkbox" id="opt-dim" checked> <span data-i18n="dimOthers">Grey out countries that aren’t in the quiz</span></label>
+          <label class="check"><input type="checkbox" id="opt-timer" checked> <span data-i18n="showTimer">Show the timer while playing</span></label>
           <div class="wide lang-opts">
             <span class="opt-heading" id="lang-heading" data-i18n="studentLanguages">Learner languages</span>
             <button type="button" class="lang-summary" id="lang-open" aria-haspopup="true" aria-controls="lang-panel" aria-describedby="lang-heading">
@@ -62,7 +64,8 @@
         <div class="row-btns">
           <button type="button" class="btn primary" id="copy-link" disabled><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="12" height="12" rx="2.2"/><path d="M15.5 5.5v-.3a1.7 1.7 0 0 0-1.7-1.7H5.2a1.7 1.7 0 0 0-1.7 1.7v8.6a1.7 1.7 0 0 0 1.7 1.7h.3"/></svg><span class="label" data-i18n="copyLink">Copy link</span></button>
           <a class="btn" id="open-link" target="_blank" rel="noopener" aria-disabled="true" data-i18n="tryIt">Try it ↗</a>
-          <a class="btn" id="print-link" target="_blank" rel="noopener" aria-disabled="true" title="Printable map worksheet" data-i18n-title="printTitle"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 9V3.5h11V9"/><path d="M6.5 17.5H5a2 2 0 0 1-2-2V11a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4.5a2 2 0 0 1-2 2h-1.5"/><rect x="6.5" y="14" width="11" height="6.5" rx="1"/></svg><span data-i18n="print">Print</span></a>
+          <a class="btn" id="print-link" target="_blank" rel="noopener" aria-disabled="true" title="Printable map worksheet" data-i18n-title="printTitle"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 9V3.5h11V9"/><path d="M6.5 17.5H5a2 2 0 0 1-2-2V11a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4.5a2 2 0 0 1-2 2h-1.5"/><rect x="6.5" y="14" width="11" height="6.5" rx="1"/></svg><span class="btn-text" data-i18n="print">Print</span></a>
+          <button type="button" class="btn" id="qr-open" disabled title="Show a QR code to scan with a phone or tablet" data-i18n-title="qrTitle"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1"/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1"/><path d="M14 14h2.5v2.5H14zM18 18h2.5v2.5H18zM14 20.5h1.5M20.5 14v1.5"/></svg><span class="btn-text" data-i18n="qrCode">QR code</span></button>
         </div>
       </div>
       <!-- Student-language picker: takes over the sidebar while open (see setup.js). -->
@@ -87,12 +90,22 @@
         </div>
       </section>
     </aside>
+    <!-- Full-screen QR code for projecting the quiz link in a classroom (see setup.js). -->
+    <dialog class="qr-dialog" id="qr-dialog" aria-labelledby="qr-title">
+      <h2 id="qr-title"></h2>
+      <p class="qr-sub" data-i18n="scanToPlay">Scan to play</p>
+      <div class="qr-code" id="qr-code"></div>
+      <p class="qr-link" id="qr-link"></p>
+      <form method="dialog" class="qr-actions">
+        <button class="btn primary" data-i18n="close">Close</button>
+      </form>
+    </dialog>
     <div class="map-wrap" id="map">
       <div class="map-hint" data-i18n="mapHint">Click countries to add or remove them</div>
       <div class="zoom-controls">
         <button type="button" id="zoom-in" title="Zoom in" aria-label="Zoom in" data-i18n-title="zoomIn" data-i18n-aria-label="zoomIn">+</button>
         <button type="button" id="zoom-out" title="Zoom out" aria-label="Zoom out" data-i18n-title="zoomOut" data-i18n-aria-label="zoomOut">−</button>
-        <button type="button" id="zoom-reset" title="Zoom to selection" aria-label="Zoom to selection" data-i18n-title="zoomToSelection" data-i18n-aria-label="zoomToSelection">⤢</button>
+        <button type="button" id="zoom-reset" title="Zoom to the quiz countries" aria-label="Zoom to the quiz countries" data-i18n-title="zoomToFit" data-i18n-aria-label="zoomToFit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
       </div>
       <div class="attribution"><span data-i18n="madeBy">Made by</span> <a href="https://russpuppy.com" target="_blank" rel="noopener">russpuppy</a> · <span data-i18n="mapCredit">Map:</span> <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a> · <a href="about" target="_blank" rel="noopener" data-i18n="about">About</a></div>
     </div>
@@ -104,6 +117,7 @@
   <script src="js/data/countries.js"></script>
   <script src="js/data/country-names.js"></script>
   <script src="js/common.js"></script>
+  <script src="vendor/qrcode.js"></script>
   <script src="js/map.js"></script>
   <script src="js/setup.js"></script>
 </body>

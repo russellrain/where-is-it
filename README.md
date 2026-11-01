@@ -29,7 +29,7 @@ All libraries, map data and flags are bundled locally. Nothing uses ES modules o
 
 ## Quiz link format
 
-`?t=Africa&c=NG,KE,EG&n=10&g=3&d=1`
+`?t=Africa&c=NG,KE,EG&n=10&g=3&d=1&s=1`
 
 | Param | Meaning | Default |
 |---|---|---|
@@ -38,6 +38,7 @@ All libraries, map data and flags are bundled locally. Nothing uses ES modules o
 | `n` | Ask this many (random subset of `c`) each game | all |
 | `g` | Guesses per country before the hint | 3 |
 | `d` | Grey out and disable countries that aren't in the quiz | 1 |
+| `s` | Show the running timer while playing (`0` hides it; the time still appears on the results) | 1 |
 | `l` | Languages students may use, e.g. `es` or `en,es,fr`. With more than one, students get a language picker. The setup page always sets it, starting from the teacher's own page language. | all |
 
 `/setup` accepts the same parameters. The **✎ Customize** link on a quiz's start and results screens opens it in `/setup` so anyone can change it and get their own link.
@@ -56,7 +57,7 @@ js/game.js               student game
 js/setup.js              teacher setup
 js/data/*.js             generated data (do not edit by hand)
 assets/flags/            generated SVG flags
-vendor/                  d3, topojson-client, third-party licenses
+vendor/                  d3, topojson-client, qrcode-generator, third-party licenses
 tools/build-data.mjs     regenerates js/data, assets/flags, vendor from npm packages
 ```
 
@@ -74,6 +75,7 @@ To add a language: add it to `LANGUAGES` in `js/i18n.js` along with its `STRINGS
 - Country metadata: [mledoze/countries](https://github.com/mledoze/countries) (ODbL 1.0)
 - Flags: [flag-icons](https://github.com/lipis/flag-icons) (MIT)
 - [D3](https://d3js.org/) and [topojson-client](https://github.com/topojson/topojson-client) (ISC)
+- [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) (MIT)
 
 License texts are in `vendor/licenses/`.
 

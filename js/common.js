@@ -7,7 +7,7 @@
 
   const REGION_ORDER = ['Africa', 'Americas', 'Asia', 'Europe', 'Oceania', 'Antarctica'];
 
-  const DEFAULTS = { guesses: 3, dim: true };
+  const DEFAULTS = { guesses: 3, dim: true, timer: true };
 
   /** Reads quiz settings from a query string. Unknown country codes are dropped. */
   function parseQuiz(search) {
@@ -28,6 +28,7 @@
       count: int('n'), // ask this many (random subset); null = all
       guesses: Math.min(int('g') || DEFAULTS.guesses, 10),
       dim: bool('d', DEFAULTS.dim),
+      timer: bool('s', DEFAULTS.timer), // show the running timer while playing
       langs: I18N.parseLangs(p.get('l')), // languages students may use; null = all
     };
   }
@@ -40,6 +41,7 @@
     if (q.count && q.count < q.codes.length) p.set('n', q.count);
     if (q.guesses && q.guesses !== DEFAULTS.guesses) p.set('g', q.guesses);
     if (q.dim === false) p.set('d', '0');
+    if (q.timer === false) p.set('s', '0');
     // Always written when chosen, so a quiz keeps its languages as new ones are added to the app.
     // Left out (null) only for links that never chose, which allow every language.
     if (q.langs && q.langs.length) p.set('l', q.langs.join(','));
@@ -50,6 +52,13 @@
   /** Country name in the current language (falls back to English). */
   function countryName(code) {
     return (window.GEO_COUNTRY_NAMES || {})[I18N.lang]?.[code] || byCode.get(code).name;
+  }
+
+  /** Title used when a quiz doesn't set one, e.g. "Africa countries" or "Countries of the world". */
+  function defaultTitle(codes) {
+    if (!codes.length) return 'Where Is It';
+    const regions = new Set(codes.map((c) => byCode.get(c).region));
+    return regions.size === 1 ? I18N.t('regionTitle', { region: I18N.region([...regions][0]) }) : I18N.t('worldTitle');
   }
 
   /** Lowercase without accents, for forgiving search ("peru" finds "Perú"). */
@@ -167,6 +176,7 @@
     wordmark,
     pinIcon,
     countryName,
+    defaultTitle,
     fold,
     formatTime,
     shuffle,
