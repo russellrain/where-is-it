@@ -18,7 +18,7 @@
           <button type="button" class="icon-btn theme-toggle" aria-label="Switch theme"><svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z" fill="currentColor"/></svg><svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
         </div>
         <a class="wordmark" href="./" aria-label="Where Is It — home"><span class="wm-name">Where Is It<svg class="pin" viewBox="0 0 24 32" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 8.4 10.2 18.6 11.2 19.6a1.1 1.1 0 0 0 1.6 0C13.8 30.6 24 20.4 24 12 24 5.37 18.63 0 12 0z"/><circle cx="12" cy="12" r="4.6"/></svg></span><span class="wm-tag" data-i18n="tagline">The country-finding game</span></a>
-        <p data-i18n="setupIntro">Pick regions or individual countries, or click countries on the map, then share the link with students.</p>
+        <p data-i18n="setupIntro">Pick regions or individual countries, or click countries on the map, then share the link.</p>
       </header>
       <div class="section">
         <div class="tree-tools">
@@ -46,13 +46,13 @@
           </label>
           <label class="check"><input type="checkbox" id="opt-dim" checked> <span data-i18n="dimOthers">Grey out countries that aren’t in the quiz</span></label>
           <div class="wide lang-opts">
-            <span class="opt-heading" id="lang-heading" data-i18n="studentLanguages">Student languages</span>
+            <span class="opt-heading" id="lang-heading" data-i18n="studentLanguages">Learner languages</span>
             <button type="button" class="lang-summary" id="lang-open" aria-haspopup="true" aria-controls="lang-panel" aria-describedby="lang-heading">
               <svg class="i-translate" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 2.5v2.2M2.5 4.7h10M10.6 4.7c-.9 4.2-3.7 7.4-8.1 9.1M4.6 7.6c1.3 2.8 3.4 4.7 6.1 5.7"/><path d="M12.6 21.5l4.2-11 4.2 11M14.2 17.6h5.2"/></svg>
               <span class="lang-summary-text" id="lang-summary"></span>
               <span class="lang-summary-action"><span data-i18n="changeLanguages">Change</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 6l6 6-6 6"/></svg></span>
             </button>
-            <small data-i18n="studentLanguagesHint">Students can switch between the languages you choose.</small>
+            <small data-i18n="studentLanguagesHint">Learners can switch between the languages you choose.</small>
           </div>
         </div>
       </div>
@@ -69,7 +69,7 @@
       <section class="sidebar-panel" id="lang-panel" aria-labelledby="lang-panel-title" hidden>
         <div class="panel-head">
           <button type="button" class="icon-btn" id="lang-back" title="Back" aria-label="Back" data-i18n-title="back" data-i18n-aria-label="back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          <h2 id="lang-panel-title" data-i18n="studentLanguages">Student languages</h2>
+          <h2 id="lang-panel-title" data-i18n="studentLanguages">Learner languages</h2>
         </div>
         <div class="panel-tools">
           <input type="search" id="lang-search" placeholder="Search languages…" aria-label="Search languages" data-i18n-placeholder="searchLanguages" data-i18n-aria-label="searchLanguages" autocomplete="off">
@@ -82,7 +82,7 @@
         <div class="lang-list" id="lang-list" role="group" aria-labelledby="lang-panel-title"></div>
         <div class="panel-foot">
           <p class="lang-warn" id="lang-warn" role="alert" hidden data-i18n="pickOneLanguage">Choose at least one language.</p>
-          <small data-i18n="studentLanguagesHint">Students can switch between the languages you choose.</small>
+          <small data-i18n="studentLanguagesHint">Learners can switch between the languages you choose.</small>
           <button type="button" class="btn primary" id="lang-done" data-i18n="done">Done</button>
         </div>
       </section>

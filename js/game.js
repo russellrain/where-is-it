@@ -125,11 +125,11 @@
     showCard(
       el('div', { class: 'hero' }, wordmark({ large: true, tagline: true })),
       el('p', {}, t('welcome')),
-      el('h2', {}, t('teachers')),
-      el('p', {}, t('teachersBlurb')),
-      el('div', { class: 'actions', style: 'margin-top:10px' }, el('a', { class: 'btn primary', href: 'setup' }, t('createQuiz'))),
       el('h2', {}, t('quickPlay')),
       el('div', { class: 'preset-list' }, links),
+      el('h2', {}, t('customize')),
+      el('p', {}, t('customizeBlurb')),
+      el('div', { class: 'actions', style: 'margin-top:10px' }, el('a', { class: 'btn primary', href: 'setup' }, t('createQuiz'))),
     );
   }
 
