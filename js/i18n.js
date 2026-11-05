@@ -25,7 +25,6 @@
     en: {
       tagline: 'The country-finding game',
       language: 'Language',
-      madeBy: 'Made by',
       mapCredit: 'Map:',
       about: 'About',
       zoomIn: 'Zoom in',
@@ -166,7 +165,6 @@
     es: {
       tagline: 'El juego de buscar países',
       language: 'Idioma',
-      madeBy: 'Hecho por',
       mapCredit: 'Mapa:',
       about: 'Acerca de',
       zoomIn: 'Acercar',
@@ -304,7 +302,6 @@
     fr: {
       tagline: 'Le jeu pour trouver les pays',
       language: 'Langue',
-      madeBy: 'Créé par',
       mapCredit: 'Carte :',
       about: 'À propos',
       zoomIn: 'Zoom avant',
