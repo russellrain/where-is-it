@@ -18,6 +18,7 @@
       object: 'countries',
       places: window.GEO_COUNTRIES,
       names: window.GEO_COUNTRY_NAMES || {},
+      capitalNames: window.GEO_CAPITAL_NAMES || {},
       regionOrder: ['Africa', 'Americas', 'Asia', 'Europe', 'Oceania', 'Antarctica'],
       core: (p) => p.sovereign,
       flags: true,
@@ -50,7 +51,7 @@
   const REGION_ORDER = ATLAS.regionOrder;
 
   // Quiz modes, picked by the link's `q` parameter: find each place by its name (the default), or, on maps
-  // whose places have capitals (U.S. states), by its capital: "Sacramento" → click California.
+  // whose places have capitals (both, today), by its capital: "Sacramento" → click California.
   const HAS_CAPITALS = COUNTRIES.some((c) => c.capital);
   const MODES = HAS_CAPITALS ? ['places', 'capitals'] : ['places'];
   const urlMode = new URLSearchParams(location.search).get('q');
@@ -65,7 +66,7 @@
   }
   setMode(mode);
 
-  /** Whether a place can be asked in the current mode (capitals quizzes skip places without one, like D.C.). */
+  /** Whether a place can be asked in the current mode (capitals quizzes skip places without one, like D.C. or Antarctica). */
   function askable(c) {
     return mode !== 'capitals' || Boolean(c.capital);
   }
@@ -124,7 +125,7 @@
 
   /** The place's capital (capitals quizzes). */
   function capitalName(code) {
-    return byCode.get(code).capital || '';
+    return ATLAS.capitalNames?.[I18N.lang]?.[code] || byCode.get(code).capital || '';
   }
 
   /** What the game asks for: the place's name, or in a capitals quiz its capital. */

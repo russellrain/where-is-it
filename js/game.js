@@ -6,9 +6,11 @@
   const text = (s) => document.createTextNode(s);
 
   const quiz = WhereIsIt.parseQuiz(location.search);
-  // Capitals quiz: the prompt is a capital ("Sacramento") and the answer its state. A star stands in for the
-  // state's code badge, which would give the answer away, and answered capitals get a star on the map.
+  // Capitals quiz: the prompt is a capital ("Sacramento") and the answer its state or country. A star stands in for
+  // the flag or code badge, which would give the answer away. On maps that know where each capital is (U.S. states),
+  // answered capitals also get a star on the map; elsewhere missed places are named on the map as usual.
   const capitals = quiz.mode === 'capitals';
+  const capitalStars = capitals && quiz.codes.every((c) => WhereIsIt.byCode.get(c).capitalLatlng);
   const pool = new Set(quiz.codes);
   const title = () => quiz.title || defaultTitle(quiz.codes);
 
@@ -281,7 +283,7 @@
     if (game.current) map.toggleClass(game.current, 'hint', false);
     map.ring(null);
     map.setLabels([]);
-    if (capitals) map.setCapitals(answered()); // keep the stars, drop the last one's name
+    if (capitalStars) map.setCapitals(answered()); // keep the stars, drop the last one's name
     game.index++;
     game.advancing = false;
     if (game.index >= game.queue.length) return finish();
@@ -312,13 +314,13 @@
       const cls = !found ? 's-missed' : game.wrong === 0 ? 's-first' : 's-ok';
       map.setState(code, cls);
       // Star the capital, named until the next one so it sinks in.
-      if (capitals) map.setCapitals(answered(), [code], code);
+      if (capitalStars) map.setCapitals(answered(), [code], code);
       if (found) {
         map.flash(code, 'flash-right', 800);
         say('good', game.wrong === 0 ? t('correct') : t('correctTries', { n: game.wrong + 1 }), code);
       } else {
         // Leave a missed country on screen, named, long enough to take in where it is.
-        if (!capitals) map.setLabels([code]);
+        if (!capitalStars) map.setLabels([code]);
         say('', t('thatsKeepPracticing', { name, capital: capitalName(code) }), code);
       }
       renderStats();
@@ -361,7 +363,7 @@
     renderStats();
     map.opts.labelCaption = null;
     // Name what was missed: the places, or in a capitals quiz the missed capitals next to every capital's star.
-    if (capitals) map.setCapitals(answered(), summary().missed);
+    if (capitalStars) map.setCapitals(answered(), summary().missed);
     else map.setLabels(summary().missed);
     map.refreshTooltip(true);
     map.resetView();

@@ -6,7 +6,7 @@ A find-it-on-the-map game for classrooms.
 
 **Play it at [whereisit.earth](https://whereisit.earth)**. Teachers can build a quiz at [whereisit.earth/setup](https://whereisit.earth/setup).
 
-- **Teachers** open `/setup`, pick a map (world countries or U.S. states) and, for states, a quiz type (find each state by name or by its capital), and choose regions, subregions, or individual places (from the list or by clicking the map). Then they copy a link to share.
+- **Teachers** open `/setup`, pick a map (world countries or U.S. states) and a quiz type (find each place by name or by its capital), and choose regions, subregions, or individual places (from the list or by clicking the map). Then they copy a link to share.
 - **Students** open the link and get one country at a time, with its name and flag, to find on the map. Each country allows 3 guesses (configurable). After that the answer is revealed and the student clicks it to continue, but it counts as missed. A timer runs and a score screen with **Copy score** appears at the end.
 
 ## Running it
@@ -34,7 +34,7 @@ All libraries, map data and flags are bundled locally. Nothing uses ES modules o
 | Param | Meaning | Default |
 |---|---|---|
 | `m` | Map: `us` for U.S. states (50 states, D.C. and the 5 inhabited territories, by postal code). Leave out for world countries | world |
-| `q` | Quiz type: `capitals` shows each place's capital (e.g. "Sacramento") and the learner finds the place. Only on maps whose places have capitals (U.S. states and territories; D.C. is left out). Leave out to find places by name | names |
+| `q` | Quiz type: `capitals` shows each place's capital (e.g. "Sacramento") and the learner finds the place. Places without a capital (D.C., Antarctica, Macau, Heard & McDonald Islands) are left out. On the U.S. map, answered capitals get a star where the city is. Leave out to find places by name | names |
 | `c` | Comma-separated ISO 3166-1 alpha-2 country codes, or state postal codes with `m=us` | required |
 | `t` | Quiz title | auto from region |
 | `n` | Ask this many (random subset of `c`) each game | all |
@@ -70,7 +70,7 @@ To regenerate data (for example after upgrading a package): `npm install && npm 
 
 The game, setup page and worksheet are available in English, Spanish, French and Portuguese. Students start in the language they last picked, or their device language, as long as the quiz allows it (`l` above). The setup page's own language is separate from the quiz's student languages. The About page (including the privacy policy) is English only.
 
-To add a language: add it to `LANGUAGES` in `js/i18n.js` along with its `STRINGS` and `REGIONS` tables, add it to `TRANSLATIONS` in `tools/build-data.mjs` (and any name fixes to `RENAME_I18N`), then run `npm run build-data` to regenerate `js/data/country-names.js`. For the U.S. states map, also add the language's `VARIANTS.us` and `VARIANTS.capitals` wording in `js/i18n.js`, the U.S. region names to its `REGIONS` table, and any state names that differ from English to `US_NAMES_I18N` in `tools/build-data.mjs`.
+To add a language: add it to `LANGUAGES` in `js/i18n.js` along with its `STRINGS` and `REGIONS` tables, add it to `TRANSLATIONS` in `tools/build-data.mjs` (and any name fixes to `RENAME_I18N`, and capitals whose names differ from English to `CAPITALS_I18N`), then run `npm run build-data` to regenerate `js/data/country-names.js`. Add its capitals-quiz wording to `VARIANTS.capitals` in `js/i18n.js`. For the U.S. states map, also add the language's `VARIANTS.us` and `VARIANTS['capitals-us']` wording, the U.S. region names to its `REGIONS` table, and any state names that differ from English to `US_NAMES_I18N` in `tools/build-data.mjs`.
 
 ## Adding another map
 

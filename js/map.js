@@ -198,7 +198,7 @@
     }
 
     /**
-     * Marks capitals with a star (places with a `capital` and `capitalLatlng`). Those in `named` also get the
+     * Marks capitals with a star (places with a `capital` and `capitalLatlng`: U.S. states). Those in `named` also get the
      * capital's name. A code in `fresh` pops in. Pass [] to remove them all.
      */
     setCapitals(codes, named = [], fresh = null) {
@@ -213,7 +213,7 @@
         const g = this.capitalLayer.append('g').attr('class', 'capital');
         const inner = g.append('g').attr('class', code === fresh ? 'capital-mark pop' : 'capital-mark');
         inner.append('path').attr('d', WhereIsIt.STAR_PATH);
-        if (withName.has(code)) inner.append('text').attr('dy', '-0.95em').text(p.capital);
+        if (withName.has(code)) inner.append('text').attr('dy', '-0.95em').text(WhereIsIt.capitalName(code));
         this._capitals.push({ g, x: xy[0], y: xy[1] });
       }
       this._updateOverlay();

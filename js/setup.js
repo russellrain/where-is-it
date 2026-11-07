@@ -31,7 +31,7 @@
 
   $('territories').checked = includeTerritories;
 
-  // Capitals quizzes leave out places without a capital (D.C.).
+  // Capitals quizzes leave out places without a capital (D.C., Antarctica).
   const visible = (c) => (includeTerritories || ATLAS.core(c)) && WhereIsIt.askable(c);
   const capitalsMode = () => WhereIsIt.mode === 'capitals';
 
@@ -86,7 +86,7 @@
 
   // ---------------------------------------------------------------- quiz type
 
-  // Find states by name, or by capital. Unlike the map, this switches in place: the places and shapes are the same.
+  // Find places by name, or by capital. Unlike the map, this switches in place: the places and shapes are the same.
   const modeButtons = [...document.querySelectorAll('[data-mode]')];
   $('mode-pick').hidden = WhereIsIt.MODES.length < 2;
   function renderMode() {
@@ -155,13 +155,13 @@
               flagImg(c.code),
               el('span', { class: 'name' }, name),
               ATLAS.core(c) ? null : el('span', { class: 'terr' }, t(c.kind === 'district' ? 'district' : 'territory')),
-              capitalsMode() ? el('span', { class: 'capital' }, '· ', c.capital) : null,
+              capitalsMode() ? el('span', { class: 'capital' }, '· ', WhereIsIt.capitalName(c.code)) : null,
             ),
             zoom,
           );
           // Search matches the English name too, so either works whatever language the page is in,
-          // and the subregion, so "caribbean" lists the Caribbean countries. And the capital, if any.
-          row.dataset.name = fold([name, c.name, I18N.region(c.subregion), c.subregion, c.capital || ''].join('|'));
+          // and the subregion, so "caribbean" lists the Caribbean countries. And the capital (either language), if any.
+          row.dataset.name = fold([name, c.name, I18N.region(c.subregion), c.subregion, c.capital || '', WhereIsIt.capitalName(c.code)].join('|'));
           row.dataset.exact = fold(name);
           target.append(row);
           countryRows.push({ row, box, c });

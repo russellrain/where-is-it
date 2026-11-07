@@ -4,7 +4,7 @@
 // Outputs (committed to the repo so the site runs with no build step):
 //   js/data/world.js      window.GEO_WORLD     - TopoJSON country shapes, ids = ISO alpha-2 codes
 //   js/data/countries.js  window.GEO_COUNTRIES - names, regions, sovereignty, capital, lat/lng
-//   js/data/country-names.js  window.GEO_COUNTRY_NAMES - country names in other app languages
+//   js/data/country-names.js  window.GEO_COUNTRY_NAMES, GEO_CAPITAL_NAMES - country and capital names in other app languages
 //   js/data/us-states.js  window.GEO_US_STATES - U.S. state shapes (TopoJSON, ids = postal codes), regions, names, capitals
 //   assets/flags/*.svg    flag images for every country on the map
 //   vendor/*.js           d3 + d3-composite-projections + topojson-client + qrcode-generator
@@ -68,6 +68,16 @@ const world = {
   objects: { countries: { type: 'GeometryCollection', geometries } },
 };
 
+// Capitals that world-countries has outdated or in an unusual spelling (by country code).
+const CAPITAL_RENAME = {
+  KZ: 'Astana', // renamed back from Nur-Sultan in 2022
+  MN: 'Ulaanbaatar',
+  IS: 'Reykjavík',
+  PF: 'Papeete',
+  SM: 'San Marino',
+  US: 'Washington, D.C.',
+};
+
 const countries = [...groups.keys()]
   .map((code) => {
     const c = byAlpha2.get(code);
@@ -77,7 +87,7 @@ const countries = [...groups.keys()]
       region: c.region === 'Antarctic' ? 'Antarctica' : c.region,
       subregion: c.subregion || (c.region === 'Antarctic' ? 'Antarctica' : c.region),
       sovereign: Boolean(c.unMember || EXTRA_SOVEREIGN.has(code)),
-      capital: c.capital?.[0] ?? '',
+      capital: CAPITAL_RENAME[code] ?? c.capital?.[0] ?? '',
       latlng: c.latlng,
     };
   })
@@ -174,6 +184,60 @@ const RENAME_I18N = {
     ZW: 'Zimbábue',
   },
 };
+// Capital names in other app languages, where they differ from English (world-countries has no translations
+// for capitals). Anything not listed shows its English name.
+const CAPITALS_I18N = {
+  es: {
+    AE: 'Abu Dabi', AF: 'Kabul', AM: 'Ereván', AT: 'Viena', AZ: 'Bakú', BD: 'Daca', BE: 'Bruselas', BF: 'Uagadugú',
+    BG: 'Sofía', BR: 'Brasilia', BS: 'Nasáu', BT: 'Timbu', CH: 'Berna', CM: 'Yaundé', CN: 'Pekín', CU: 'La Habana',
+    CZ: 'Praga', DE: 'Berlín', DJ: 'Yibuti', DK: 'Copenhague', DZ: 'Argel', EE: 'Tallin', EG: 'El Cairo',
+    ES: 'Madrid', ET: 'Adís Abeba', FR: 'París', GB: 'Londres', GE: 'Tiflis', GN: 'Conakri', GR: 'Atenas',
+    GT: 'Ciudad de Guatemala', HT: 'Puerto Príncipe', ID: 'Yakarta', IE: 'Dublín', IL: 'Jerusalén', IN: 'Nueva Delhi',
+    IQ: 'Bagdad', IR: 'Teherán', IS: 'Reikiavik', IT: 'Roma', JO: 'Amán', JP: 'Tokio', KG: 'Biskek', KH: 'Nom Pen',
+    KP: 'Pionyang', KR: 'Seúl', KW: 'Ciudad de Kuwait', LA: 'Vientián', LU: 'Luxemburgo', LY: 'Trípoli',
+    MC: 'Mónaco', MD: 'Chisináu', MK: 'Skopie', MM: 'Naipyidó', MN: 'Ulán Bator', MR: 'Nuakchot', MT: 'La Valeta',
+    MW: 'Lilongüe', MX: 'Ciudad de México', NC: 'Numea', NG: 'Abuya', NL: 'Ámsterdam', NP: 'Katmandú',
+    OM: 'Mascate', PA: 'Ciudad de Panamá', PL: 'Varsovia', PS: 'Ramala', PT: 'Lisboa', RO: 'Bucarest', RS: 'Belgrado',
+    RU: 'Moscú', SA: 'Riad', SE: 'Estocolmo', SG: 'Singapur', SI: 'Liubliana', SO: 'Mogadiscio', SS: 'Yuba',
+    ST: 'Santo Tomé', SD: 'Jartum', SY: 'Damasco', TJ: 'Dusambé', TM: 'Asjabad', TN: 'Túnez', TT: 'Puerto España',
+    TW: 'Taipéi', UA: 'Kiev', US: 'Washington D. C.', UZ: 'Taskent', VA: 'Ciudad del Vaticano', VN: 'Hanói',
+    YE: 'Saná',
+  },
+  fr: {
+    AD: 'Andorre-la-Vieille', AE: 'Abou Dabi', AF: 'Kaboul', AM: 'Erevan', AT: 'Vienne', AZ: 'Bakou', BD: 'Dacca',
+    BE: 'Bruxelles', BR: 'Brasilia', BT: 'Thimphou', CH: 'Berne', CN: 'Pékin', CO: 'Bogota', CU: 'La Havane',
+    CY: 'Nicosie', DK: 'Copenhague', DZ: 'Alger', EG: 'Le Caire', ET: 'Addis-Abeba', GB: 'Londres', GE: 'Tbilissi',
+    GR: 'Athènes', GT: 'Guatemala', IL: 'Jérusalem', IQ: 'Bagdad', IR: 'Téhéran', KG: 'Bichkek', KW: 'Koweït',
+    LB: 'Beyrouth', MN: 'Oulan-Bator', MT: 'La Valette', MU: 'Port-Louis', MX: 'Mexico', NP: 'Katmandou',
+    OM: 'Mascate', PA: 'Panama', PL: 'Varsovie', PT: 'Lisbonne', RO: 'Bucarest', RU: 'Moscou', SA: 'Riyad',
+    SG: 'Singapour', SM: 'Saint-Marin', SO: 'Mogadiscio', SY: 'Damas', TD: 'N’Djaména', TJ: 'Douchanbé',
+    TM: 'Achgabat', TT: 'Port-d’Espagne', UZ: 'Tachkent', VA: 'Cité du Vatican', VN: 'Hanoï', US: 'Washington',
+    YE: 'Sanaa',
+  },
+  pt: {
+    AD: 'Andorra-a-Velha', AF: 'Cabul', AM: 'Erevan', AT: 'Viena', BD: 'Daca', BE: 'Bruxelas', BF: 'Uagadugu',
+    BG: 'Sófia', BT: 'Timbu', CH: 'Berna', CM: 'Iaundé', CN: 'Pequim', CY: 'Nicósia', CZ: 'Praga', DE: 'Berlim',
+    DJ: 'Djibuti', DK: 'Copenhague', DZ: 'Argel', ES: 'Madri', ET: 'Adis Abeba', FI: 'Helsinque', GB: 'Londres',
+    GN: 'Conacri', GR: 'Atenas', GT: 'Cidade da Guatemala', HT: 'Porto Príncipe', ID: 'Jacarta', IL: 'Jerusalém',
+    IN: 'Nova Délhi', IQ: 'Bagdá', IR: 'Teerã', IT: 'Roma', JO: 'Amã', JP: 'Tóquio', KE: 'Nairóbi',
+    KR: 'Seul', KW: 'Cidade do Kuwait', LB: 'Beirute', LU: 'Luxemburgo', LY: 'Trípoli', MC: 'Mônaco',
+    MD: 'Chisinau', MN: 'Ulan Bator', MT: 'Valeta', MX: 'Cidade do México', NL: 'Amsterdã', NP: 'Catmandu',
+    OM: 'Mascate', PA: 'Cidade do Panamá', PL: 'Varsóvia', PT: 'Lisboa', PY: 'Assunção', RO: 'Bucareste',
+    RS: 'Belgrado', RU: 'Moscou', SA: 'Riad', SD: 'Cartum', SE: 'Estocolmo', SG: 'Singapura', SI: 'Liubliana',
+    SM: 'São Marinho', SN: 'Dacar', SO: 'Mogadíscio', SY: 'Damasco', TJ: 'Duchambé', TN: 'Túnis',
+    TT: 'Porto de Espanha', TW: 'Taipé', UA: 'Kiev', VA: 'Cidade do Vaticano', VN: 'Hanói', YE: 'Saná',
+  },
+};
+const capitalNames = {};
+for (const lang of Object.keys(TRANSLATIONS)) {
+  capitalNames[lang] = {};
+  for (const [code, name] of Object.entries(CAPITALS_I18N[lang] || {})) {
+    const c = countries.find((x) => x.code === code);
+    if (!c?.capital) throw new Error(`CAPITALS_I18N.${lang}.${code}: no such country, or it has no capital`);
+    if (name !== c.capital) capitalNames[lang][code] = name;
+  }
+}
+
 const countryNames = {};
 for (const [lang, key] of Object.entries(TRANSLATIONS)) {
   countryNames[lang] = {};
@@ -186,7 +250,8 @@ for (const [lang, key] of Object.entries(TRANSLATIONS)) {
 fs.mkdirSync(path.join(root, 'js', 'data'), { recursive: true });
 fs.writeFileSync(
   path.join(root, 'js', 'data', 'country-names.js'),
-  `window.GEO_COUNTRY_NAMES=${JSON.stringify(countryNames).replace(/\},"/g, '},\n"')};\n`,
+  `window.GEO_COUNTRY_NAMES=${JSON.stringify(countryNames).replace(/\},"/g, '},\n"')};\n` +
+    `window.GEO_CAPITAL_NAMES=${JSON.stringify(capitalNames).replace(/\},"/g, '},\n"')};\n`,
 );
 fs.writeFileSync(path.join(root, 'js', 'data', 'world.js'), `window.GEO_WORLD=${JSON.stringify(world)};\n`);
 fs.writeFileSync(

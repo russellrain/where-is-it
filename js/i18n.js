@@ -760,7 +760,7 @@
         thatsHereIs: 'That’s {name}. {capital} is in {target}. Click it to continue.',
         countriesHeading: 'Capitals',
         resultsHint: 'Click a capital to see it on the map.',
-        regionTitle: 'Capitals of {region}',
+        regionTitle: '{region} capitals', // like '{region} countries'
         worldTitle: 'Capitals of the world',
         quizTitlePlaceholder: 'e.g. Capitals of Africa',
         guessesPerCountry: 'Guesses per capital',
