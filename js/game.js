@@ -95,6 +95,8 @@
     shuffle: '<path d="M3.5 7h3.2c1.5 0 2.9.8 3.7 2l3.2 6c.8 1.2 2.2 2 3.7 2h3.2"/><path d="M3.5 17h3.2c1.5 0 2.9-.8 3.7-2l.4-.7M13.2 9.7l.4-.7c.8-1.2 2.2-2 3.7-2h3.2"/><path d="M18 4.5L20.5 7 18 9.5M18 14.5l2.5 2.5-2.5 2.5"/>',
     map: '<path d="M3.5 6.5l5.5-2.5 6 2.5 5.5-2.5v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>',
     chevron: '<path d="M9.5 6l6 6-6 6"/>',
+    // A folded map with a pencil over its corner: "draw up your own map quiz".
+    mapEdit: '<path d="M11.2 18.6L9 17.5l-5.5 2.5V6.5L9 4l6 2.5L20.5 4v6.3"/><path d="M9 4v13.5M15 6.5v4.8"/><path d="M19.2 12.3l2 2-6.4 6.4-2.8.8.8-2.8z"/>',
   };
 
   if (!quiz.codes.length) showHome();
@@ -213,12 +215,18 @@
             el('div', { class: 'preset-list' }, presetLinks(presets), heading === 'quickPlayStates' && hasCounties ? countiesButton() : null),
           ]),
       ),
+      // A tinted panel with the card's only primary button, so building a quiz reads as its own path, apart
+      // from the grid of ready-made quizzes.
       el(
-        'div',
-        { class: 'make-own' },
-        el('h2', {}, t('makeYourOwn')),
-        el('p', {}, t('makeYourOwnBlurb')),
-        el('div', { class: 'actions', style: 'margin-top:10px' }, el('a', { class: 'btn', href: 'setup' }, t('createQuiz'))),
+        'section',
+        { class: 'make-own', 'aria-labelledby': 'make-own-title' },
+        el(
+          'div',
+          { class: 'make-own-row' },
+          el('div', { class: 'make-own-badge' }, icon('mapEdit')),
+          el('div', { class: 'make-own-body' }, el('h2', { id: 'make-own-title' }, t('makeYourOwn')), el('p', {}, t('makeYourOwnBlurb'))),
+          el('a', { class: 'btn primary', href: 'setup' }, t('createQuiz')),
+        ),
       ),
     );
     ui.card.classList.add('welcome');

@@ -54,7 +54,7 @@
       welcome: ({ n }) =>
         `You’ll see one place at a time. Find it and click it on the map. If you miss ${n} ${plural(n, 'time', 'times')}, we’ll show you where it is.`,
       makeYourOwn: 'Make your own',
-      makeYourOwnBlurb: 'Pick exactly what you want to practice and make your own quiz.',
+      makeYourOwnBlurb: 'Pick the exact places you want to practice.',
       createQuiz: 'Create a quiz →',
       quickPlayCountries: 'Countries',
       quickPlayStates: 'U.S. states',
@@ -217,7 +217,7 @@
       welcome: ({ n }) =>
         `Verás un lugar a la vez. Búscalo y haz clic en él en el mapa. Si fallas ${n} ${plural(n, 'vez', 'veces')}, te mostraremos dónde está.`,
       makeYourOwn: 'Crea el tuyo',
-      makeYourOwnBlurb: 'Elige exactamente lo que quieres practicar y crea tu propio cuestionario.',
+      makeYourOwnBlurb: 'Elige exactamente los lugares que quieres practicar.',
       createQuiz: 'Crear un cuestionario →',
       quickPlayCountries: 'Países',
       quickPlayStates: 'Estados de EE. UU.',
@@ -378,7 +378,7 @@
       welcome: ({ n }) =>
         `Tu verras un lieu à la fois. Trouve-le et clique dessus sur la carte. Si tu te trompes ${n} fois, on te montrera où il se trouve.`,
       makeYourOwn: 'Créez le vôtre',
-      makeYourOwnBlurb: 'Choisissez exactement ce que vous voulez réviser et créez votre propre quiz.',
+      makeYourOwnBlurb: 'Choisissez exactement les lieux que vous voulez réviser.',
       createQuiz: 'Créer un quiz →',
       quickPlayCountries: 'Pays',
       quickPlayStates: 'États américains',
@@ -538,7 +538,7 @@
       welcome: ({ n }) =>
         `Você verá um lugar por vez. Encontre-o e clique nele no mapa. Se errar ${n} ${plural(n, 'vez', 'vezes')}, mostraremos onde ele fica.`,
       makeYourOwn: 'Crie o seu',
-      makeYourOwnBlurb: 'Escolha exatamente o que você quer praticar e crie seu próprio quiz.',
+      makeYourOwnBlurb: 'Escolha exatamente os lugares que você quer praticar.',
       createQuiz: 'Criar um quiz →',
       quickPlayCountries: 'Países',
       quickPlayStates: 'Estados dos EUA',

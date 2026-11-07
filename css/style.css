@@ -375,7 +375,25 @@ input, select { background: var(--panel); }
 .welcome-text { grid-area: text; }
 .card .welcome-text { margin: 0; } /* grid items don't collapse margins, so spacing comes from the neighbours */
 .welcome-presets { grid-area: presets; }
-.make-own { grid-area: own; }
+.make-own { grid-area: own; margin-top: 24px; container-type: inline-size; }
+/* A banner: icon, text and button in one row. In a narrow column (phones, or the left column of the wide
+   layout) the button drops to its own full-width row. */
+.make-own-row {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px 14px;
+  padding: 14px 16px 14px 14px; border-radius: var(--radius);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--line));
+  background: color-mix(in srgb, var(--accent) 7%, var(--panel));
+}
+.make-own-row .btn { white-space: nowrap; }
+@container (max-width: 460px) {
+  .make-own-row { grid-template-columns: auto minmax(0, 1fr); }
+  .make-own-row .btn { grid-column: 1 / -1; justify-content: center; }
+}
+/* A bare icon, not a filled tile, so it doesn't read as a second button next to the real one. */
+.make-own-badge { display: flex; padding-left: 4px; color: var(--accent); }
+.make-own-badge .ico { width: 30px; height: 30px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.card .make-own h2 { margin: 0 0 2px; font-size: 1.05rem; }
+.card .make-own p { margin: 0; font-size: 0.92rem; }
 @media (min-width: 900px) and (max-height: 800px) {
   .card.welcome {
     width: min(1000px, 100%); column-gap: 36px;
@@ -383,9 +401,8 @@ input, select { background: var(--panel); }
     grid-template-rows: auto auto 1fr;
     grid-template-areas: 'head presets' 'text presets' 'own presets';
   }
-  .make-own { align-self: end; }
+  .make-own { align-self: end; margin-top: 20px; }
   .welcome-presets > .preset-heading:first-child { margin-top: 4px; }
-  .make-own > h2:first-child { margin-top: 0; }
 }
 .prompt .label:empty { display: none; }
 
