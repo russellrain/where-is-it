@@ -2,10 +2,49 @@
 (function () {
   'use strict';
 
-  const COUNTRIES = window.GEO_COUNTRIES;
-  const byCode = new Map(COUNTRIES.map((c) => [c.code, c]));
+  // The maps a quiz can use. A page shows one map, picked by the link's `m` parameter (world by default);
+  // COUNTRIES, byCode, countryName and friends below all refer to the places on that map.
+  //   places     [{ code, name, region, subregion, ... }] from js/data
+  //   core(p)    listed without ticking "include territories" (sovereign countries; states but not D.C.)
+  //   flags      has flag images (otherwise a code badge stands in)
+  //   sphere     a whole-globe map: draw the ocean and graticule, and rotate to keep the quiz in view
+  //   credit     [name, url] of the map shapes' source
+  const ATLASES = {
+    world: {
+      id: 'world',
+      topo: window.GEO_WORLD,
+      object: 'countries',
+      places: window.GEO_COUNTRIES,
+      names: window.GEO_COUNTRY_NAMES || {},
+      regionOrder: ['Africa', 'Americas', 'Asia', 'Europe', 'Oceania', 'Antarctica'],
+      core: (p) => p.sovereign,
+      flags: true,
+      sphere: true,
+      credit: ['Natural Earth', 'https://www.naturalearthdata.com/'],
+      projection: (rotate) => d3.geoNaturalEarth1().rotate([rotate || 0, 0]),
+    },
+  };
+  if (window.GEO_US_STATES) {
+    ATLASES.us = {
+      id: 'us',
+      topo: GEO_US_STATES.topo,
+      object: 'states',
+      places: GEO_US_STATES.places,
+      names: GEO_US_STATES.names,
+      regionOrder: ['Northeast', 'Midwest', 'South', 'West'],
+      core: (p) => p.state,
+      flags: false,
+      sphere: false,
+      credit: ['U.S. Census Bureau', 'https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html'],
+      projection: () => d3.geoAlbersUsa(), // Alaska and Hawaii as insets
+    };
+  }
+  const ATLAS = ATLASES[new URLSearchParams(location.search).get('m')] || ATLASES.world;
+  I18N.setVariant(ATLAS.id); // e.g. "Guesses per state" instead of "per country"
 
-  const REGION_ORDER = ['Africa', 'Americas', 'Asia', 'Europe', 'Oceania', 'Antarctica'];
+  const COUNTRIES = ATLAS.places;
+  const byCode = new Map(COUNTRIES.map((c) => [c.code, c]));
+  const REGION_ORDER = ATLAS.regionOrder;
 
   const DEFAULTS = { guesses: 3, dim: true, timer: true };
 
@@ -23,6 +62,7 @@
     };
     const bool = (k, d) => (p.has(k) ? p.get(k) !== '0' : d);
     return {
+      map: ATLAS.id,
       codes,
       title: (p.get('t') || '').trim().slice(0, 80),
       count: int('n'), // ask this many (random subset); null = all
@@ -36,8 +76,10 @@
   /** Builds a query string for a quiz. Only non-default options are included to keep links short. */
   function quizQuery(q) {
     const p = new URLSearchParams();
+    const map = q.map || ATLAS.id;
+    if (map !== 'world') p.set('m', map);
     if (q.title) p.set('t', q.title);
-    p.set('c', q.codes.join(','));
+    if (q.codes.length) p.set('c', q.codes.join(','));
     if (q.count && q.count < q.codes.length) p.set('n', q.count);
     if (q.guesses && q.guesses !== DEFAULTS.guesses) p.set('g', q.guesses);
     if (q.dim === false) p.set('d', '0');
@@ -49,12 +91,12 @@
     return '?' + p.toString().replace(/%2C/g, ',');
   }
 
-  /** Country name in the current language (falls back to English). */
+  /** Place name in the current language (falls back to English). */
   function countryName(code) {
-    return (window.GEO_COUNTRY_NAMES || {})[I18N.lang]?.[code] || byCode.get(code).name;
+    return ATLAS.names[I18N.lang]?.[code] || byCode.get(code).name;
   }
 
-  /** Title used when a quiz doesn't set one, e.g. "Africa countries" or "Countries of the world". */
+  /** Title used when a quiz doesn't set one, e.g. "Africa countries" or "Countries of the world" ("U.S. states"). */
   function defaultTitle(codes) {
     if (!codes.length) return 'Where Is It';
     const regions = new Set(codes.map((c) => byCode.get(c).region));
@@ -117,7 +159,7 @@
 
   /** Picks a map rotation so the selected countries aren't split by the map edge. */
   function rotationFor(codes) {
-    if (!codes.length) return 0;
+    if (!codes.length || !ATLAS.sphere) return 0;
     let x = 0, y = 0;
     for (const code of codes) {
       const lon = (byCode.get(code).latlng[1] * Math.PI) / 180;
@@ -159,11 +201,20 @@
     return s;
   }
 
+  /** The place's flag, or on maps without flags a badge with its code (e.g. "TX"). */
   function flagImg(code, cls) {
+    if (!ATLAS.flags) return el('span', { class: `${cls || 'flag'} code-badge`, 'aria-hidden': 'true' }, code);
     return el('img', { class: cls || 'flag', src: flagUrl(code), alt: '', draggable: 'false' });
   }
 
+  /** GeoJSON features of the current map's shapes. */
+  function features() {
+    return topojson.feature(ATLAS.topo, ATLAS.topo.objects[ATLAS.object]).features;
+  }
+
   window.WhereIsIt = {
+    ATLASES,
+    ATLAS,
     COUNTRIES,
     byCode,
     REGION_ORDER,
@@ -173,6 +224,7 @@
     pageUrl,
     flagUrl,
     flagImg,
+    features,
     wordmark,
     pinIcon,
     countryName,

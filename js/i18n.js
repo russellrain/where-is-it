@@ -23,7 +23,7 @@
 
   const STRINGS = {
     en: {
-      tagline: 'The country-finding game',
+      tagline: 'The place-finding game',
       language: 'Language',
       mapCredit: 'Map:',
       about: 'About',
@@ -42,7 +42,7 @@
       print: 'Print',
 
       // game
-      gamePageTitle: 'Where Is It · The country-finding game',
+      gamePageTitle: 'Where Is It · The place-finding game',
       backToStart: 'Back to quiz start',
       statCountry: 'Country',
       statCorrect: 'Correct',
@@ -51,11 +51,14 @@
       showResults: 'Show results',
       confirmLeave: 'Go back to the start? Your progress will be lost.',
       welcome: ({ n }) =>
-        `You’ll see one country at a time. Find it and click it on the map. If you miss ${n} ${plural(n, 'time', 'times')}, we’ll show you where it is.`,
+        `You’ll see one place at a time. Find it and click it on the map. If you miss ${n} ${plural(n, 'time', 'times')}, we’ll show you where it is.`,
       makeYourOwn: 'Make your own',
-      makeYourOwnBlurb: 'Choose regions or individual countries to make your own quiz.',
+      makeYourOwnBlurb: 'Pick exactly what you want to practice and make your own quiz.',
       createQuiz: 'Create a quiz →',
       quickPlay: 'Quick play',
+      quickPlayCountries: 'Countries',
+      quickPlayStates: 'U.S. states',
+      presetUsAll: 'All 50 states',
       presetAfrica: 'Africa',
       presetEurope: 'Europe',
       presetAsia: 'Asia',
@@ -107,6 +110,10 @@
       // setup
       setupPageTitle: 'Create a Quiz · Where Is It',
       setupIntro: 'Pick regions or individual countries, or click countries on the map, then share the link.',
+      mapLabel: 'Map',
+      mapWorld: 'World countries',
+      mapUs: 'U.S. states',
+      confirmSwitchMap: 'Switch maps? The places you’ve picked will be cleared.',
       searchCountries: 'Search countries…',
       clear: 'Clear',
       includeTerritories: 'Include territories & dependencies (e.g. Greenland, Puerto Rico)',
@@ -163,7 +170,7 @@
     },
 
     es: {
-      tagline: 'El juego de buscar países',
+      tagline: 'El juego de buscar lugares',
       language: 'Idioma',
       mapCredit: 'Mapa:',
       about: 'Acerca de',
@@ -181,7 +188,7 @@
       copyFailed: 'No se pudo copiar',
       print: 'Imprimir',
 
-      gamePageTitle: 'Where Is It · El juego de buscar países',
+      gamePageTitle: 'Where Is It · El juego de buscar lugares',
       backToStart: 'Volver al inicio del cuestionario',
       statCountry: 'País',
       statCorrect: 'Aciertos',
@@ -190,11 +197,14 @@
       showResults: 'Ver resultados',
       confirmLeave: '¿Volver al inicio? Se perderá tu progreso.',
       welcome: ({ n }) =>
-        `Verás un país a la vez. Búscalo y haz clic en él en el mapa. Si fallas ${n} ${plural(n, 'vez', 'veces')}, te mostraremos dónde está.`,
+        `Verás un lugar a la vez. Búscalo y haz clic en él en el mapa. Si fallas ${n} ${plural(n, 'vez', 'veces')}, te mostraremos dónde está.`,
       makeYourOwn: 'Crea el tuyo',
-      makeYourOwnBlurb: 'Elige regiones o países concretos para crear tu propio cuestionario.',
+      makeYourOwnBlurb: 'Elige exactamente lo que quieres practicar y crea tu propio cuestionario.',
       createQuiz: 'Crear un cuestionario →',
       quickPlay: 'Juego rápido',
+      quickPlayCountries: 'Países',
+      quickPlayStates: 'Estados de EE. UU.',
+      presetUsAll: 'Los 50 estados',
       presetAfrica: 'África',
       presetEurope: 'Europa',
       presetAsia: 'Asia',
@@ -245,6 +255,10 @@
 
       setupPageTitle: 'Crear un cuestionario · Where Is It',
       setupIntro: 'Elige regiones o países concretos, o haz clic en los países del mapa, y luego comparte el enlace.',
+      mapLabel: 'Mapa',
+      mapWorld: 'Países del mundo',
+      mapUs: 'Estados de EE. UU.',
+      confirmSwitchMap: '¿Cambiar de mapa? Se borrarán los lugares que has elegido.',
       searchCountries: 'Buscar países…',
       clear: 'Borrar',
       includeTerritories: 'Incluir territorios y dependencias (p. ej., Groenlandia, Puerto Rico)',
@@ -300,7 +314,7 @@
     },
 
     fr: {
-      tagline: 'Le jeu pour trouver les pays',
+      tagline: 'Le jeu pour trouver les lieux',
       language: 'Langue',
       mapCredit: 'Carte :',
       about: 'À propos',
@@ -318,7 +332,7 @@
       copyFailed: 'Échec de la copie',
       print: 'Imprimer',
 
-      gamePageTitle: 'Where Is It · Le jeu pour trouver les pays',
+      gamePageTitle: 'Where Is It · Le jeu pour trouver les lieux',
       backToStart: 'Retour au début du quiz',
       statCountry: 'Pays',
       statCorrect: 'Réussis',
@@ -327,11 +341,14 @@
       showResults: 'Voir les résultats',
       confirmLeave: 'Revenir au début ? Ta progression sera perdue.',
       welcome: ({ n }) =>
-        `Tu verras un pays à la fois. Trouve-le et clique dessus sur la carte. Si tu te trompes ${n} fois, on te montrera où il se trouve.`,
+        `Tu verras un lieu à la fois. Trouve-le et clique dessus sur la carte. Si tu te trompes ${n} fois, on te montrera où il se trouve.`,
       makeYourOwn: 'Créez le vôtre',
-      makeYourOwnBlurb: 'Choisissez des régions ou des pays précis pour créer votre propre quiz.',
+      makeYourOwnBlurb: 'Choisissez exactement ce que vous voulez réviser et créez votre propre quiz.',
       createQuiz: 'Créer un quiz →',
       quickPlay: 'Partie rapide',
+      quickPlayCountries: 'Pays',
+      quickPlayStates: 'États américains',
+      presetUsAll: 'Les 50 États',
       presetAfrica: 'Afrique',
       presetEurope: 'Europe',
       presetAsia: 'Asie',
@@ -382,6 +399,10 @@
 
       setupPageTitle: 'Créer un quiz · Where Is It',
       setupIntro: 'Choisissez des régions ou des pays précis, ou cliquez sur les pays de la carte, puis partagez le lien.',
+      mapLabel: 'Carte',
+      mapWorld: 'Pays du monde',
+      mapUs: 'États américains',
+      confirmSwitchMap: 'Changer de carte ? Les lieux choisis seront effacés.',
       searchCountries: 'Rechercher des pays…',
       clear: 'Effacer',
       includeTerritories: 'Inclure les territoires et dépendances (p. ex. Groenland, Porto Rico)',
@@ -437,9 +458,108 @@
     },
   };
 
+  // Wording for maps of something other than countries, keyed by map id (see ATLASES in common.js).
+  // Each entry overrides STRINGS for that language while that map is shown.
+  const VARIANTS = {
+    us: {
+      en: {
+        zoomToFit: 'Zoom to the quiz states',
+        territory: 'district',
+        statCountry: 'State',
+        introFind: ({ n }) => `Find ${n} ${plural(n, 'state', 'states')} on the map.`,
+        introGuesses: ({ n }) =>
+          `You get ${n} ${plural(n, 'guess', 'guesses')} before getting a hint. States you need a hint for are marked as missed.`,
+        thatsClickHighlighted: 'That’s {name}. Click the highlighted state.',
+        countriesHeading: 'States',
+        resultsHint: 'Click a state to see it on the map.',
+        regionTitle: 'States of the {region}',
+        worldTitle: 'U.S. states',
+        setupIntro: 'Pick regions or individual states, or click states on the map, then share the link.',
+        searchCountries: 'Search states…',
+        includeTerritories: 'Include Washington, D.C.',
+        quizTitlePlaceholder: 'e.g. States of the West',
+        guessesPerCountry: 'Guesses per state',
+        dimOthers: 'Grey out states that aren’t in the quiz',
+        noneSelected: 'No states selected',
+        nSelected: ({ n }) => `${n} ${plural(n, 'state', 'states')} selected`,
+        mapHint: 'Click states to add or remove them',
+        findTheCountries: 'Find the States',
+        wordBankInstructions: 'Write the number from the map next to each state.',
+        printEmpty: 'No states selected.',
+        printEmptyLink: 'Choose some states',
+      },
+      es: {
+        zoomToFit: 'Ajustar a los estados del cuestionario',
+        territory: 'distrito',
+        statCountry: 'Estado',
+        introFind: ({ n }) => `Encuentra ${n} ${plural(n, 'estado', 'estados')} en el mapa.`,
+        introGuesses: ({ n }) =>
+          `Tienes ${n} ${plural(n, 'intento', 'intentos')} antes de recibir una pista. Los estados para los que necesites una pista cuentan como fallados.`,
+        thatsClickHighlighted: 'Eso es {name}. Haz clic en el estado resaltado.',
+        countriesHeading: 'Estados',
+        resultsHint: 'Haz clic en un estado para verlo en el mapa.',
+        regionTitle: 'Estados del {region}',
+        worldTitle: 'Estados de EE. UU.',
+        setupIntro: 'Elige regiones o estados concretos, o haz clic en los estados del mapa, y luego comparte el enlace.',
+        searchCountries: 'Buscar estados…',
+        includeTerritories: 'Incluir Washington D. C.',
+        quizTitlePlaceholder: 'p. ej., Estados del Oeste',
+        guessesPerCountry: 'Intentos por estado',
+        dimOthers: 'Atenuar los estados que no están en el cuestionario',
+        noneSelected: 'No hay estados seleccionados',
+        nSelected: ({ n }) => `${n} ${plural(n, 'estado seleccionado', 'estados seleccionados')}`,
+        mapHint: 'Haz clic en los estados para añadirlos o quitarlos',
+        findTheCountries: 'Encuentra los estados',
+        wordBankInstructions: 'Escribe junto a cada estado el número que tiene en el mapa.',
+        printEmpty: 'No hay estados seleccionados.',
+        printEmptyLink: 'Elige algunos estados',
+      },
+      fr: {
+        zoomToFit: 'Ajuster aux États du quiz',
+        territory: 'district',
+        statCountry: 'État',
+        introFind: ({ n }) => `Trouve ${n} ${plural(n, 'État', 'États')} sur la carte.`,
+        introGuesses: ({ n }) =>
+          `Tu as ${n} ${plural(n, 'essai', 'essais')} avant de recevoir un indice. Les États pour lesquels tu as besoin d’un indice comptent comme manqués.`,
+        thatsClickHighlighted: 'Ça, c’est : {name}. Clique sur l’État en surbrillance.',
+        countriesHeading: 'États',
+        resultsHint: 'Clique sur un État pour le voir sur la carte.',
+        regionTitle: 'États : {region}',
+        worldTitle: 'États des États-Unis',
+        setupIntro: 'Choisissez des régions ou des États précis, ou cliquez sur les États de la carte, puis partagez le lien.',
+        searchCountries: 'Rechercher des États…',
+        includeTerritories: 'Inclure Washington D.C.',
+        quizTitlePlaceholder: 'p. ex. Les États de l’Ouest',
+        guessesPerCountry: 'Essais par État',
+        dimOthers: 'Griser les États qui ne font pas partie du quiz',
+        noneSelected: 'Aucun État sélectionné',
+        nSelected: ({ n }) => `${n} ${plural(n, 'État sélectionné', 'États sélectionnés')}`,
+        mapHint: 'Cliquez sur les États pour les ajouter ou les retirer',
+        findTheCountries: 'Trouve les États',
+        wordBankInstructions: 'Écris à côté de chaque État le numéro qui lui correspond sur la carte.',
+        printEmpty: 'Aucun État sélectionné.',
+        printEmptyLink: 'Choisissez quelques États',
+      },
+    },
+  };
+
   // Region and subregion names (English names are the keys used in the data).
+  // The U.S. ones are census regions and divisions.
   const REGIONS = {
     es: {
+      Northeast: 'Noreste',
+      Midwest: 'Medio Oeste',
+      South: 'Sur',
+      West: 'Oeste',
+      'New England': 'Nueva Inglaterra',
+      'Mid-Atlantic': 'Atlántico Medio',
+      'East North Central': 'Centro-noreste',
+      'West North Central': 'Centro-noroeste',
+      'South Atlantic': 'Atlántico Sur',
+      'East South Central': 'Centro-sureste',
+      'West South Central': 'Centro-suroeste',
+      Mountain: 'Montaña',
+      Pacific: 'Pacífico',
       Africa: 'África',
       Americas: 'América',
       Asia: 'Asia',
@@ -472,6 +592,19 @@
       'Western Europe': 'Europa Occidental',
     },
     fr: {
+      Northeast: 'Nord-Est',
+      Midwest: 'Midwest',
+      South: 'Sud',
+      West: 'Ouest',
+      'New England': 'Nouvelle-Angleterre',
+      'Mid-Atlantic': 'Centre-Atlantique',
+      'East North Central': 'Centre-Nord-Est',
+      'West North Central': 'Centre-Nord-Ouest',
+      'South Atlantic': 'Atlantique Sud',
+      'East South Central': 'Centre-Sud-Est',
+      'West South Central': 'Centre-Sud-Ouest',
+      Mountain: 'Montagnes',
+      Pacific: 'Pacifique',
       Africa: 'Afrique',
       Americas: 'Amériques',
       Asia: 'Asie',
@@ -537,8 +670,15 @@
   let lang = (allowed.includes(saved()) && saved()) || fromDevice() || allowed[0];
   root.lang = lang;
 
+  let variant = null; // map id with its own wording (VARIANTS), set by common.js
+
+  function setVariant(id) {
+    variant = VARIANTS[id] ? id : null;
+  }
+
   function t(key, vars) {
-    const v = STRINGS[lang][key] ?? STRINGS.en[key];
+    const alt = variant && VARIANTS[variant];
+    const v = alt?.[lang]?.[key] ?? STRINGS[lang][key] ?? alt?.en?.[key] ?? STRINGS.en[key];
     if (v == null) return key;
     if (typeof v === 'function') return v(vars || {});
     return vars ? v.replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m)) : v;
@@ -613,6 +753,7 @@
       return lang;
     },
     t,
+    setVariant,
     region,
     compare,
     parseLangs,

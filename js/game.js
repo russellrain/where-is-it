@@ -1,4 +1,4 @@
-// Student game: find each country on the map.
+// Student game: find each country (or state) on the map.
 (function () {
   'use strict';
   const { el, flagImg, formatTime, wordmark, pinIcon, countryName, defaultTitle } = WhereIsIt;
@@ -109,33 +109,51 @@
 
   function showWelcome() {
     document.title = t('gamePageTitle');
-    const presets = [
-      ['presetAfrica', (c) => c.region === 'Africa'],
-      ['presetEurope', (c) => c.region === 'Europe'],
-      ['presetAsia', (c) => c.region === 'Asia'],
-      ['presetSouthAmerica', (c) => c.subregion === 'South America'],
-      ['presetNorthCentralAmerica', (c) => ['North America', 'Central America', 'Caribbean'].includes(c.subregion)],
-      ['presetOceania', (c) => c.region === 'Oceania'],
-      ['presetMiddleEast', (c) => c.subregion === 'Western Asia'],
-      ['presetWorld', () => true],
-      ['presetAllCountries', () => true],
+    // [map, label, filter, random sample size]. Untitled presets get the automatic title, which follows the language.
+    const { world, us } = WhereIsIt.ATLASES;
+    const groups = [
+      [
+        'quickPlayCountries',
+        [
+          [world, t('presetAfrica'), (c) => c.region === 'Africa'],
+          [world, t('presetEurope'), (c) => c.region === 'Europe'],
+          [world, t('presetAsia'), (c) => c.region === 'Asia'],
+          [world, t('presetSouthAmerica'), (c) => c.subregion === 'South America'],
+          [world, t('presetNorthCentralAmerica'), (c) => ['North America', 'Central America', 'Caribbean'].includes(c.subregion)],
+          [world, t('presetOceania'), (c) => c.region === 'Oceania'],
+          [world, t('presetMiddleEast'), (c) => c.subregion === 'Western Asia'],
+          [world, t('presetWorld'), () => true, 20],
+          [world, t('presetAllCountries'), () => true],
+        ],
+      ],
+      [
+        'quickPlayStates',
+        us
+          ? [
+              ...us.regionOrder.map((r) => [us, null, (c) => c.region === r, null, I18N.region(r)]),
+              [us, null, () => true, 10, t('presetWorld')],
+              [us, t('presetUsAll'), () => true],
+            ]
+          : [],
+      ],
     ];
-    const links = presets.map(([key, fn]) => {
-      const codes = WhereIsIt.COUNTRIES.filter((c) => c.sovereign && fn(c)).map((c) => c.code);
-      const n = key === 'presetWorld' ? 20 : null;
-      const name = t(key);
-      return el(
-        'a',
-        { class: 'btn', href: WhereIsIt.quizQuery({ codes, title: name, count: n }) },
-        name,
-        el('small', { style: 'color:var(--ink-soft);font-weight:500;margin-left:auto' }, `${n ?? codes.length}`),
-      );
-    });
+    const presetLinks = (presets) =>
+      presets.map(([atlas, title, fn, n, label]) => {
+        const codes = atlas.places.filter((c) => atlas.core(c) && fn(c)).map((c) => c.code);
+        return el(
+          'a',
+          { class: 'btn', href: WhereIsIt.quizQuery({ map: atlas.id, codes, title, count: n }) },
+          label || title,
+          el('small', { style: 'color:var(--ink-soft);font-weight:500;margin-left:auto' }, `${n ?? codes.length}`),
+        );
+      });
     showCard(
       el('div', { class: 'hero' }, wordmark({ large: true, tagline: true })),
       el('p', {}, t('welcome', { n: WhereIsIt.DEFAULTS.guesses })),
       el('h2', {}, t('quickPlay')),
-      el('div', { class: 'preset-list' }, links),
+      ...groups
+        .filter(([, presets]) => presets.length)
+        .flatMap(([heading, presets]) => [el('h3', { class: 'preset-heading' }, t(heading)), el('div', { class: 'preset-list' }, presetLinks(presets))]),
       el('h2', {}, t('makeYourOwn')),
       el('p', {}, t('makeYourOwnBlurb')),
       el('div', { class: 'actions', style: 'margin-top:10px' }, el('a', { class: 'btn', href: 'setup' }, t('createQuiz'))),

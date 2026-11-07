@@ -1,4 +1,5 @@
-// Interactive world map (D3 + TopoJSON) shared by the setup page and the game.
+// Interactive map (D3 + TopoJSON) shared by the setup page and the game. It draws the current
+// map's places (WhereIsIt.ATLAS): the world's countries, or U.S. states.
 //
 //   const map = new GeoMap(container, {
 //     rotate: 0,                         // central meridian offset in degrees
@@ -31,10 +32,11 @@
       this.countries = new Map(); // code -> { el, dot, bounds, center, area }
       this.transform = d3.zoomIdentity;
 
-      const projection = d3.geoNaturalEarth1().rotate([this.opts.rotate, 0]).fitWidth(BASE_W, { type: 'Sphere' });
-      const path = d3.geoPath(projection);
+      const atlas = WhereIsIt.ATLAS;
+      const features = WhereIsIt.features();
+      const { path, outline } = GeoMap.projectAtlas(atlas, this.opts.rotate, features);
       this.path = path;
-      this.worldBounds = path.bounds({ type: 'Sphere' });
+      this.worldBounds = path.bounds(outline); // the whole map (named for the world map, its first use)
 
       const svg = d3.select(container).append('svg').attr('class', 'geomap');
       this.svg = svg;
@@ -52,8 +54,10 @@
       this.hatch = hatch;
       const vp = svg.append('g').attr('class', 'viewport');
       this.viewport = vp;
-      vp.append('path').attr('class', 'sphere').attr('d', path({ type: 'Sphere' }));
-      vp.append('path').attr('class', 'graticule').attr('d', path(d3.geoGraticule10()));
+      if (atlas.sphere) {
+        vp.append('path').attr('class', 'sphere').attr('d', path({ type: 'Sphere' }));
+        vp.append('path').attr('class', 'graticule').attr('d', path(d3.geoGraticule10()));
+      }
       const land = vp.append('g').attr('class', 'land');
       const dots = vp.append('g').attr('class', 'dots');
       this.overlay = vp.append('g').attr('class', 'overlay');
@@ -61,8 +65,6 @@
       this._labels = [];
       this._labelCodes = [];
 
-      const topo = window.GEO_WORLD;
-      const features = topojson.feature(topo, topo.objects.countries).features;
       for (const f of features) {
         const d = path(f);
         if (!d) continue;
@@ -435,6 +437,18 @@
     return { area: total, bounds, center: pieces[0].center };
   }
 
-  GeoMap.measure = measure; // also used by the printable worksheet
+  /**
+   * The atlas's projection, fitted to a BASE_W-wide space: the whole globe for the world map,
+   * the places themselves otherwise. Returns { path, outline }, outline being what was fitted.
+   */
+  function projectAtlas(atlas, rotate, features) {
+    const outline = atlas.sphere ? { type: 'Sphere' } : { type: 'FeatureCollection', features };
+    const projection = atlas.projection(rotate).fitWidth(BASE_W, outline);
+    return { path: d3.geoPath(projection), outline };
+  }
+
+  // Also used by the printable worksheet.
+  GeoMap.measure = measure;
+  GeoMap.projectAtlas = projectAtlas;
   window.GeoMap = GeoMap;
 })();

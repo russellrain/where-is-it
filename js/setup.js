@@ -1,13 +1,13 @@
-// Teacher setup: choose countries and options, produce a shareable quiz link.
+// Teacher setup: choose a map, then countries (or states) and options, and produce a shareable quiz link.
 (function () {
   'use strict';
-  const { byCode, el, flagImg, countryName, fold } = WhereIsIt;
+  const { ATLAS, byCode, el, flagImg, countryName, fold } = WhereIsIt;
   const { t } = I18N;
   const $ = (id) => document.getElementById(id);
 
   const initial = WhereIsIt.parseQuiz(location.search);
   const selected = new Set(initial.codes);
-  let includeTerritories = initial.codes.some((c) => !byCode.get(c).sovereign);
+  let includeTerritories = initial.codes.some((c) => !ATLAS.core(byCode.get(c)));
   const expanded = new Set();
 
   const opt = {
@@ -31,7 +31,7 @@
 
   $('territories').checked = includeTerritories;
 
-  const visible = (c) => includeTerritories || c.sovereign;
+  const visible = (c) => includeTerritories || ATLAS.core(c);
 
   // region -> subregion -> [country]
   const groups = new Map();
@@ -45,6 +45,9 @@
     (a, b) => WhereIsIt.REGION_ORDER.indexOf(a) - WhereIsIt.REGION_ORDER.indexOf(b),
   );
 
+  $('map-credit').textContent = ATLAS.credit[0];
+  $('map-credit').href = ATLAS.credit[1];
+
   const map = new GeoMap($('map'), {
     rotate: 0,
     isActive: (code) => visible(byCode.get(code)),
@@ -56,6 +59,19 @@
   $('zoom-in').onclick = () => map.zoomBy(1.6);
   $('zoom-out').onclick = () => map.zoomBy(1 / 1.6);
   $('zoom-reset').onclick = () => map.focus([...selected], 600);
+
+  // ---------------------------------------------------------------- map picker
+
+  // Each map is its own page load (?m=us), since places, shapes and wording all change with it.
+  // The quiz options carry over; the picked places and the title don't.
+  for (const btn of document.querySelectorAll('[data-map]')) {
+    const id = btn.dataset.map;
+    btn.setAttribute('aria-pressed', String(id === ATLAS.id));
+    btn.onclick = () => {
+      if (id === ATLAS.id || (selected.size && !confirm(t('confirmSwitchMap')))) return;
+      location.href = WhereIsIt.pageUrl('setup', WhereIsIt.quizQuery({ ...currentQuiz(), map: id, codes: [], title: '' }));
+    };
+  }
 
   // ---------------------------------------------------------------- tree
 
@@ -99,7 +115,7 @@
           const row = el(
             'div',
             { class: 'row country' },
-            el('label', {}, box, flagImg(c.code), el('span', { class: 'name' }, name), c.sovereign ? null : el('span', { class: 'terr' }, t('territory'))),
+            el('label', {}, box, flagImg(c.code), el('span', { class: 'name' }, name), ATLAS.core(c) ? null : el('span', { class: 'terr' }, t('territory'))),
             zoom,
           );
           // Search matches the English name too, so either works whatever language the page is in,
@@ -195,7 +211,7 @@
 
   $('territories').onchange = (e) => {
     includeTerritories = e.target.checked;
-    if (!includeTerritories) for (const c of [...selected]) if (!byCode.get(c).sovereign) selected.delete(c);
+    if (!includeTerritories) for (const c of [...selected]) if (!ATLAS.core(byCode.get(c))) selected.delete(c);
     $('search').value = '';
     map.refreshActive();
     buildTree();
@@ -389,7 +405,8 @@
     }
     // Keep this page's URL in sync so a refresh (or bookmark) keeps the selection.
     try {
-      history.replaceState(null, '', n ? query : location.pathname);
+      const empty = ATLAS.id === 'world' ? '' : `?m=${ATLAS.id}`; // keep the chosen map
+      history.replaceState(null, '', n ? query : location.pathname + empty);
     } catch {} // some browsers block this on file://
   }
 

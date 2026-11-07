@@ -33,6 +33,9 @@ licenses (full texts in vendor/licenses/):
 - vendor/qrcode.js                 qrcode-generator, MIT License
 - js/data/world.js                 Derived from world-atlas (ISC License),
                                    built from Natural Earth (public domain)
+- js/data/us-states.js             Derived from us-atlas (ISC License),
+                                   built from U.S. Census Bureau
+                                   cartographic boundaries (public domain)
 - assets/flags/*.svg               flag-icons, MIT License
 - js/data/countries.js             Derived from mledoze/countries
                                    (world-countries), Open Database License

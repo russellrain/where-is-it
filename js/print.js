@@ -22,16 +22,12 @@
 
   // ---------------------------------------------------------------- geography
 
-  const projection = d3
-    .geoNaturalEarth1()
-    .rotate([WhereIsIt.rotationFor(quiz.codes), 0])
-    .fitWidth(1000, { type: 'Sphere' });
-  const path = d3.geoPath(projection);
-  const sphere = path({ type: 'Sphere' });
-  const topo = window.GEO_WORLD;
+  const features = WhereIsIt.features();
+  const { path } = GeoMap.projectAtlas(WhereIsIt.ATLAS, WhereIsIt.rotationFor(quiz.codes), features);
+  const sphere = WhereIsIt.ATLAS.sphere ? path({ type: 'Sphere' }) : null; // the ocean, on the world map
   const shapes = [];
   const shapeByCode = new Map();
-  for (const f of topojson.feature(topo, topo.objects.countries).features) {
+  for (const f of features) {
     const d = path(f);
     if (!d) continue;
     const s = { code: String(f.id), d, f };
@@ -192,7 +188,7 @@
     const px = (v) => v / s; // screen px -> map units
 
     const svg = svgEl('svg', { viewBox: `${x0} ${y0} ${bw} ${bh}`, width: W, height: H, class: 'print-map' });
-    svg.append(svgEl('path', { d: sphere, class: 'pm-ocean' }));
+    if (sphere) svg.append(svgEl('path', { d: sphere, class: 'pm-ocean' }));
     const land = svgEl('g', { 'stroke-width': px(0.6), 'stroke-linejoin': 'round' });
     const selected = new Set(codes);
     for (const { code, d } of shapes) {
