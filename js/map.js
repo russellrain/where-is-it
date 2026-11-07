@@ -9,6 +9,7 @@
 //     labelCaption: null,                // optional small caption before the name, e.g. 'Find'
 //     labelContent: null,                // (code, hovered) => [nodes] for the cursor label; default: flag and name
 //     labelHover: false,                 // labelContent also depends on the hovered country, so rebuild as it changes
+//     peekInactive: false,               // hovering an inactive country names it (muted) in the cursor label
 //     onClick: (code) => {},
 //   });
 //
@@ -28,7 +29,7 @@
   class GeoMap {
     constructor(container, opts) {
       this.opts = Object.assign(
-        { rotate: 0, extended: false, isActive: () => true, labelFor: (hovered) => hovered, labelCaption: null, labelContent: null, labelHover: false, onClick: null },
+        { rotate: 0, extended: false, isActive: () => true, labelFor: (hovered) => hovered, labelCaption: null, labelContent: null, labelHover: false, peekInactive: false, onClick: null },
         opts,
       );
       this.container = container;
@@ -343,15 +344,19 @@
       document.body.appendChild(tip);
       this.tooltip = tip;
       let hovered = null; // country under the pointer
+      let peek = null; // inactive country under the pointer (only with opts.peekInactive)
       let inside = false; // pointer is over the map
       let shown = null; // country currently rendered in the tooltip
       let last = null; // last pointer position
       let mouse = false; // last pointer was a mouse (no tooltip for touch/pen)
       let hideTimer = null;
 
-      const codeAt = (e) => {
+      const rawCodeAt = (e) => {
         const t = e.target.closest && e.target.closest('[data-code]');
-        const code = t && t.dataset.code;
+        return (t && t.dataset.code) || null;
+      };
+      const codeAt = (e) => {
+        const code = rawCodeAt(e);
         return code && this.opts.isActive(code) ? code : null;
       };
       const place = () => {
@@ -364,28 +369,43 @@
         if (y + r.height > window.innerHeight - 4) y = last.y - r.height - pad;
         tip.style.transform = `translate(${x}px, ${y}px)`;
       };
-      // The tooltip shows whichever country opts.labelFor(hovered) returns (or nothing).
+      // The tooltip shows whichever country opts.labelFor(hovered) returns (or nothing), plus,
+      // with opts.peekInactive, the name of an inactive country under the pointer so gaps in the
+      // quiz area (e.g. Western Sahara in Africa) aren't a mystery.
       const updateTip = () => {
         const code = inside && mouse ? this.opts.labelFor(hovered) : null;
-        const key = code && this.opts.labelHover ? `${code}|${hovered}` : code;
+        const peekCode = inside && mouse ? peek : null;
+        let key = code && this.opts.labelHover ? `${code}|${hovered}` : code;
+        if (peekCode) key = `${key}|peek:${peekCode}`;
         if (key !== shown) {
           shown = key;
+          let parts = [];
+          let caption = null;
           if (code) {
-            const parts = this.opts.labelContent
+            parts = this.opts.labelContent
               ? this.opts.labelContent(code, hovered)
               : [WhereIsIt.flagImg(code), document.createTextNode(WhereIsIt.countryName(code))];
-            const caption = this.opts.labelCaption;
+            caption = this.opts.labelCaption;
             if (caption) {
               const c = document.createElement('span');
               c.className = 'map-tooltip-caption';
               c.textContent = caption;
               parts.unshift(c);
             }
+          }
+          if (peekCode) {
+            const p = document.createElement('span');
+            p.className = code ? 'map-tooltip-hover map-tooltip-peek' : 'map-tooltip-peek';
+            p.textContent = WhereIsIt.countryName(peekCode);
+            parts.push(p);
+          }
+          if (code || peekCode) {
             tip.replaceChildren(...parts);
             tip.classList.toggle('has-caption', !!caption);
+            tip.classList.toggle('peek-only', !code);
           }
         }
-        tip.hidden = !code;
+        tip.hidden = !code && !peekCode;
         place();
       };
       const setHover = (code) => {
@@ -396,10 +416,18 @@
         }
         updateTip();
       };
+      const setPeek = (code) => {
+        if (code === peek) return;
+        if (peek) this.toggleClass(peek, 'peek', false);
+        peek = code;
+        if (code) this.toggleClass(code, 'peek', true);
+      };
       const track = (e) => {
         last = { x: e.clientX, y: e.clientY };
         mouse = e.pointerType === 'mouse';
         inside = true;
+        const raw = rawCodeAt(e);
+        setPeek(this.opts.peekInactive && raw && !this.opts.isActive(raw) ? raw : null);
         setHover(codeAt(e));
       };
 
@@ -410,6 +438,7 @@
       });
       node.addEventListener('pointerleave', () => {
         inside = false;
+        setPeek(null);
         setHover(null);
       });
       node.addEventListener('pointerdown', (e) => {
@@ -421,6 +450,7 @@
           clearTimeout(hideTimer);
           hideTimer = setTimeout(() => {
             inside = false;
+            setPeek(null);
             setHover(null);
           }, 1200);
         }
@@ -431,6 +461,7 @@
       });
       this.hideTooltip = () => {
         inside = false;
+        setPeek(null);
         setHover(null);
       };
       // force: rebuild the label even if it's for the same country (e.g. after a language switch).

@@ -61,6 +61,7 @@
             : [flagImg(code), text(fullName(code))]
       : null,
     labelHover: capitals,
+    peekInactive: true, // name the greyed-out places outside the quiz on hover (no clue: they're never answers)
     onClick: onCountryClick,
   });
   map.focus(quiz.codes);

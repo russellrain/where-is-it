@@ -148,6 +148,7 @@ input, select { background: var(--panel); }
 }
 .geomap .dot.inactive { display: none; }
 .geomap .hover { fill: var(--hover); }
+.geomap .country.inactive.peek { fill: color-mix(in srgb, var(--land-inactive) 75%, var(--land-inactive-stroke)); }
 .geomap .selected { fill: var(--selected); }
 .geomap .selected.hover { fill: var(--selected-hover); }
 .geomap .s-first { fill: var(--first); }
@@ -214,6 +215,9 @@ input, select { background: var(--panel); }
 }
 /* Capitals quizzes: the place under the pointer, after the capital to find. */
 .map-tooltip-hover { padding-left: 8px; border-left: 1px solid rgba(255, 255, 255, 0.4); font-weight: 500; opacity: 0.9; }
+/* A greyed-out place outside the quiz, named so gaps in the area aren't a mystery. */
+.map-tooltip-peek { font-weight: 500; font-style: italic; opacity: 0.85; }
+.map-tooltip.peek-only { background: var(--tooltip-bg); opacity: 0.85; }
 
 .zoom-controls {
   position: absolute; right: 14px; bottom: 14px; display: flex; flex-direction: column; gap: 6px; z-index: 5;
