@@ -40,6 +40,7 @@
 
   const map = new GeoMap($('map'), {
     rotate: WhereIsIt.rotationFor(quiz.codes),
+    extended: WhereIsIt.usesExtended(quiz.codes),
     isActive: (code) => !quiz.dim || pool.has(code) || !pool.size,
     // While playing, the cursor label shows the country to find, never the one under the pointer.
     // Once finished, it names whatever is under the pointer so students can explore their results.

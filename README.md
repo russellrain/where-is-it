@@ -33,7 +33,7 @@ All libraries, map data and flags are bundled locally. Nothing uses ES modules o
 
 | Param | Meaning | Default |
 |---|---|---|
-| `m` | Map: `us` for U.S. states (50 states + D.C., by postal code). Leave out for world countries | world |
+| `m` | Map: `us` for U.S. states (50 states, D.C. and the 5 inhabited territories, by postal code). Leave out for world countries | world |
 | `c` | Comma-separated ISO 3166-1 alpha-2 country codes, or state postal codes with `m=us` | required |
 | `t` | Quiz title | auto from region |
 | `n` | Ask this many (random subset of `c`) each game | all |
@@ -59,7 +59,7 @@ js/setup.js              teacher setup
 js/common.js             also defines the maps (ATLASES): world countries, U.S. states
 js/data/*.js             generated data (do not edit by hand)
 assets/flags/            generated SVG flags
-vendor/                  d3, topojson-client, qrcode-generator, third-party licenses
+vendor/                  d3, d3-composite-projections, topojson-client, qrcode-generator, third-party licenses
 tools/build-data.mjs     regenerates js/data, assets/flags, vendor from npm packages
 ```
 
@@ -78,6 +78,7 @@ Maps are defined in `ATLASES` in `js/common.js`. To add, say, Canadian provinces
 ## Credits & licenses
 
 - Map shapes: [Natural Earth](https://www.naturalearthdata.com/) (public domain) via [world-atlas](https://github.com/topojson/world-atlas) (ISC)
+- U.S. territory insets: [d3-composite-projections](https://github.com/rveciana/d3-composite-projections) (BSD-3-Clause)
 - U.S. state shapes: [U.S. Census Bureau](https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html) (public domain) via [us-atlas](https://github.com/topojson/us-atlas) (ISC)
 - Country metadata: [mledoze/countries](https://github.com/mledoze/countries) (ODbL 1.0)
 - Flags: [flag-icons](https://github.com/lipis/flag-icons) (MIT)

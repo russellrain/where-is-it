@@ -22,8 +22,9 @@
 
   // ---------------------------------------------------------------- geography
 
-  const features = WhereIsIt.features();
-  const { path } = GeoMap.projectAtlas(WhereIsIt.ATLAS, WhereIsIt.rotationFor(quiz.codes), features);
+  const extended = WhereIsIt.usesExtended(quiz.codes);
+  const features = WhereIsIt.features(extended);
+  const { path, borders } = GeoMap.projectAtlas(WhereIsIt.ATLAS, WhereIsIt.rotationFor(quiz.codes), features, extended);
   const sphere = WhereIsIt.ATLAS.sphere ? path({ type: 'Sphere' }) : null; // the ocean, on the world map
   const shapes = [];
   const shapeByCode = new Map();
@@ -195,6 +196,7 @@
       land.append(svgEl('path', { d, class: selected.has(code) ? 'pm-sel' : 'pm-land' }));
     }
     svg.append(land);
+    if (borders) svg.append(svgEl('path', { d: borders, class: 'pm-insets', 'stroke-width': px(0.8) }));
     // Redraw selected outlines on top so shared borders with grey neighbours stay crisp.
     const outlines = svgEl('g', { 'stroke-width': px(0.9), 'stroke-linejoin': 'round', class: 'pm-outline' });
     for (const code of codes) outlines.append(svgEl('path', { d: shapeByCode.get(code).d }));

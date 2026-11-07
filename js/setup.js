@@ -48,14 +48,23 @@
   $('map-credit').textContent = ATLAS.credit[0];
   $('map-credit').href = ATLAS.credit[1];
 
-  const map = new GeoMap($('map'), {
-    rotate: 0,
-    isActive: (code) => visible(byCode.get(code)),
-    onClick: (code) => {
-      toggle([code], !selected.has(code));
-    },
-  });
-  if (selected.size) map.focus([...selected]);
+  // Ticking "include territories" on the U.S. map switches to the layout with territory insets, which
+  // means drawing the map again (see ATLAS.inset).
+  const extended = () => includeTerritories && Boolean(ATLAS.inset);
+  let map = null;
+  function drawMap() {
+    if (map) map.destroy();
+    map = new GeoMap($('map'), {
+      rotate: 0,
+      extended: extended(),
+      isActive: (code) => visible(byCode.get(code)),
+      onClick: (code) => {
+        toggle([code], !selected.has(code));
+      },
+    });
+    if (selected.size) map.focus([...selected]);
+  }
+  drawMap();
   $('zoom-in').onclick = () => map.zoomBy(1.6);
   $('zoom-out').onclick = () => map.zoomBy(1 / 1.6);
   $('zoom-reset').onclick = () => map.focus([...selected], 600);
@@ -115,7 +124,7 @@
           const row = el(
             'div',
             { class: 'row country' },
-            el('label', {}, box, flagImg(c.code), el('span', { class: 'name' }, name), ATLAS.core(c) ? null : el('span', { class: 'terr' }, t('territory'))),
+            el('label', {}, box, flagImg(c.code), el('span', { class: 'name' }, name), ATLAS.core(c) ? null : el('span', { class: 'terr' }, t(c.kind === 'district' ? 'district' : 'territory'))),
             zoom,
           );
           // Search matches the English name too, so either works whatever language the page is in,
@@ -213,7 +222,8 @@
     includeTerritories = e.target.checked;
     if (!includeTerritories) for (const c of [...selected]) if (!ATLAS.core(byCode.get(c))) selected.delete(c);
     $('search').value = '';
-    map.refreshActive();
+    if (map.opts.extended !== extended()) drawMap();
+    else map.refreshActive();
     buildTree();
   };
 

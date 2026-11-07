@@ -3,6 +3,7 @@
 //
 //   const map = new GeoMap(container, {
 //     rotate: 0,                         // central meridian offset in degrees
+//     extended: false,                   // the atlas's extended layout (U.S. territories)
 //     isActive: (code) => true,          // can this country be hovered/clicked?
 //     labelFor: (hovered) => hovered,    // country to show next to the cursor (or null)
 //     labelCaption: null,                // optional small caption before the name, e.g. 'Find'
@@ -25,7 +26,7 @@
   class GeoMap {
     constructor(container, opts) {
       this.opts = Object.assign(
-        { rotate: 0, isActive: () => true, labelFor: (hovered) => hovered, labelCaption: null, onClick: null },
+        { rotate: 0, extended: false, isActive: () => true, labelFor: (hovered) => hovered, labelCaption: null, onClick: null },
         opts,
       );
       this.container = container;
@@ -33,8 +34,8 @@
       this.transform = d3.zoomIdentity;
 
       const atlas = WhereIsIt.ATLAS;
-      const features = WhereIsIt.features();
-      const { path, outline } = GeoMap.projectAtlas(atlas, this.opts.rotate, features);
+      const features = WhereIsIt.features(this.opts.extended);
+      const { path, outline, borders } = GeoMap.projectAtlas(atlas, this.opts.rotate, features, this.opts.extended);
       this.path = path;
       this.worldBounds = path.bounds(outline); // the whole map (named for the world map, its first use)
 
@@ -58,6 +59,7 @@
         vp.append('path').attr('class', 'sphere').attr('d', path({ type: 'Sphere' }));
         vp.append('path').attr('class', 'graticule').attr('d', path(d3.geoGraticule10()));
       }
+      if (borders) vp.append('path').attr('class', 'inset-borders').attr('d', borders);
       const land = vp.append('g').attr('class', 'land');
       const dots = vp.append('g').attr('class', 'dots');
       this.overlay = vp.append('g').attr('class', 'overlay');
@@ -100,6 +102,13 @@
       this._focus = null;
       this._onResize();
       this.refreshActive();
+    }
+
+    /** Removes the map from the page (e.g. to rebuild it with another layout). */
+    destroy() {
+      this._resizeObserver.disconnect();
+      this.tooltip.remove();
+      this.svg.interrupt().remove();
     }
 
     has(code) {
@@ -439,12 +448,17 @@
 
   /**
    * The atlas's projection, fitted to a BASE_W-wide space: the whole globe for the world map,
-   * the places themselves otherwise. Returns { path, outline }, outline being what was fitted.
+   * the places themselves otherwise. Returns { path, outline, borders }: outline is what was fitted,
+   * borders an SVG path of the inset boxes (composite projections only).
    */
-  function projectAtlas(atlas, rotate, features) {
+  function projectAtlas(atlas, rotate, features, extended) {
     const outline = atlas.sphere ? { type: 'Sphere' } : { type: 'FeatureCollection', features };
-    const projection = atlas.projection(rotate).fitWidth(BASE_W, outline);
-    return { path: d3.geoPath(projection), outline };
+    const projection = atlas.projection(rotate, extended);
+    // Composite projections have no fitWidth; a very tall extent leaves the width as the constraint.
+    if (projection.fitWidth) projection.fitWidth(BASE_W, outline);
+    else projection.fitExtent([[0, 0], [BASE_W, BASE_W * 10]], outline);
+    const borders = projection.getCompositionBorders ? projection.getCompositionBorders() : null;
+    return { path: d3.geoPath(projection), outline, borders };
   }
 
   // Also used by the printable worksheet.

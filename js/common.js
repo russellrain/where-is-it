@@ -9,6 +9,8 @@
   //   flags      has flag images (otherwise a code badge stands in)
   //   sphere     a whole-globe map: draw the ocean and graticule, and rotate to keep the quiz in view
   //   credit     [name, url] of the map shapes' source
+  //   inset(p)   only drawn in the extended layout (U.S. territories, which need extra insets);
+  //              projection(rotate, extended) picks the layout, see usesExtended()
   const ATLASES = {
     world: {
       id: 'world',
@@ -31,12 +33,14 @@
       object: 'states',
       places: GEO_US_STATES.places,
       names: GEO_US_STATES.names,
-      regionOrder: ['Northeast', 'Midwest', 'South', 'West'],
-      core: (p) => p.state,
+      regionOrder: ['Northeast', 'Midwest', 'South', 'West', 'Territories'],
+      core: (p) => p.kind === 'state',
+      inset: (p) => p.kind === 'territory',
       flags: false,
       sphere: false,
       credit: ['U.S. Census Bureau', 'https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html'],
-      projection: () => d3.geoAlbersUsa(), // Alaska and Hawaii as insets
+      // Alaska and Hawaii as insets; the extended layout adds boxes for the territories.
+      projection: (rotate, extended) => (extended ? d3.geoAlbersUsaTerritories() : d3.geoAlbersUsa()),
     };
   }
   const ATLAS = ATLASES[new URLSearchParams(location.search).get('m')] || ATLASES.world;
@@ -100,7 +104,9 @@
   function defaultTitle(codes) {
     if (!codes.length) return 'Where Is It';
     const regions = new Set(codes.map((c) => byCode.get(c).region));
-    return regions.size === 1 ? I18N.t('regionTitle', { region: I18N.region([...regions][0]) }) : I18N.t('worldTitle');
+    if (regions.size !== 1) return I18N.t('worldTitle');
+    const region = [...regions][0];
+    return I18N.t('regionTitle', { region: I18N.region(region), key: region }); // key: the region's English name
   }
 
   /** Lowercase without accents, for forgiving search ("peru" finds "Perú"). */
@@ -207,9 +213,16 @@
     return el('img', { class: cls || 'flag', src: flagUrl(code), alt: '', draggable: 'false' });
   }
 
-  /** GeoJSON features of the current map's shapes. */
-  function features() {
-    return topojson.feature(ATLAS.topo, ATLAS.topo.objects[ATLAS.object]).features;
+  /** Whether a quiz of these places needs the extended layout (e.g. it includes a U.S. territory). */
+  function usesExtended(codes) {
+    return Boolean(ATLAS.inset) && codes.some((c) => ATLAS.inset(byCode.get(c)));
+  }
+
+  /** GeoJSON features of the current map's shapes; inset-only places are left out unless `extended`. */
+  function features(extended) {
+    const all = topojson.feature(ATLAS.topo, ATLAS.topo.objects[ATLAS.object]).features;
+    if (!ATLAS.inset || extended) return all;
+    return all.filter((f) => !byCode.has(f.id) || !ATLAS.inset(byCode.get(f.id)));
   }
 
   window.WhereIsIt = {
@@ -225,6 +238,7 @@
     flagUrl,
     flagImg,
     features,
+    usesExtended,
     wordmark,
     pinIcon,
     countryName,

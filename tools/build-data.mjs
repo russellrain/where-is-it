@@ -7,7 +7,7 @@
 //   js/data/country-names.js  window.GEO_COUNTRY_NAMES - country names in other app languages
 //   js/data/us-states.js  window.GEO_US_STATES - U.S. state shapes (TopoJSON, ids = postal codes), regions, names
 //   assets/flags/*.svg    flag images for every country on the map
-//   vendor/*.js           d3 + topojson-client + qrcode-generator
+//   vendor/*.js           d3 + d3-composite-projections + topojson-client + qrcode-generator
 //
 // Data is emitted as .js (not .json) so pages work from file:// (and in Electron) without fetch().
 
@@ -151,7 +151,8 @@ fs.writeFileSync(
 
 // ---------------------------------------------------------------- U.S. states
 // Census Bureau shapes via us-atlas, keyed by postal code, grouped into census regions and divisions.
-// Territories are left out: the Albers USA projection only covers the 50 states and D.C.
+// The inhabited territories are listed under their own "Territories" region. They only fit on the map with
+// extra insets (geoAlbersUsaTerritories), so the pages switch to that layout when a quiz includes one.
 const US_STATES = {
   // fips: [postal, division]
   '09': ['CT', 'New England'], 23: ['ME', 'New England'], 25: ['MA', 'New England'],
@@ -172,12 +173,16 @@ const US_STATES = {
   '04': ['AZ', 'Mountain'], '08': ['CO', 'Mountain'], 16: ['ID', 'Mountain'], 30: ['MT', 'Mountain'],
   32: ['NV', 'Mountain'], 35: ['NM', 'Mountain'], 49: ['UT', 'Mountain'], 56: ['WY', 'Mountain'],
   '02': ['AK', 'Pacific'], '06': ['CA', 'Pacific'], 15: ['HI', 'Pacific'], 41: ['OR', 'Pacific'], 53: ['WA', 'Pacific'],
+  60: ['AS', 'Territories'], 66: ['GU', 'Territories'], 69: ['MP', 'Territories'], 72: ['PR', 'Territories'],
+  78: ['VI', 'Territories'],
 };
+const US_RENAME = { 'Commonwealth of the Northern Mariana Islands': 'Northern Mariana Islands', 'United States Virgin Islands': 'U.S. Virgin Islands' };
 const US_REGION_OF = {
   'New England': 'Northeast', 'Mid-Atlantic': 'Northeast',
   'East North Central': 'Midwest', 'West North Central': 'Midwest',
   'South Atlantic': 'South', 'East South Central': 'South', 'West South Central': 'South',
   Mountain: 'West', Pacific: 'West',
+  Territories: 'Territories',
 };
 // State names that differ from English (by postal code).
 const US_NAMES_I18N = {
@@ -185,11 +190,13 @@ const US_NAMES_I18N = {
     DC: 'Distrito de Columbia', HI: 'Hawái', LA: 'Luisiana', MI: 'Míchigan', MS: 'Misisipi', MO: 'Misuri',
     NH: 'Nuevo Hampshire', NJ: 'Nueva Jersey', NM: 'Nuevo México', NY: 'Nueva York', NC: 'Carolina del Norte',
     ND: 'Dakota del Norte', PA: 'Pensilvania', SC: 'Carolina del Sur', SD: 'Dakota del Sur', WV: 'Virginia Occidental',
+    AS: 'Samoa Americana', MP: 'Islas Marianas del Norte', VI: 'Islas Vírgenes de EE. UU.',
   },
   fr: {
     CA: 'Californie', NC: 'Caroline du Nord', SC: 'Caroline du Sud', ND: 'Dakota du Nord', SD: 'Dakota du Sud',
     DC: 'District de Columbia', FL: 'Floride', GA: 'Géorgie', HI: 'Hawaï', LA: 'Louisiane', NM: 'Nouveau-Mexique',
     PA: 'Pennsylvanie', VA: 'Virginie', WV: 'Virginie-Occidentale',
+    AS: 'Samoa américaines', MP: 'Îles Mariannes du Nord', PR: 'Porto Rico', VI: 'Îles Vierges des États-Unis',
   },
 };
 
@@ -198,8 +205,10 @@ const usGeoms = usTopo.objects.states.geometries.filter((g) => US_STATES[g.id]);
 const usPlaces = usGeoms
   .map((g) => {
     const [code, subregion] = US_STATES[g.id];
-    // `state` is false for D.C., which setup lists only when "Include Washington, D.C." is ticked.
-    return { code, name: g.properties.name, region: US_REGION_OF[subregion], subregion, state: code !== 'DC' };
+    const name = US_RENAME[g.properties.name] ?? g.properties.name;
+    // kind: 'state', 'district' (D.C.) or 'territory'. Setup lists the last two only when they're included.
+    const kind = code === 'DC' ? 'district' : subregion === 'Territories' ? 'territory' : 'state';
+    return { code, name, region: US_REGION_OF[subregion], subregion, kind };
   })
   .sort((a, b) => a.name.localeCompare(b.name));
 const usStates = {
@@ -215,7 +224,7 @@ const usStates = {
   places: usPlaces,
   names: US_NAMES_I18N,
 };
-if (usPlaces.length !== 51) throw new Error(`expected 50 states + DC, got ${usPlaces.length}`);
+if (usPlaces.length !== 56) throw new Error(`expected 50 states, D.C. and 5 territories, got ${usPlaces.length}`);
 fs.writeFileSync(path.join(root, 'js', 'data', 'us-states.js'), `window.GEO_US_STATES=${JSON.stringify(usStates)};\n`);
 
 // Flags
@@ -235,6 +244,7 @@ fs.mkdirSync(path.join(vendor, 'licenses'), { recursive: true });
 fs.copyFileSync(nm('d3', 'dist', 'd3.min.js'), path.join(vendor, 'd3.min.js'));
 fs.copyFileSync(nm('topojson-client', 'dist', 'topojson-client.min.js'), path.join(vendor, 'topojson-client.min.js'));
 fs.copyFileSync(nm('qrcode-generator', 'qrcode.js'), path.join(vendor, 'qrcode.js'));
+fs.copyFileSync(nm('d3-composite-projections', 'd3-composite-projections.min.js'), path.join(vendor, 'd3-composite-projections.min.js'));
 // qrcode-generator has no LICENSE file; its MIT notice is in the header of qrcode.js.
 fs.writeFileSync(
   path.join(vendor, 'licenses', 'qrcode-generator.txt'),
@@ -242,12 +252,12 @@ fs.writeFileSync(
     'http://www.opensource.org/licenses/mit-license.php\n\n' +
     'The word "QR Code" is a registered trademark of DENSO WAVE INCORPORATED.\n',
 );
-for (const pkg of ['d3', 'topojson-client', 'world-atlas', 'us-atlas', 'flag-icons', 'world-countries']) {
-  const lic = ['LICENSE', 'LICENSE.md', 'LICENSE.txt'].map((f) => nm(pkg, f)).find((f) => fs.existsSync(f));
+for (const pkg of ['d3', 'topojson-client', 'world-atlas', 'us-atlas', 'd3-composite-projections', 'flag-icons', 'world-countries']) {
+  const lic = ['LICENSE', 'LICENSE.md', 'LICENSE.txt', 'LICENCE'].map((f) => nm(pkg, f)).find((f) => fs.existsSync(f));
   if (lic) fs.copyFileSync(lic, path.join(vendor, 'licenses', `${pkg}.txt`));
 }
 
 console.log(`countries: ${countries.length} (${countries.filter((c) => c.sovereign).length} sovereign)`);
 console.log(`unassigned shapes: ${other.map((g) => g.properties?.name).join(', ')}`);
-console.log(`U.S.: ${usPlaces.filter((p) => p.state).length} states + D.C.`);
+console.log(`U.S.: ${usPlaces.filter((p) => p.kind === 'state').length} states, D.C., ${usPlaces.filter((p) => p.kind === 'territory').length} territories`);
 if (missingFlags.length) console.log(`missing flags: ${missingFlags.join(', ')}`);
