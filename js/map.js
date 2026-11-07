@@ -93,6 +93,9 @@
 
       this.zoom = d3
         .zoom()
+        // d3 swallows the click if the mouse moves at all between down and up (default 0px),
+        // so a slightly shaky click registers as a pan. Allow a few px of jitter.
+        .clickDistance(6)
         .on('zoom', (e) => this._applyTransform(e.transform));
       svg.call(this.zoom).on('dblclick.zoom', null);
 
