@@ -248,9 +248,18 @@ input, select { background: var(--panel); }
 .prompt .label { color: var(--ink-soft); font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.06em; }
 .prompt .target { display: flex; align-items: center; gap: 10px; font-size: 1.6rem; font-weight: 800; line-height: 1.1; }
 .prompt .target .flag { width: 2.1rem; height: 1.575rem; }
+/* Each new question's name rises in slightly, so the change of target registers. Short enough not to slow fast players. */
+.prompt .target.enter { animation: rise-in 0.18s ease-out; }
+@keyframes rise-in { from { opacity: 0; transform: translateY(4px); } }
 .guesses { display: flex; gap: 5px; margin-left: 4px; }
 .guesses span { width: 12px; height: 12px; border-radius: 50%; background: var(--first); }
 .guesses span.used { background: var(--pip-used); }
+/* The pip a wrong guess just used dips and drains, backing up the red flash on the map. */
+.guesses span.just-used { animation: pip-used 0.25s ease-out; }
+@keyframes pip-used {
+  from { background: var(--first); }
+  40% { transform: scale(0.6); }
+}
 .stats { display: flex; gap: 18px; align-items: center; }
 /* Before a quiz starts the stats are only placeholders. visibility (not display) keeps the header from shifting when they appear. */
 .stats.idle { visibility: hidden; }
@@ -259,6 +268,9 @@ input, select { background: var(--panel); }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 .stat { text-align: center; min-width: 54px; }
 .stat b { display: block; font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+/* Score ticks up with a small bump (never the timer, which changes every second). */
+.stat b.bump { animation: bump 0.2s ease-out; }
+@keyframes bump { 50% { transform: scale(1.15); } }
 .stat small { color: var(--ink-soft); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
 .progress { height: 4px; background: var(--track); }
 .progress div { height: 100%; width: 0; background: var(--accent); transition: width 0.3s; }
@@ -274,11 +286,21 @@ input, select { background: var(--panel); }
 .feedback.hint { background: var(--hint); color: #fff; }
 .feedback.pop { animation: pop 0.25s ease-out; }
 @keyframes pop { from { transform: translateX(-50%) scale(0.9); } to { transform: translateX(-50%) scale(1); } }
+/* Leaving: a quick fade (game.js hides it once this has played). */
+.feedback.out { animation: fade-out 0.15s ease-in forwards; }
+@keyframes fade-out { to { opacity: 0; } }
 
 .overlay {
   position: absolute; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center;
   padding: 16px; background: var(--scrim); overflow: auto;
 }
+/* The overlay is visible in the HTML so the scrim is there from the first paint (map data loads before game.js
+   fills the card); the empty card stays out of sight until then. The scrim fades in only when it comes back
+   after being hidden (game.js adds .fade-in), and a new card lifts in slightly (.enter on each card swap). */
+.card:empty { display: none; }
+.overlay.fade-in { animation: fade-in 0.2s ease-out; }
+.card.enter { animation: card-in 0.22s ease-out; }
+@keyframes card-in { from { opacity: 0; transform: translateY(8px); } }
 .card {
   background: var(--panel); border-radius: 18px; box-shadow: var(--shadow); padding: 28px;
   width: min(640px, 100%);
@@ -626,7 +648,10 @@ body.print-page { overflow: auto; height: auto; min-height: 100%; }
 }
 /* Respect "reduce motion": no pulsing or flashing, and hints stay highlighted with a steady colour. */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition-duration: 0.01ms !important; }
+  /* Catch-all so any animation added later is effectively instant, ending in its final state. */
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
+  }
   .feedback.pop { animation: none; }
   .stats:not(.idle) { animation: none; }
   .geomap .hint { animation: none; fill: var(--hint); }

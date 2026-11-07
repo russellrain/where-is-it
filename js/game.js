@@ -59,7 +59,7 @@
     map.ring(null);
     hideSay();
     ui.showResults.hidden = true;
-    ui.overlay.hidden = false;
+    showOverlay();
   };
 
   // Some classes hide the running clock (less pressure); the time still shows on the results.
@@ -115,9 +115,18 @@
 
   function showCard(...children) {
     ui.card.className = 'card'; // drop any per-card modifier (showWelcome adds 'welcome')
+    void ui.card.offsetWidth; // reflow so .enter below restarts its animation even when swapping cards
+    ui.card.classList.add('enter');
     ui.card.replaceChildren(...children.filter((c) => c != null)); // replaceChildren would print null as "null"
-    ui.overlay.hidden = false;
+    showOverlay();
     ui.showResults.hidden = true;
+  }
+
+  /** Shows the card overlay, fading the scrim in only if it was hidden (not when swapping cards, or on page load). */
+  function showOverlay() {
+    if (!ui.overlay.hidden) return;
+    ui.overlay.hidden = false;
+    replay(ui.overlay, 'fade-in');
   }
 
   function showWelcome() {
@@ -264,6 +273,7 @@
     game.wrong = 0;
     game.hint = false;
     renderPrompt();
+    replay(ui.target, 'enter');
     renderStats();
   }
 
@@ -304,7 +314,7 @@
       return;
     }
     game.wrong++;
-    renderGuesses();
+    renderGuesses(true);
     if (game.wrong >= quiz.guesses) {
       game.hint = true;
       map.toggleClass(target, 'hint', true);
@@ -461,9 +471,13 @@
     announce(`${t('find')}: ${countryName(c)}`);
   }
 
-  function renderGuesses() {
+  /** animate: play the "used up" animation on the pip the latest wrong guess took. */
+  function renderGuesses(animate = false) {
     const dots = [];
-    for (let i = 0; i < quiz.guesses; i++) dots.push(el('span', { class: i < game.wrong ? 'used' : '' }));
+    for (let i = 0; i < quiz.guesses; i++) {
+      const cls = i < game.wrong ? (animate && i === game.wrong - 1 ? 'used just-used' : 'used') : '';
+      dots.push(el('span', { class: cls }));
+    }
     ui.guesses.replaceChildren(...dots);
     ui.guesses.title = t('guessesLeft', { n: Math.max(quiz.guesses - game.wrong, 0) });
   }
@@ -472,7 +486,9 @@
     const total = game.queue.length;
     const shown = Math.min(game.index + 1, total);
     ui.progress.textContent = total ? `${shown}/${total}` : '–';
-    ui.score.textContent = game.results.filter((r) => r.found).length;
+    const score = game.results.filter((r) => r.found).length;
+    if (score > Number(ui.score.textContent)) replay(ui.score, 'bump');
+    ui.score.textContent = score;
     ui.bar.style.width = total ? `${(game.results.length / total) * 100}%` : '0';
   }
 
@@ -490,7 +506,17 @@
   }
   function hideSay() {
     clearTimeout(sayTimer);
-    ui.feedback.hidden = true;
+    const f = ui.feedback;
+    if (f.hidden) return;
+    // Fade out, then hide. say() resets the class list, so a new message during the fade cancels it.
+    f.classList.add('out');
+    sayTimer = setTimeout(() => (f.hidden = true), 150);
+  }
+  /** Restarts a one-shot CSS animation class on an element. */
+  function replay(node, cls) {
+    node.classList.remove(cls);
+    void node.offsetWidth;
+    node.classList.add(cls);
   }
   /** Reads feedback out to screen readers (the visible pill comes and goes too fast to be announced). */
   function announce(text) {
