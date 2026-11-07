@@ -81,10 +81,17 @@
   if (!quiz.timer) ui.time.closest('.stat').hidden = true;
 
   const homeBtn = $('home');
+  const topHome = $('top-home'); // the logo, linking to the main screen, while a quiz is on
+  const leaving = () => game.state === 'playing' && game.results.length && !confirm(t('confirmLeave'));
   homeBtn.onclick = () => {
-    if (game.state === 'playing' && game.results.length && !confirm(t('confirmLeave'))) return;
+    if (leaving()) return;
     backToIntro();
   };
+  topHome.onclick = (e) => { if (leaving()) e.preventDefault(); };
+  function showQuizChrome(on) {
+    homeBtn.hidden = !on;
+    topHome.hidden = !on;
+  }
 
   // Outline icons for buttons (24x24, drawn with the .ico stroke style). Declared before the first
   // render below: the welcome card uses them, and a const can't be read before its line has run.
@@ -113,6 +120,7 @@
       const c = game.current;
       ui.label.textContent = t('find');
       ui.target.replaceChildren(...promptNodes(c));
+      fitName();
       renderGuesses();
       if (!game.hint) hideSay(); // a showing hint stays until they click the country
     } else {
@@ -299,7 +307,7 @@
   });
 
   function showIntro() {
-    homeBtn.hidden = true;
+    showQuizChrome(false);
     ui.stats.classList.add('idle');
     document.title = `${title()} · Where Is It`;
     const total = questionCount();
@@ -343,7 +351,7 @@
   }
 
   function start(queue) {
-    homeBtn.hidden = false;
+    showQuizChrome(true);
     ui.stats.classList.remove('idle');
     clearTimeout(game.nextTimer);
     clearTimeout(game.ringTimer);
@@ -575,6 +583,7 @@
     const c = game.current;
     ui.label.textContent = t('find');
     ui.target.replaceChildren(...promptNodes(c));
+    fitName();
     renderGuesses();
     hideSay();
     map.refreshTooltip();
@@ -583,8 +592,30 @@
 
   /** The top bar's prompt: flag (or code badge) and name, or in a capitals quiz a star and the capital. */
   function promptNodes(code) {
-    return [capitals ? starIcon() : flagImg(code), text(promptName(code))];
+    const name = promptName(code);
+    return [capitals ? starIcon() : flagImg(code), el('span', { class: 'name' }, name)];
   }
+
+  // Fit the place name to the room in the top bar. Shrink it (down to 60%) to keep it on one line, so the
+  // bar keeps its height for long names. Failing that, wrap it onto two compact lines (at 3/4 size, or
+  // smaller until its longest word fits, e.g. "Liechtenstein" on a phone). Never truncated: the name is the question.
+  function fitName() {
+    const n = ui.target.querySelector('.name');
+    if (!n) return;
+    n.style.fontSize = '';
+    n.style.whiteSpace = 'nowrap';
+    const base = parseFloat(getComputedStyle(n).fontSize);
+    const tooWide = () => n.scrollWidth > n.clientWidth + 1;
+    let size = base;
+    while (tooWide() && size > Math.max(base * 0.6, 15)) n.style.fontSize = `${--size}px`;
+    const oneLine = !tooWide();
+    n.style.whiteSpace = '';
+    if (oneLine) return;
+    size = Math.round(base * 0.75);
+    n.style.fontSize = `${size}px`;
+    while (tooWide() && size > 12) n.style.fontSize = `${--size}px`;
+  }
+  window.addEventListener('resize', fitName);
 
   /** animate: play the "used up" animation on the pip the latest wrong guess took. */
   function renderGuesses(animate = false) {

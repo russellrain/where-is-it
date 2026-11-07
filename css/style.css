@@ -242,7 +242,7 @@ input, select { background: var(--panel); }
 .game { display: flex; flex-direction: column; height: 100%; }
 .topbar {
   display: flex; align-items: center; gap: 16px; padding: 10px 16px; background: var(--panel);
-  border-bottom: 1px solid var(--line); min-height: 64px; z-index: 10; flex-wrap: wrap;
+  border-bottom: 1px solid var(--line); min-height: 64px; z-index: 10;
 }
 .icon-btn {
   display: inline-flex; align-items: center; justify-content: center; flex: none; padding: 0; cursor: pointer;
@@ -266,7 +266,10 @@ input, select { background: var(--panel); }
 .lang-picker .lang-code { display: none; }
 .theme-toggle .i-sun, [data-theme='dark'] .theme-toggle .i-moon { display: none; }
 [data-theme='dark'] .theme-toggle .i-sun { display: block; }
-.prompt { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 220px; }
+/* The prompt is what gives way when the bar is tight (min-width 0): the name wraps rather than pushing buttons to a new row. */
+.prompt { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+.prompt > div { min-width: 0; }
+.prompt .target, .prompt .name { min-width: 0; } /* lets fitName() measure the room the name has */
 .prompt .label { color: var(--ink-soft); font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.06em; }
 .prompt .target { display: flex; align-items: center; gap: 10px; font-size: 1.6rem; font-weight: 800; line-height: 1.1; }
 .prompt .target .flag { width: 2.1rem; height: 1.575rem; }
@@ -367,6 +370,12 @@ input, select { background: var(--panel); }
 .card-head .subtle-link { align-self: flex-start; margin-left: auto; }
 .welcome-head { margin: 4px 0 14px; }
 .card > .wordmark { margin-bottom: 12px; }
+/* The small logo at the left of the game's top bar (during and after a quiz): one click to the main screen.
+   Kept quiet (small, muted) so the question stays the loudest thing; a rule splits navigation from the question. */
+.wordmark.top-home { flex: none; font-size: 0.85rem; color: var(--ink-soft); }
+.wordmark.top-home:hover { color: var(--ink); }
+.wordmark.top-home[hidden] { display: none; }
+#home:not([hidden]) + .prompt { border-left: 1px solid var(--line); padding-left: 16px; }
 
 /* Welcome card: one column by default. Grid areas let wide, short screens (see the media query below)
    move the presets into a second column without changing the DOM order. */
@@ -591,6 +600,20 @@ input, select { background: var(--panel); }
 .qr-link { margin: 12px 0 0; font-size: 0.8rem; color: var(--ink-soft); word-break: break-all; max-height: 3.9em; overflow: hidden; }
 .qr-actions { display: flex; justify-content: center; margin-top: 16px; }
 
+/* Medium screens: the top bar can't fit the full logo, the back button, a long name, the stats and the
+   language picker on one row, so the logo becomes just its pin and the guess pips move up beside "FIND". */
+@media (max-width: 1200px) {
+  .top-home .wm-text { display: none; }
+  .wordmark.top-home { justify-content: center; align-items: center; width: 28px; height: 40px; font-size: 1.35rem; }
+  .top-home .pin { margin: 0; }
+  .prompt { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: 8px; min-width: 0; }
+  .prompt > div:first-child { display: contents; }
+  .prompt .label { grid-area: 1 / 1; }
+  .prompt .guesses { grid-area: 1 / 2; margin-left: 0; gap: 4px; }
+  .prompt .guesses span { width: 9px; height: 9px; }
+  .prompt .target { grid-area: 2 / 1 / 3 / 3; }
+}
+
 @media (max-width: 800px) {
   body { overflow: auto; }
   /* Pin the share bar to the bottom of the screen so the link is always one tap away (setup.js sets --share-h). */
@@ -605,7 +628,7 @@ input, select { background: var(--panel); }
   .tree { max-height: 50vh; }
   .lang-list { max-height: 60vh; }
   .setup .map-wrap { height: 55vh; flex: none; order: 1; }
-  .topbar { gap: 10px; padding: 8px 12px; }
+  .topbar { gap: 10px; padding: 8px 12px; flex-wrap: wrap; }
   .prompt .target { font-size: 1.25rem; }
   .stats { gap: 10px; width: 100%; justify-content: space-between; order: 1; }
   /* Here the stats take a row of their own, so reserving their space would leave an empty band; drop them instead. */
@@ -626,6 +649,10 @@ input, select { background: var(--panel); }
    and let the title give way so the header controls stay on one row. */
 @media (max-width: 600px) {
   .prompt { min-width: 120px; }
+  /* The back-to-start chevron gives way: the pin is a real link, so the browser's back button
+     still returns to a shared quiz, and the place name needs the room. */
+  .topbar #home { display: none; }
+  #home:not([hidden]) + .prompt { padding-left: 10px; }
   .lang-picker .lang-select { width: 70px; padding: 0; color: transparent; }
   .lang-picker .lang-select option { color: var(--ink); background: var(--panel); }
   .lang-picker .i-chevron { display: none; }
