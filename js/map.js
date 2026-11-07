@@ -19,7 +19,7 @@
   'use strict';
 
   const BASE_W = 1000;
-  const TINY_AREA = 3; // base units²; countries smaller than this get a clickable dot
+  const TINY_AREA = 12; // base units²; countries smaller than this get a clickable dot
   const DOT_RADIUS = 6; // screen px
   const DOT_HIDE_AREA = 90; // screen px²; hide the dot once the shape itself is this big
   const STATE_CLASSES = ['s-first', 's-ok', 's-missed', 'selected'];
