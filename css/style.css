@@ -172,6 +172,10 @@ select:not(.lang-select):hover { background-color: var(--hover-bg); }
   font: 700 12px system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; text-anchor: middle; pointer-events: none;
   fill: var(--ink); stroke: var(--panel); stroke-width: 3px; stroke-linejoin: round; paint-order: stroke;
 }
+/* Capitals quizzes: the hovered place's name, lighter than the answer labels so it doesn't read as one. */
+.geomap .map-hover-label text { font-weight: 500; }
+/* A greyed-out place outside the quiz: muted, like its shape, since it's never an answer. */
+.geomap .map-peek-label text { font-style: italic; fill: var(--ink-soft); }
 .geomap .s-first.hover, .geomap .s-ok.hover, .geomap .s-missed.hover { fill-opacity: 0.75; }
 /* Capital stars (capitals quizzes), drawn at a fixed screen size; see GeoMap.setCapitals. */
 .geomap .capital { pointer-events: none; }
@@ -224,11 +228,9 @@ select:not(.lang-select):hover { background-color: var(--hover-bg); }
   padding: 2px 6px; border-radius: 5px; background: rgba(255, 255, 255, 0.22);
   font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
 }
-/* Capitals quizzes: the place under the pointer, after the capital to find. */
-.map-tooltip-hover { padding-left: 8px; border-left: 1px solid rgba(255, 255, 255, 0.4); font-weight: 500; opacity: 0.9; }
-/* A greyed-out place outside the quiz, named so gaps in the area aren't a mystery. */
-.map-tooltip-peek { font-weight: 500; font-style: italic; opacity: 0.85; }
-.map-tooltip.peek-only { background: var(--tooltip-bg); opacity: 0.85; }
+/* Capitals quizzes: the capital to find, starred (white, since the accent star vanishes on the accent pill). */
+.map-tooltip-capital { display: inline-flex; align-items: center; gap: 5px; font-size: 1.05rem; font-weight: 700; }
+.map-tooltip-capital .capital-star { fill: #fff; }
 
 .zoom-controls {
   position: absolute; right: 14px; bottom: 14px; display: flex; flex-direction: column; gap: 6px; z-index: 5;

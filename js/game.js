@@ -53,14 +53,15 @@
     // Once finished, it names whatever is under the pointer so students can explore their results.
     labelFor: (hovered) => (game.state === 'playing' ? game.current : game.state === 'done' ? hovered : null),
     labelCaption: t('find'),
-    // Capitals quizzes test the capitals, not where the places are, so the label also names the place under the pointer.
     labelContent: capitals
-      ? (code, hovered) =>
+      ? (code) =>
           game.state === 'playing'
-            ? [starIcon(), text(capitalName(code)), hovered ? el('span', { class: 'map-tooltip-hover' }, countryName(hovered)) : null].filter(Boolean)
+            ? [el('span', { class: 'map-tooltip-capital' }, starIcon(), capitalName(code))]
             : [flagImg(code), text(fullName(code))]
       : null,
-    labelHover: capitals,
+    // Capitals quizzes test the capitals, not where the places are, so name the place under the pointer, on the map
+    // itself, so it can't be mistaken for part of the question in the cursor label.
+    hoverName: () => capitals && game.state === 'playing',
     peekInactive: true, // name the greyed-out places outside the quiz on hover (no clue: they're never answers)
     onClick: onCountryClick,
   });

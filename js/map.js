@@ -9,7 +9,8 @@
 //     labelCaption: null,                // optional small caption before the name, e.g. 'Find'
 //     labelContent: null,                // (code, hovered) => [nodes] for the cursor label; default: flag and name
 //     labelHover: false,                 // labelContent also depends on the hovered country, so rebuild as it changes
-//     peekInactive: false,               // hovering an inactive country names it (muted) in the cursor label
+//     peekInactive: false,               // hovering an inactive country writes its name (muted) on the map
+//     hoverName: () => false,            // (hovered) => true writes the hovered country's name on the map itself
 //     onClick: (code) => {},
 //   });
 //
@@ -30,7 +31,7 @@
   class GeoMap {
     constructor(container, opts) {
       this.opts = Object.assign(
-        { rotate: 0, extended: false, isActive: () => true, labelFor: (hovered) => hovered, labelCaption: null, labelContent: null, labelHover: false, peekInactive: false, onClick: null },
+        { rotate: 0, extended: false, isActive: () => true, labelFor: (hovered) => hovered, labelCaption: null, labelContent: null, labelHover: false, peekInactive: false, hoverName: () => false, onClick: null },
         opts,
       );
       this.container = container;
@@ -70,6 +71,8 @@
       this.overlay = vp.append('g').attr('class', 'overlay');
       this.capitalLayer = vp.append('g').attr('class', 'capitals');
       this.labelLayer = vp.append('g').attr('class', 'map-labels');
+      this.hoverLabelLayer = vp.append('g').attr('class', 'map-labels');
+      this._hoverLabel = null; // { g, x, y } of the hovered country's name, when opts.hoverName wants it
       this._labels = [];
       this._labelCodes = [];
       this._capitals = [];
@@ -193,6 +196,18 @@
       }
       this._updateOverlay();
     }
+    /** Writes the hovered country's name on the map (opts.hoverName, or muted for opts.peekInactive), or clears it. */
+    _setHoverLabel(code, peek) {
+      this.hoverLabelLayer.selectAll('*').remove();
+      this._hoverLabel = null;
+      const c = code && this.countries.get(code);
+      if (!c) return;
+      const g = this.hoverLabelLayer.append('g').attr('class', `map-label map-hover-label${peek ? ' map-peek-label' : ''}`);
+      g.append('text').attr('dy', c.dot ? '-1.1em' : '0.35em').text(WhereIsIt.countryName(code));
+      this._hoverLabel = { g, x: c.center[0], y: c.center[1] };
+      this._updateOverlay();
+    }
+
     /** Rebuilds the labels, e.g. after a language change. */
     refreshLabels() {
       this.setLabels(this._labelCodes);
@@ -341,7 +356,9 @@
     _updateOverlay() {
       const k = this.transform.k;
       // Labels stay the same size on screen whatever the zoom.
-      for (const { g, x, y } of this._labels.concat(this._capitals)) g.attr('transform', `translate(${x},${y}) scale(${1 / k})`);
+      const marks = this._labels.concat(this._capitals);
+      if (this._hoverLabel) marks.push(this._hoverLabel);
+      for (const { g, x, y } of marks) g.attr('transform', `translate(${x},${y}) scale(${1 / k})`);
       if (!this._ring) return;
       const { g, cx, cy, r } = this._ring;
       // Ring radius in screen px: around the country, but never smaller than 22px.
@@ -356,6 +373,7 @@
       document.body.appendChild(tip);
       this.tooltip = tip;
       let hovered = null; // country under the pointer
+      let hoverName = null; // 'code' or 'peek:code': the name written on the map (opts.hoverName / opts.peekInactive)
       let peek = null; // inactive country under the pointer (only with opts.peekInactive)
       let inside = false; // pointer is over the map
       let shown = null; // country currently rendered in the tooltip
@@ -381,14 +399,10 @@
         if (y + r.height > window.innerHeight - 4) y = last.y - r.height - pad;
         tip.style.transform = `translate(${x}px, ${y}px)`;
       };
-      // The tooltip shows whichever country opts.labelFor(hovered) returns (or nothing), plus,
-      // with opts.peekInactive, the name of an inactive country under the pointer so gaps in the
-      // quiz area (e.g. Western Sahara in Africa) aren't a mystery.
+      // The tooltip shows whichever country opts.labelFor(hovered) returns (or nothing).
       const updateTip = () => {
         const code = inside && mouse ? this.opts.labelFor(hovered) : null;
-        const peekCode = inside && mouse ? peek : null;
-        let key = code && this.opts.labelHover ? `${code}|${hovered}` : code;
-        if (peekCode) key = `${key}|peek:${peekCode}`;
+        const key = code && this.opts.labelHover ? `${code}|${hovered}` : code;
         if (key !== shown) {
           shown = key;
           let parts = [];
@@ -405,19 +419,12 @@
               parts.unshift(c);
             }
           }
-          if (peekCode) {
-            const p = document.createElement('span');
-            p.className = code ? 'map-tooltip-hover map-tooltip-peek' : 'map-tooltip-peek';
-            p.textContent = WhereIsIt.countryName(peekCode);
-            parts.push(p);
-          }
-          if (code || peekCode) {
+          if (code) {
             tip.replaceChildren(...parts);
             tip.classList.toggle('has-caption', !!caption);
-            tip.classList.toggle('peek-only', !code);
           }
         }
-        tip.hidden = !code && !peekCode;
+        tip.hidden = !code;
         place();
       };
       const setHover = (code) => {
@@ -425,6 +432,13 @@
           if (hovered) this.toggleClass(hovered, 'hover', false);
           hovered = code;
           if (code) this.toggleClass(code, 'hover', true);
+        }
+        // Names written on the map: the hovered place when opts.hoverName wants it, or with opts.peekInactive, a
+        // greyed-out place outside the quiz so gaps in the area (e.g. Western Sahara in Africa) aren't a mystery.
+        const name = peek ? `peek:${peek}` : code && this.opts.hoverName(code) ? code : null;
+        if (name !== hoverName) {
+          hoverName = name;
+          this._setHoverLabel(peek || (name && code), !!peek);
         }
         updateTip();
       };
