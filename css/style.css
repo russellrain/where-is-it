@@ -414,7 +414,8 @@ input, select { background: var(--panel); }
 .preset-list .preset-name { display: inline-flex; align-items: center; gap: 6px; }
 .preset-list small { color: var(--ink-soft); font-weight: 500; font-size: 0.8rem; white-space: nowrap; }
 .preset-list a.whole { background: var(--subtle-bg); border-style: dashed; }
-.preset-list a.whole:hover { background: var(--hover-bg); }
+/* The resting fill is already near --hover-bg, so hover lifts to the panel color and firms up the border instead. */
+.preset-list a.whole:hover { background: var(--panel); border-style: solid; border-color: color-mix(in srgb, var(--ink-soft) 45%, var(--line)); }
 
 .show-results { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 6; box-shadow: var(--shadow); }
 .toast {
