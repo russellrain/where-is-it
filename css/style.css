@@ -208,7 +208,7 @@ input, select { background: var(--panel); }
 .zoom-controls svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .zoom-controls button:hover { background: var(--hover-bg); }
 
-/* Sits above the start/results overlay (z-index 20) so "About" can always be clicked. */
+/* Map credit and About link in the setup page's map corner. */
 .attribution {
   position: absolute; left: 8px; bottom: 6px; font-size: 11px; color: var(--attribution); z-index: 21;
 }
@@ -270,11 +270,14 @@ input, select { background: var(--panel); }
 
 .overlay {
   position: absolute; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center;
-  padding: 16px 16px 28px; background: var(--scrim); overflow: auto; /* extra bottom room keeps the card off the About link */
+  padding: 16px; background: var(--scrim); overflow: auto;
 }
 .card {
   background: var(--panel); border-radius: 18px; box-shadow: var(--shadow); padding: 28px;
-  width: min(560px, 100%); max-height: 100%; overflow: auto;
+  width: min(640px, 100%);
+  /* No inner scroll: a tall card grows and the overlay scrolls instead, keeping the scrollbar off the rounded corner.
+     Auto margins center it but collapse to 0 on overflow, so the top never gets clipped (unlike align-items: center). */
+  margin: auto;
 }
 .card h1 { margin: 0 0 6px; font-size: 1.8rem; }
 .card h2 { margin: 18px 0 8px; font-size: 1rem; }
@@ -287,8 +290,10 @@ input, select { background: var(--panel); }
 }
 .subtle-link:hover { opacity: 1; text-decoration: underline; }
 /* Quiet footer row at the bottom of a card, for secondary links like Customize. */
-.card-foot { display: flex; justify-content: flex-end; margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--line); }
+.card-foot { display: flex; justify-content: flex-end; gap: 16px; margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--line); }
 .card-foot .subtle-link { margin-left: 0; align-self: auto; }
+/* A second subtle link in an actions row sits right after the first instead of being pushed apart. */
+.subtle-link + .subtle-link { margin-left: 0; }
 .card label.field { display: block; margin-top: 16px; font-weight: 600; }
 .card label.field input {
   display: block; width: 100%; margin-top: 6px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
@@ -307,8 +312,30 @@ input, select { background: var(--panel); }
 .pin circle { fill: #fff; }
 .pin-icon { display: inline-flex; font-size: 1.3rem; }
 .pin-icon .pin { margin: 0; }
-.hero { margin: 4px 0 14px; }
+.card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.card-head .subtle-link { align-self: flex-start; margin-left: auto; }
+.welcome-head { margin: 4px 0 14px; }
 .card > .wordmark { margin-bottom: 12px; }
+
+/* Welcome card: one column by default. Grid areas let wide, short screens (see the media query below)
+   move the presets into a second column without changing the DOM order. */
+.card.welcome { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: 'head' 'text' 'presets' 'own'; }
+.welcome-head { grid-area: head; }
+.welcome-text { grid-area: text; }
+.card .welcome-text { margin: 0; } /* grid items don't collapse margins, so spacing comes from the neighbours */
+.welcome-presets { grid-area: presets; }
+.make-own { grid-area: own; }
+@media (min-width: 900px) and (max-height: 800px) {
+  .card.welcome {
+    width: min(1000px, 100%); column-gap: 36px;
+    grid-template-columns: minmax(300px, 1fr) minmax(0, 1.6fr);
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas: 'head presets' 'text presets' 'own presets';
+  }
+  .make-own { align-self: end; }
+  .welcome-presets > .preset-heading:first-child { margin-top: 4px; }
+  .make-own > h2:first-child { margin-top: 0; }
+}
 .prompt .label:empty { display: none; }
 
 .score-big { display: flex; gap: 14px; margin: 18px 0 8px; }
@@ -333,10 +360,16 @@ input, select { background: var(--panel); }
 .result-list li.missed .mark { color: var(--missed); }
 
 .card h3.preset-heading { margin: 14px 0 8px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft); }
-.card h2 + h3.preset-heading { margin-top: 4px; }
-.preset-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); grid-auto-rows: 1fr; gap: 8px; }
-.preset-list a { justify-content: flex-start; white-space: normal; text-align: left; }
-.preset-list a small { white-space: nowrap; }
+/* Name over count. The min-height fits a two-line name, so the country and state grids match in every language. */
+.preset-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.preset-list a {
+  flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px;
+  min-height: 64px; padding: 9px 14px; white-space: normal; text-align: left; line-height: 1.2;
+}
+.preset-list .preset-name { display: inline-flex; align-items: center; gap: 6px; }
+.preset-list small { color: var(--ink-soft); font-weight: 500; font-size: 0.8rem; white-space: nowrap; }
+.preset-list a.whole { background: var(--subtle-bg); border-style: dashed; }
+.preset-list a.whole:hover { background: var(--hover-bg); }
 
 .show-results { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 6; box-shadow: var(--shadow); }
 .toast {
@@ -487,6 +520,15 @@ input, select { background: var(--panel); }
   .prompt .target { font-size: 1.25rem; }
   .stats { gap: 10px; width: 100%; justify-content: space-between; order: 1; }
   .card { padding: 20px; }
+}
+
+/* Short screens: tighten the dialog card so it fits without scrolling more often. */
+@media (max-height: 640px) {
+  .overlay { padding: 10px 16px; }
+  .card { padding: 18px 20px; }
+  .card .wordmark.large { font-size: 2rem; }
+  .card-head { margin-bottom: 8px; }
+  .card h2 { margin-top: 12px; }
 }
 
 /* Small screens: shrink the language picker to "文A EN" (the native list still shows full names)

@@ -70,6 +70,16 @@
     backToIntro();
   };
 
+  // Outline icons for buttons (24x24, drawn with the .ico stroke style). Declared before the first
+  // render below: the welcome card uses them, and a const can't be read before its line has run.
+  const ICONS = {
+    copy: '<rect x="8.5" y="8.5" width="12" height="12" rx="2.2"/><path d="M15.5 5.5v-.3a1.7 1.7 0 0 0-1.7-1.7H5.2a1.7 1.7 0 0 0-1.7 1.7v8.6a1.7 1.7 0 0 0 1.7 1.7h.3"/>',
+    replay: '<path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 3.5V8H8"/>',
+    target: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.6" fill="currentColor"/>',
+    shuffle: '<path d="M3.5 7h3.2c1.5 0 2.9.8 3.7 2l3.2 6c.8 1.2 2.2 2 3.7 2h3.2"/><path d="M3.5 17h3.2c1.5 0 2.9-.8 3.7-2l.4-.7M13.2 9.7l.4-.7c.8-1.2 2.2-2 3.7-2h3.2"/><path d="M18 4.5L20.5 7 18 9.5M18 14.5l2.5 2.5-2.5 2.5"/>',
+    map: '<path d="M3.5 6.5l5.5-2.5 6 2.5 5.5-2.5v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>',
+  };
+
   if (!quiz.codes.length) showWelcome();
   else showIntro();
 
@@ -103,6 +113,7 @@
   // ---------------------------------------------------------------- screens
 
   function showCard(...children) {
+    ui.card.className = 'card'; // drop any per-card modifier (showWelcome adds 'welcome')
     ui.card.replaceChildren(...children.filter((c) => c != null)); // replaceChildren would print null as "null"
     ui.overlay.hidden = false;
     ui.showResults.hidden = true;
@@ -131,7 +142,8 @@
         'quickPlayStates',
         us
           ? [
-              ...us.regionOrder.map((r) => [us, null, (c) => c.region === r, null, I18N.region(r)]),
+              // Territories stay out of quick play; they're still available in "Create a quiz".
+              ...us.regionOrder.filter((r) => r !== 'Territories').map((r) => [us, null, (c) => c.region === r, null, I18N.region(r)]),
               [us, null, () => true, 10, t('presetWorld')],
               [us, t('presetUsAll'), () => true],
             ]
@@ -140,25 +152,38 @@
     ];
     const presetLinks = (presets) =>
       presets.map(([atlas, title, fn, n, label]) => {
-        const codes = atlas.places.filter((c) => atlas.core(c) && fn(c)).map((c) => c.code);
+        const core = atlas.places.filter((c) => atlas.core(c));
+        const codes = core.filter(fn).map((c) => c.code);
+        // "Random" and "All" draw from the whole map rather than one region, so they get a quieter, distinct look.
+        const whole = codes.length === core.length;
         return el(
           'a',
-          { class: 'btn', href: WhereIsIt.quizQuery({ map: atlas.id, codes, title, count: n }) },
-          label || title,
-          el('small', { style: 'color:var(--ink-soft);font-weight:500;margin-left:auto' }, `${n ?? codes.length}`),
+          { class: whole ? 'btn whole' : 'btn', href: WhereIsIt.quizQuery({ map: atlas.id, codes, title, count: n }) },
+          el('span', { class: 'preset-name' }, n ? icon('shuffle') : null, label || title),
+          el('small', {}, t(atlas.id === 'us' ? 'nStates' : 'nCountries', { n: n ?? codes.length })),
         );
       });
+    // In reading order for the one-column layout; wide, short screens move the presets into a
+    // second column via grid areas (see .card.welcome in the CSS).
     showCard(
-      el('div', { class: 'hero' }, wordmark({ large: true, tagline: true })),
-      el('p', {}, t('welcome', { n: WhereIsIt.DEFAULTS.guesses })),
-      el('h2', {}, t('quickPlay')),
-      ...groups
-        .filter(([, presets]) => presets.length)
-        .flatMap(([heading, presets]) => [el('h3', { class: 'preset-heading' }, t(heading)), el('div', { class: 'preset-list' }, presetLinks(presets))]),
-      el('h2', {}, t('makeYourOwn')),
-      el('p', {}, t('makeYourOwnBlurb')),
-      el('div', { class: 'actions', style: 'margin-top:10px' }, el('a', { class: 'btn', href: 'setup' }, t('createQuiz'))),
+      el('div', { class: 'card-head welcome-head' }, wordmark({ large: true, tagline: true }), aboutLink()),
+      el('p', { class: 'welcome-text' }, t('welcome', { n: WhereIsIt.DEFAULTS.guesses })),
+      el(
+        'div',
+        { class: 'welcome-presets' },
+        ...groups
+          .filter(([, presets]) => presets.length)
+          .flatMap(([heading, presets]) => [el('h3', { class: 'preset-heading' }, t(heading)), el('div', { class: 'preset-list' }, presetLinks(presets))]),
+      ),
+      el(
+        'div',
+        { class: 'make-own' },
+        el('h2', {}, t('makeYourOwn')),
+        el('p', {}, t('makeYourOwnBlurb')),
+        el('div', { class: 'actions', style: 'margin-top:10px' }, el('a', { class: 'btn', href: 'setup' }, t('createQuiz'))),
+      ),
     );
+    ui.card.classList.add('welcome');
   }
 
   function showIntro() {
@@ -482,13 +507,6 @@
 
   // ---------------------------------------------------------------- helpers
 
-  // Outline icons for buttons (24x24, drawn with the .ico stroke style).
-  const ICONS = {
-    copy: '<rect x="8.5" y="8.5" width="12" height="12" rx="2.2"/><path d="M15.5 5.5v-.3a1.7 1.7 0 0 0-1.7-1.7H5.2a1.7 1.7 0 0 0-1.7 1.7v8.6a1.7 1.7 0 0 0 1.7 1.7h.3"/>',
-    replay: '<path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 3.5V8H8"/>',
-    target: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.6" fill="currentColor"/>',
-    map: '<path d="M3.5 6.5l5.5-2.5 6 2.5 5.5-2.5v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>',
-  };
   function icon(name) {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('class', 'ico');
@@ -505,6 +523,11 @@
       { class: 'subtle-link', href: 'setup' + WhereIsIt.quizQuery(quiz), title: t('customizeTitle') },
       t('customize'),
     );
+  }
+
+  /** The About page, linked from the welcome card only (quiz and results cards stay focused on the quiz). */
+  function aboutLink() {
+    return el('a', { class: 'subtle-link', href: 'about', target: '_blank', rel: 'noopener' }, t('about'));
   }
 
   function questionCount() {
