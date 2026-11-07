@@ -24,7 +24,8 @@
   const DOT_HIDE_AREA = 90; // screen px²; hide the dot once the shape itself is this big
   const STATE_CLASSES = ['s-first', 's-ok', 's-missed', 'selected'];
   const HATCH = 7; // screen px between the stripes on missed countries
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const URALS_LON = 60; // east edge of Russia when framing it with other places (see boundsOf)
+  const reduceMotion =window.matchMedia('(prefers-reduced-motion: reduce)');
 
   class GeoMap {
     constructor(container, opts) {
@@ -227,10 +228,21 @@
       for (const code of codes) {
         const c = this.countries.get(code);
         if (!c) continue;
-        x0 = Math.min(x0, c.bounds[0][0]);
-        y0 = Math.min(y0, c.bounds[0][1]);
-        x1 = Math.max(x1, c.bounds[1][0]);
-        y1 = Math.max(y1, c.bounds[1][1]);
+        let b = c.bounds;
+        // Alongside other places (e.g. the Europe quiz), only count Russia up to the Urals, or Siberia would take
+        // most of the view. On its own it's framed whole.
+        if (code === 'RU' && codes.length > 1) {
+          // East edge at the Urals; top edge at the Arctic coast west of them (Siberia reaches further north).
+          const east = this.projection([URALS_LON, 55]);
+          const north = this.projection([URALS_LON, 70.5]);
+          if (east && north && east[0] > b[0][0] && east[0] < b[1][0]) {
+            b = [[b[0][0], Math.max(b[0][1], north[1])], [east[0], b[1][1]]];
+          }
+        }
+        x0 = Math.min(x0, b[0][0]);
+        y0 = Math.min(y0, b[0][1]);
+        x1 = Math.max(x1, b[1][0]);
+        y1 = Math.max(y1, b[1][1]);
       }
       return x0 === Infinity ? this.worldBounds : [[x0, y0], [x1, y1]];
     }
