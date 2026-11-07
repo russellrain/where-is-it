@@ -950,7 +950,14 @@
     '<svg class="i-chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">' +
     '<path d="M6 9.5l6 6 6-6"/></svg>';
 
-  document.addEventListener('DOMContentLoaded', () => {
+  // Builds the language pickers and translates the page. Pages call this from an inline script placed
+  // after their markup but before the big map/data scripts, so the header is laid out and translated
+  // on first paint instead of shifting once DOMContentLoaded finally fires. DOMContentLoaded is the
+  // fallback; running twice is harmless.
+  let initialized = false;
+  function init() {
+    if (initialized) return;
+    initialized = true;
     for (const sel of document.querySelectorAll('select.lang-select')) {
       sel.replaceChildren(...allowed.map((code) => new Option(LANGUAGES[code], code)));
       sel.hidden = false;
@@ -964,7 +971,8 @@
       wrap.append(sel);
     }
     apply();
-  });
+  }
+  document.addEventListener('DOMContentLoaded', init);
 
   window.I18N = {
     LANGUAGES,
@@ -980,5 +988,6 @@
     parseLangs,
     apply,
     setLang,
+    init,
   };
 })();
