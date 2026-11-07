@@ -121,6 +121,8 @@ input, select { background: var(--panel); }
   letter-spacing: 0.02em; line-height: 1; background: var(--subtle-bg); color: var(--ink-soft); box-shadow: 0 0 0 1px var(--line);
 }
 .prompt .target .code-badge { font-size: 0.75rem; }
+/* Maps with neither flags nor badges (counties). */
+.no-badge { display: none !important; }
 /* Star before a capital's name (capitals quizzes), in place of the flag or code badge that would give the answer away. */
 .capital-star { width: 1.1em; height: 1.1em; flex: none; vertical-align: -0.15em; fill: var(--accent); }
 .prompt .target .capital-star { width: 1.4rem; height: 1.4rem; }
@@ -416,6 +418,20 @@ input, select { background: var(--panel); }
 .preset-list a.whole { background: var(--subtle-bg); border-style: dashed; }
 /* The resting fill is already near --hover-bg, so hover lifts to the panel color and firms up the border instead. */
 .preset-list a.whole:hover { background: var(--panel); border-style: solid; border-color: color-mix(in srgb, var(--ink-soft) 45%, var(--line)); }
+.preset-list .preset-name .ico { width: 0.95em; height: 0.95em; opacity: 0.6; }
+
+/* Counties sub-menu: a back button and a searchable grid of the 50 states. Single-line names, so the
+   buttons are shorter than the presets'. */
+.card.counties { width: min(760px, 100%); }
+.county-head { align-items: center; justify-content: flex-start; gap: 8px; margin: -4px 0 4px -6px; }
+.card .county-head h1 { margin: 0; font-size: 1.5rem; }
+.state-search {
+  display: block; width: 100%; margin: 14px 0 12px; padding: 10px 12px; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink); font: inherit;
+}
+.preset-list.county-states { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px; }
+.preset-list.county-states a { min-height: 0; padding: 8px 12px; }
+.preset-list.county-states a[hidden] { display: none; }
 
 .show-results { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 6; box-shadow: var(--shadow); }
 .toast {
@@ -474,6 +490,7 @@ input, select { background: var(--panel); }
 .pickers .map-pick { display: contents; }
 .pickers .map-pick[hidden] { display: none; }
 .map-pick .opt-heading { font-weight: 600; font-size: 0.9rem; }
+.county-state { padding: 7px 9px; border-radius: 8px; border: 1px solid var(--line); width: 100%; }
 .pickers .mode-hint { grid-column: 1 / -1; margin-top: -2px; color: var(--ink-soft); font-size: 0.8rem; }
 .tree .row.country .capital { font-size: 0.8rem; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 0 1 auto; }
 /* Two-way switch between maps; the current one is aria-pressed. */

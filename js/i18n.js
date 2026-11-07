@@ -60,6 +60,12 @@
       quickPlayStates: 'U.S. states',
       presetUsAll: 'All 50 states',
       presetCapitalsAll: 'All 50 capitals',
+      presetCounties: 'Counties',
+      presetCountiesSub: 'Pick a state',
+      countiesPickState: 'Counties: choose a state',
+      countiesPickStateText: 'Pick a state to find its counties on the map.',
+      searchStates: 'Search states…',
+      nCounties: ({ n }) => `${n} ${plural(n, 'county', 'counties')}`,
       nCapitals: ({ n }) => `${n} ${plural(n, 'capital', 'capitals')}`,
       presetAfrica: 'Africa',
       presetEurope: 'Europe',
@@ -118,6 +124,8 @@
       mapLabel: 'Map',
       mapWorld: 'World countries',
       mapUs: 'U.S. states',
+      mapCounties: 'U.S. counties',
+      countiesState: 'State',
       quizType: 'Quiz type',
       modePlaces: 'Countries',
       modeCapitals: 'Capitals',
@@ -215,6 +223,12 @@
       quickPlayStates: 'Estados de EE. UU.',
       presetUsAll: 'Los 50 estados',
       presetCapitalsAll: 'Las 50 capitales',
+      presetCounties: 'Condados',
+      presetCountiesSub: 'Elige un estado',
+      countiesPickState: 'Condados: elige un estado',
+      countiesPickStateText: 'Elige un estado para encontrar sus condados en el mapa.',
+      searchStates: 'Buscar estados…',
+      nCounties: ({ n }) => `${n} ${plural(n, 'condado', 'condados')}`,
       nCapitals: ({ n }) => `${n} ${plural(n, 'capital', 'capitales')}`,
       presetAfrica: 'África',
       presetEurope: 'Europa',
@@ -272,6 +286,8 @@
       mapLabel: 'Mapa',
       mapWorld: 'Países del mundo',
       mapUs: 'Estados de EE. UU.',
+      mapCounties: 'Condados de EE. UU.',
+      countiesState: 'Estado',
       quizType: 'Tipo de cuestionario',
       modePlaces: 'Países',
       modeCapitals: 'Capitales',
@@ -368,6 +384,12 @@
       quickPlayStates: 'États américains',
       presetUsAll: 'Les 50 États',
       presetCapitalsAll: 'Les 50 capitales',
+      presetCounties: 'Comtés',
+      presetCountiesSub: 'Choisis un État',
+      countiesPickState: 'Comtés : choisis un État',
+      countiesPickStateText: 'Choisis un État pour trouver ses comtés sur la carte.',
+      searchStates: 'Rechercher des États…',
+      nCounties: ({ n }) => `${n} ${plural(n, 'comté', 'comtés')}`,
       nCapitals: ({ n }) => `${n} ${plural(n, 'capitale', 'capitales')}`,
       presetAfrica: 'Afrique',
       presetEurope: 'Europe',
@@ -425,6 +447,8 @@
       mapLabel: 'Carte',
       mapWorld: 'Pays du monde',
       mapUs: 'États américains',
+      mapCounties: 'Comtés américains',
+      countiesState: 'État',
       quizType: 'Type de quiz',
       modePlaces: 'Pays',
       modeCapitals: 'Capitales',
@@ -520,6 +544,12 @@
       quickPlayStates: 'Estados dos EUA',
       presetUsAll: 'Os 50 estados',
       presetCapitalsAll: 'As 50 capitais',
+      presetCounties: 'Condados',
+      presetCountiesSub: 'Escolha um estado',
+      countiesPickState: 'Condados: escolha um estado',
+      countiesPickStateText: 'Escolha um estado para encontrar seus condados no mapa.',
+      searchStates: 'Buscar estados…',
+      nCounties: ({ n }) => `${n} ${plural(n, 'condado', 'condados')}`,
       nCapitals: ({ n }) => `${n} ${plural(n, 'capital', 'capitais')}`,
       presetAfrica: 'África',
       presetEurope: 'Europa',
@@ -577,6 +607,8 @@
       mapLabel: 'Mapa',
       mapWorld: 'Países do mundo',
       mapUs: 'Estados dos EUA',
+      mapCounties: 'Condados dos EUA',
+      countiesState: 'Estado',
       quizType: 'Tipo de quiz',
       modePlaces: 'Países',
       modeCapitals: 'Capitais',
@@ -636,6 +668,36 @@
       printEmptyAfter: 'primeiro.',
     },
   };
+
+  /** English wording for a map of county-like places: countyWords('parish', 'parishes', 'Louisiana'). */
+  function countyWords(one, many, example = 'Texas') {
+    const Many = many[0].toUpperCase() + many.slice(1);
+    return {
+      zoomToFit: `Zoom to the quiz ${many}`,
+      statCountry: one[0].toUpperCase() + one.slice(1),
+      modePlaces: Many,
+      introFind: ({ n }) => `Find ${n} ${plural(n, one, many)} on the map.`,
+      introGuesses: ({ n }) =>
+        `You get ${n} ${plural(n, 'guess', 'guesses')} before getting a hint. ${Many} you need a hint for are marked as missed.`,
+      thatsClickHighlighted: `That’s {name}. Click the highlighted ${one}.`,
+      countriesHeading: Many,
+      resultsHint: `Click a ${one} to see it on the map.`,
+      regionTitle: `{region} ${many}`,
+      worldTitle: `U.S. ${many}`,
+      setupIntro: `Pick individual ${many}, or click ${many} on the map, then share the link.`,
+      searchCountries: `Search ${many}…`,
+      quizTitlePlaceholder: `e.g. ${example} ${many}`,
+      guessesPerCountry: `Guesses per ${one}`,
+      dimOthers: `Grey out ${many} that aren’t in the quiz`,
+      noneSelected: `No ${many} selected`,
+      nSelected: ({ n }) => `${n} ${plural(n, one, many)} selected`,
+      mapHint: `Click ${many} to add or remove them`,
+      findTheCountries: `Find the ${Many}`,
+      wordBankInstructions: `Write the number from the map next to each ${one}.`,
+      printEmpty: `No ${many} selected.`,
+      printEmptyLink: `Choose some ${many}`,
+    };
+  }
 
   // Wording for maps of something other than countries, keyed by map id (see ATLASES in common.js).
   // Each entry overrides STRINGS for that language while that map is shown.
@@ -746,6 +808,88 @@
         printEmptyLink: 'Escolha alguns estados',
       },
     },
+    // A state's counties (?m=counties-tx). {region} is the state's name. English wording comes from countyWords()
+    // below, which also makes the 'parishes' (Louisiana) and 'boroughs' (Alaska) variants.
+    counties: {
+      en: countyWords('county', 'counties'),
+      es: {
+        zoomToFit: 'Ajustar a los condados del cuestionario',
+        statCountry: 'Condado',
+        modePlaces: 'Condados',
+        introFind: ({ n }) => `Encuentra ${n} ${plural(n, 'condado', 'condados')} en el mapa.`,
+        introGuesses: ({ n }) =>
+          `Tienes ${n} ${plural(n, 'intento', 'intentos')} antes de recibir una pista. Los condados para los que necesites una pista cuentan como fallados.`,
+        thatsClickHighlighted: 'Eso es {name}. Haz clic en el condado resaltado.',
+        countriesHeading: 'Condados',
+        resultsHint: 'Haz clic en un condado para verlo en el mapa.',
+        regionTitle: 'Condados de {region}',
+        worldTitle: 'Condados de EE. UU.',
+        setupIntro: 'Elige condados concretos o haz clic en los condados del mapa, y luego comparte el enlace.',
+        searchCountries: 'Buscar condados…',
+        quizTitlePlaceholder: 'p. ej., Condados de Texas',
+        guessesPerCountry: 'Intentos por condado',
+        dimOthers: 'Atenuar los condados que no están en el cuestionario',
+        noneSelected: 'No hay condados seleccionados',
+        nSelected: ({ n }) => `${n} ${plural(n, 'condado seleccionado', 'condados seleccionados')}`,
+        mapHint: 'Haz clic en los condados para añadirlos o quitarlos',
+        findTheCountries: 'Encuentra los condados',
+        wordBankInstructions: 'Escribe junto a cada condado el número que tiene en el mapa.',
+        printEmpty: 'No hay condados seleccionados.',
+        printEmptyLink: 'Elige algunos condados',
+      },
+      fr: {
+        zoomToFit: 'Ajuster aux comtés du quiz',
+        statCountry: 'Comté',
+        modePlaces: 'Comtés',
+        introFind: ({ n }) => `Trouve ${n} ${plural(n, 'comté', 'comtés')} sur la carte.`,
+        introGuesses: ({ n }) =>
+          `Tu as ${n} ${plural(n, 'essai', 'essais')} avant de recevoir un indice. Les comtés pour lesquels tu as besoin d’un indice comptent comme manqués.`,
+        thatsClickHighlighted: 'Ça, c’est : {name}. Clique sur le comté en surbrillance.',
+        countriesHeading: 'Comtés',
+        resultsHint: 'Clique sur un comté pour le voir sur la carte.',
+        regionTitle: 'Comtés : {region}',
+        worldTitle: 'Comtés des États-Unis',
+        setupIntro: 'Choisissez des comtés précis ou cliquez sur les comtés de la carte, puis partagez le lien.',
+        searchCountries: 'Rechercher des comtés…',
+        quizTitlePlaceholder: 'p. ex. Les comtés du Texas',
+        guessesPerCountry: 'Essais par comté',
+        dimOthers: 'Griser les comtés qui ne font pas partie du quiz',
+        noneSelected: 'Aucun comté sélectionné',
+        nSelected: ({ n }) => `${n} ${plural(n, 'comté sélectionné', 'comtés sélectionnés')}`,
+        mapHint: 'Cliquez sur les comtés pour les ajouter ou les retirer',
+        findTheCountries: 'Trouve les comtés',
+        wordBankInstructions: 'Écris à côté de chaque comté le numéro qui lui correspond sur la carte.',
+        printEmpty: 'Aucun comté sélectionné.',
+        printEmptyLink: 'Choisissez quelques comtés',
+      },
+      pt: {
+        zoomToFit: 'Ajustar aos condados do quiz',
+        statCountry: 'Condado',
+        modePlaces: 'Condados',
+        introFind: ({ n }) => `Encontre ${n} ${plural(n, 'condado', 'condados')} no mapa.`,
+        introGuesses: ({ n }) =>
+          `Você tem ${n} ${plural(n, 'tentativa', 'tentativas')} antes de receber uma dica. Os condados em que você precisar de dica contam como errados.`,
+        thatsClickHighlighted: 'Esse é: {name}. Clique no condado destacado.',
+        countriesHeading: 'Condados',
+        resultsHint: 'Clique em um condado para vê-lo no mapa.',
+        regionTitle: 'Condados: {region}',
+        worldTitle: 'Condados dos EUA',
+        setupIntro: 'Escolha condados específicos ou clique nos condados do mapa, e depois compartilhe o link.',
+        searchCountries: 'Buscar condados…',
+        quizTitlePlaceholder: 'ex.: Condados do Texas',
+        guessesPerCountry: 'Tentativas por condado',
+        dimOthers: 'Esmaecer os condados que não estão no quiz',
+        noneSelected: 'Nenhum condado selecionado',
+        nSelected: ({ n }) => `${n} ${plural(n, 'condado selecionado', 'condados selecionados')}`,
+        mapHint: 'Clique nos condados para adicioná-los ou removê-los',
+        findTheCountries: 'Encontre os condados',
+        wordBankInstructions: 'Escreva ao lado de cada condado o número correspondente no mapa.',
+        printEmpty: 'Nenhum condado selecionado.',
+        printEmptyLink: 'Escolha alguns condados',
+      },
+    },
+    parishes: { en: countyWords('parish', 'parishes', 'Louisiana') },
+    boroughs: { en: countyWords('borough', 'boroughs', 'Alaska') },
     // Capitals quizzes: the prompt is a capital, the answer its place. common.js applies these ahead of the map's
     // own wording, most specific first: 'capitals-us' (states), then 'capitals' (countries, and anything shared).
     capitals: {
@@ -1092,6 +1236,11 @@
     return REGIONS[lang]?.[name] ?? name;
   }
 
+  /** Adds region names for the current page, e.g. a state's name when it's the region (counties maps): { es: { Louisiana: 'Luisiana' } }. */
+  function addRegions(byLang) {
+    for (const [l, names] of Object.entries(byLang)) if (REGIONS[l]) Object.assign(REGIONS[l], names);
+  }
+
   let collator = null;
   function compare(a, b) {
     if (!collator || collator.lang !== lang) collator = Object.assign(new Intl.Collator(lang), { lang });
@@ -1167,6 +1316,7 @@
     t,
     setVariant,
     region,
+    addRegions,
     compare,
     parseLangs,
     apply,

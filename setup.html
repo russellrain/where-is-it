@@ -26,7 +26,13 @@
           <div class="segmented">
             <button type="button" data-map="world" data-i18n="mapWorld">World countries</button>
             <button type="button" data-map="us" data-i18n="mapUs">U.S. states</button>
+            <button type="button" data-map="counties" data-i18n="mapCounties">U.S. counties</button>
           </div>
+        </div>
+        <!-- Counties maps are one state at a time; shown on a counties map, or once "U.S. counties" is clicked. -->
+        <div class="map-pick" id="county-pick" hidden>
+          <label class="opt-heading" for="county-state" data-i18n="countiesState">State</label>
+          <select id="county-state" class="county-state"></select>
         </div>
         <!-- Shown on maps whose places have capitals; see setup.js. The labels follow the map (States/Countries). -->
         <div class="map-pick" id="mode-pick" role="group" aria-labelledby="mode-pick-label" hidden>
@@ -43,7 +49,7 @@
           <input type="search" id="search" placeholder="Search countries…" aria-label="Search countries" data-i18n-placeholder="searchCountries" data-i18n-aria-label="searchCountries">
           <button type="button" class="btn" id="clear" style="padding:8px 12px" data-i18n="clear">Clear</button>
         </div>
-        <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:0.9rem">
+        <label id="territories-opt" style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:0.9rem">
           <input type="checkbox" id="territories"> <span data-i18n="includeTerritories">Include territories &amp; dependencies (e.g. Greenland, Puerto Rico)</span>
         </label>
       </div>
@@ -137,6 +143,7 @@
   <script src="js/data/countries.js"></script>
   <script src="js/data/country-names.js"></script>
   <script src="js/data/us-states.js"></script>
+  <script src="js/data/us-counties.js"></script>
   <script src="js/common.js"></script>
   <script src="vendor/qrcode.js"></script>
   <script src="js/map.js"></script>

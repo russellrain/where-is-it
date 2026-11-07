@@ -29,13 +29,13 @@ All libraries, map data and flags are bundled locally. Nothing uses ES modules o
 
 ## Quiz link format
 
-`?t=Africa&c=NG,KE,EG&n=10&g=3&d=1&s=1` or, for U.S. states, `?m=us&c=CA,TX,NY`, or for their capitals `?m=us&q=capitals&c=CA,TX,NY`
+`?t=Africa&c=NG,KE,EG&n=10&g=3&d=1&s=1` or, for U.S. states, `?m=us&c=CA,TX,NY`, or for their capitals `?m=us&q=capitals&c=CA,TX,NY`, or for a state's counties `?m=counties-tx&c=all`
 
 | Param | Meaning | Default |
 |---|---|---|
-| `m` | Map: `us` for U.S. states (50 states, D.C. and the 5 inhabited territories, by postal code). Leave out for world countries | world |
+| `m` | Map: `us` for U.S. states (50 states, D.C. and the 5 inhabited territories, by postal code), or `counties-xx` for the counties of one state (`xx` = its postal code; counties by 5-digit FIPS code). Leave out for world countries | world |
 | `q` | Quiz type: `capitals` shows each place's capital (e.g. "Sacramento") and the learner finds the place. Places without a capital (D.C., Antarctica, Macau, Heard & McDonald Islands) are left out. On the U.S. map, answered capitals get a star where the city is. Leave out to find places by name | names |
-| `c` | Comma-separated ISO 3166-1 alpha-2 country codes, or state postal codes with `m=us` | required |
+| `c` | Comma-separated ISO 3166-1 alpha-2 country codes, state postal codes with `m=us`, or county FIPS codes with `m=counties-xx`. `all` picks every place on the map (not D.C. or territories) | required |
 | `t` | Quiz title | auto from region |
 | `n` | Ask this many (random subset of `c`) each game | all |
 | `g` | Guesses per country before the hint | 3 |
@@ -70,7 +70,7 @@ To regenerate data (for example after upgrading a package): `npm install && npm 
 
 The game, setup page and worksheet are available in English, Spanish, French and Portuguese. Students start in the language they last picked, or their device language, as long as the quiz allows it (`l` above). The setup page's own language is separate from the quiz's student languages. The About page (including the privacy policy) is English only.
 
-To add a language: add it to `LANGUAGES` in `js/i18n.js` along with its `STRINGS` and `REGIONS` tables, add it to `TRANSLATIONS` in `tools/build-data.mjs` (and any name fixes to `RENAME_I18N`, and capitals whose names differ from English to `CAPITALS_I18N`), then run `npm run build-data` to regenerate `js/data/country-names.js`. Add its capitals-quiz wording to `VARIANTS.capitals` in `js/i18n.js`. For the U.S. states map, also add the language's `VARIANTS.us` and `VARIANTS['capitals-us']` wording, the U.S. region names to its `REGIONS` table, and any state names that differ from English to `US_NAMES_I18N` in `tools/build-data.mjs`.
+To add a language: add it to `LANGUAGES` in `js/i18n.js` along with its `STRINGS` and `REGIONS` tables, add it to `TRANSLATIONS` in `tools/build-data.mjs` (and any name fixes to `RENAME_I18N`, and capitals whose names differ from English to `CAPITALS_I18N`), then run `npm run build-data` to regenerate `js/data/country-names.js`. Add its capitals-quiz wording to `VARIANTS.capitals` in `js/i18n.js`. For the U.S. maps, also add the language's `VARIANTS.us`, `VARIANTS['capitals-us']` and `VARIANTS.counties` wording, the U.S. region names to its `REGIONS` table, and any state names that differ from English to `US_NAMES_I18N` in `tools/build-data.mjs`.
 
 ## Adding another map
 

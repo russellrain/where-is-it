@@ -44,7 +44,34 @@
       projection: (rotate, extended) => (extended ? d3.geoAlbersUsaTerritories() : d3.geoAlbersUsa()),
     };
   }
-  const ATLAS = ATLASES[new URLSearchParams(location.search).get('m')] || ATLASES.world;
+  // A state's counties (?m=counties-tx). js/data/us-counties.js loads the one state's shapes the link names.
+  if (window.GEO_US_COUNTIES && window.GEO_US_STATES) {
+    const d = GEO_US_COUNTIES;
+    const state = GEO_US_STATES.places.find((p) => p.code === d.state);
+    const id = `counties-${d.state.toLowerCase()}`;
+    ATLASES[id] = {
+      id,
+      // Wording: Louisiana has parishes and Alaska boroughs; everything else falls back to 'counties'.
+      variants: [{ LA: 'parishes', AK: 'boroughs' }[d.state], 'counties'].filter(Boolean),
+      state: d.state,
+      topo: d.topo,
+      object: 'counties',
+      places: d.places,
+      names: {},
+      regionOrder: [state.name],
+      core: () => true,
+      flags: false,
+      badge: false, // a code badge would only show the FIPS number
+      sphere: false,
+      credit: ['U.S. Census Bureau', 'https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html'],
+      projection: () => d3.geoConicEqualArea().parallels(d.parallels).rotate(d.rotate),
+    };
+    // The state's name is the counties' region: translate it like a region ("Counties of Luisiana").
+    const regionNames = {};
+    for (const [lang, names] of Object.entries(GEO_US_STATES.names)) if (names[d.state]) regionNames[lang] = { [state.name]: names[d.state] };
+    I18N.addRegions(regionNames);
+  }
+  const ATLAS = ATLASES[(new URLSearchParams(location.search).get('m') || '').toLowerCase()] || ATLASES.world;
 
   const COUNTRIES = ATLAS.places;
   const byCode = new Map(COUNTRIES.map((c) => [c.code, c]));
@@ -60,7 +87,8 @@
   /** Switches the page's mode (setup does this in place). Wording follows, e.g. "Capitals of the West". */
   function setMode(next) {
     mode = MODES.includes(next) ? next : 'places';
-    I18N.setVariant(mode === 'capitals' ? [`capitals-${ATLAS.id}`, 'capitals', ATLAS.id] : [ATLAS.id]); // e.g. "Guesses per state"
+    const own = ATLAS.variants || [ATLAS.id];
+    I18N.setVariant(mode === 'capitals' ? [`capitals-${ATLAS.id}`, 'capitals', ...own] : own); // e.g. "Guesses per state"
     // The page's static text was translated before this script loaded (see I18N.init), so redo it in this wording.
     I18N.apply();
   }
@@ -77,7 +105,10 @@
   function parseQuiz(search) {
     const p = new URLSearchParams(search);
     const seen = new Set();
-    const codes = (p.get('c') || '')
+    // c=all: every place on the map (but not the extras behind "include territories"). Used by the counties
+    // menu, which doesn't load the counties of all 50 states just to list their codes.
+    const all = (p.get('c') || '').trim().toLowerCase() === 'all';
+    const codes = (all ? COUNTRIES.filter((c) => ATLAS.core(c)).map((c) => c.code).join(',') : p.get('c') || '')
       .split(/[\s,]+/)
       .map((s) => s.trim().toUpperCase())
       .filter((c) => byCode.has(c) && askable(byCode.get(c)) && !seen.has(c) && seen.add(c));
@@ -106,7 +137,10 @@
     if (map !== 'world') p.set('m', map);
     if (q.mode && q.mode !== 'places') p.set('q', q.mode);
     if (q.title) p.set('t', q.title);
-    if (q.codes.length) p.set('c', q.codes.join(','));
+    // Every place on this map (e.g. all 254 Texas counties) is written as c=all, to keep the link and its QR code short.
+    const core = map === ATLAS.id ? COUNTRIES.filter((c) => ATLAS.core(c) && askable(c)) : null;
+    const everything = core && q.codes.length === core.length && core.every((c) => q.codes.includes(c.code));
+    if (q.codes.length) p.set('c', everything ? 'all' : q.codes.join(','));
     if (q.count && q.count < q.codes.length) p.set('n', q.count);
     if (q.guesses && q.guesses !== DEFAULTS.guesses) p.set('g', q.guesses);
     if (q.dim === false) p.set('d', '0');
@@ -266,8 +300,10 @@
     return svg;
   }
 
-  /** The place's flag, or on maps without flags a badge with its code (e.g. "TX"). */
+  /** The place's flag, or on maps without flags a badge with its code (e.g. "TX"), or nothing (counties). */
   function flagImg(code, cls) {
+    // Nothing to show (counties): an empty element, so callers can still put it in a list of nodes.
+    if (ATLAS.badge === false) return el('span', { class: 'no-badge', 'aria-hidden': 'true' });
     if (!ATLAS.flags) return el('span', { class: `${cls || 'flag'} code-badge`, 'aria-hidden': 'true' }, code);
     return el('img', { class: cls || 'flag', src: flagUrl(code), alt: '', draggable: 'false' });
   }

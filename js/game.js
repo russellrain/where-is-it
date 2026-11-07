@@ -93,9 +93,10 @@
     target: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.6" fill="currentColor"/>',
     shuffle: '<path d="M3.5 7h3.2c1.5 0 2.9.8 3.7 2l3.2 6c.8 1.2 2.2 2 3.7 2h3.2"/><path d="M3.5 17h3.2c1.5 0 2.9-.8 3.7-2l.4-.7M13.2 9.7l.4-.7c.8-1.2 2.2-2 3.7-2h3.2"/><path d="M18 4.5L20.5 7 18 9.5M18 14.5l2.5 2.5-2.5 2.5"/>',
     map: '<path d="M3.5 6.5l5.5-2.5 6 2.5 5.5-2.5v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>',
+    chevron: '<path d="M9.5 6l6 6-6 6"/>',
   };
 
-  if (!quiz.codes.length) showWelcome();
+  if (!quiz.codes.length) showHome();
   else showIntro();
 
   // Re-render whatever is on screen in the new language. Game progress is kept.
@@ -104,7 +105,7 @@
     map.refreshLabels();
     if (game.state === 'intro') {
       if (quiz.codes.length) showIntro();
-      else showWelcome();
+      else showHome();
     } else if (game.state === 'playing') {
       const c = game.current;
       ui.label.textContent = t('find');
@@ -149,12 +150,10 @@
     // [map, label, filter, random sample size, button label, mode]. Untitled presets get the automatic title,
     // which follows the language.
     const { world, us } = WhereIsIt.ATLASES;
-    // Territories stay out of quick play; they're still available in "Create a quiz".
-    // Capitals get a single button alongside the states rather than a section of their own; no random-states
-    // preset, so the six buttons fill two rows.
+    // Territories stay out of quick play; they're still available in "Create a quiz". Regions of states are too
+    // (also in "Create a quiz"); the third button opens a list of states to pick a counties quiz from.
     const usPresets = us
       ? [
-          ...us.regionOrder.filter((r) => r !== 'Territories').map((r) => [us, null, (c) => c.region === r, null, I18N.region(r), 'places']),
           [us, t('presetUsAll'), () => true, null, null, 'places'],
           [us, t('presetCapitalsAll'), () => true, null, null, 'capitals'],
         ]
@@ -189,6 +188,15 @@
           el('small', {}, t(mode === 'capitals' ? 'nCapitals' : atlas.id === 'us' ? 'nStates' : 'nCountries', { n: n ?? codes.length })),
         );
       });
+    // Opens the list of states (a sub-menu in this card). Like a link, so the browser's back button closes it.
+    const countiesButton = () =>
+      el(
+        'a',
+        { class: 'btn', href: '#counties' },
+        el('span', { class: 'preset-name' }, t('presetCounties'), icon('chevron')),
+        el('small', {}, t('presetCountiesSub')),
+      );
+    const hasCounties = us && window.GEO_US_COUNTY_STATES;
     // In reading order for the one-column layout; wide, short screens move the presets into a
     // second column via grid areas (see .card.welcome in the CSS).
     showCard(
@@ -199,7 +207,10 @@
         { class: 'welcome-presets' },
         ...groups
           .filter(([, presets]) => presets.length)
-          .flatMap(([heading, presets]) => [el('h3', { class: 'preset-heading' }, t(heading)), el('div', { class: 'preset-list' }, presetLinks(presets))]),
+          .flatMap(([heading, presets]) => [
+            el('h3', { class: 'preset-heading' }, t(heading)),
+            el('div', { class: 'preset-list' }, presetLinks(presets), heading === 'quickPlayStates' && hasCounties ? countiesButton() : null),
+          ]),
       ),
       el(
         'div',
@@ -211,6 +222,72 @@
     );
     ui.card.classList.add('welcome');
   }
+
+  /** The counties sub-menu: pick a state to play its counties. */
+  function showCountyStates() {
+    ui.stats.classList.add('idle');
+    document.title = `${t('countiesPickState')} · Where Is It`;
+    const counts = window.GEO_US_COUNTY_STATES;
+    const usNames = GEO_US_STATES.names[I18N.lang] || {};
+    const states = GEO_US_STATES.places
+      .filter((p) => counts[p.code])
+      .map((p) => ({ ...p, label: usNames[p.code] || p.name }))
+      .sort((a, b) => I18N.compare(a.label, b.label));
+    const links = states.map((p) => {
+      const a = el(
+        'a',
+        { class: 'btn', href: WhereIsIt.quizQuery({ map: `counties-${p.code.toLowerCase()}`, codes: ['all'] }) },
+        el('span', { class: 'preset-name' }, p.label),
+        el('small', {}, t('nCounties', { n: counts[p.code] })),
+      );
+      a.dataset.name = WhereIsIt.fold(`${p.label}|${p.name}|${p.code}`);
+      return a;
+    });
+    const search = el('input', { type: 'search', class: 'state-search', placeholder: t('searchStates'), 'aria-label': t('searchStates') });
+    search.addEventListener('input', () => {
+      const q = WhereIsIt.fold(search.value.trim());
+      for (const a of links) a.hidden = Boolean(q) && !a.dataset.name.includes(q);
+    });
+    // Enter opens the only match, so "tex ⏎" starts Texas.
+    search.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      const shown = links.filter((a) => !a.hidden);
+      if (shown.length === 1) location.href = shown[0].href;
+    });
+    const back = el(
+      'button',
+      { class: 'icon-btn', type: 'button', title: t('back'), 'aria-label': t('back'), onclick: closeCountyStates },
+    );
+    back.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    showCard(
+      el('div', { class: 'card-head county-head' }, back, el('h1', {}, t('countiesPickState'))),
+      el('p', {}, t('countiesPickStateText')),
+      search,
+      el('div', { class: 'preset-list county-states' }, links),
+    );
+    ui.card.classList.add('counties');
+    // Don't pop the on-screen keyboard on touch devices.
+    if (window.matchMedia('(pointer: fine)').matches) setTimeout(() => search.focus(), 50);
+  }
+
+  // The counties sub-menu lives at #counties, so the browser's back button returns to the presets.
+  let openedCounties = false; // arrived from the presets (so going back is a history step)
+  function closeCountyStates() {
+    if (openedCounties) history.back();
+    else {
+      history.replaceState(null, '', location.pathname + location.search);
+      showWelcome();
+    }
+  }
+  function showHome() {
+    if (location.hash === '#counties' && window.GEO_US_COUNTY_STATES && window.GEO_US_STATES) showCountyStates();
+    else showWelcome();
+  }
+  window.addEventListener('hashchange', () => {
+    if (quiz.codes.length) return;
+    openedCounties = location.hash === '#counties';
+    showHome();
+  });
 
   function showIntro() {
     homeBtn.hidden = true;

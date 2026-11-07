@@ -75,14 +75,50 @@
 
   // Each map is its own page load (?m=us), since places, shapes and wording all change with it.
   // The quiz options carry over; the picked places and the title don't.
+  const switchMap = (id) => {
+    if (id === ATLAS.id || (selected.size && !confirm(t('confirmSwitchMap')))) return false;
+    location.href = WhereIsIt.pageUrl('setup', WhereIsIt.quizQuery({ ...currentQuiz(), map: id, codes: [], title: '' }));
+    return true;
+  };
+  // Counties are one state at a time (?m=counties-tx): "U.S. counties" shows a state picker, and picking a state
+  // switches maps.
+  const onCounties = Boolean(ATLAS.state);
+  const countyPick = $('county-pick');
+  const countyState = $('county-state');
+  const countyBtn = document.querySelector('[data-map="counties"]');
+  if (!window.GEO_US_COUNTY_STATES || !window.GEO_US_STATES) countyBtn.hidden = true;
+  function renderCountyStates() {
+    if (countyBtn.hidden) return;
+    const usNames = GEO_US_STATES.names[I18N.lang] || {};
+    const states = GEO_US_STATES.places
+      .filter((p) => GEO_US_COUNTY_STATES[p.code])
+      .map((p) => [p.code, usNames[p.code] || p.name])
+      .sort((a, b) => I18N.compare(a[1], b[1]));
+    const placeholder = new Option(`${t('countiesState')}…`, '');
+    placeholder.disabled = true;
+    countyState.replaceChildren(...(onCounties ? [] : [placeholder]), ...states.map(([code, name]) => new Option(name, code)));
+    countyState.value = onCounties ? ATLAS.state : '';
+  }
+  renderCountyStates();
+  countyPick.hidden = !onCounties;
+  countyState.onchange = () => {
+    if (!switchMap(`counties-${countyState.value.toLowerCase()}`)) countyState.value = onCounties ? ATLAS.state : '';
+  };
   for (const btn of document.querySelectorAll('[data-map]')) {
     const id = btn.dataset.map;
-    btn.setAttribute('aria-pressed', String(id === ATLAS.id));
+    btn.setAttribute('aria-pressed', String(id === 'counties' ? onCounties : id === ATLAS.id));
     btn.onclick = () => {
-      if (id === ATLAS.id || (selected.size && !confirm(t('confirmSwitchMap')))) return;
-      location.href = WhereIsIt.pageUrl('setup', WhereIsIt.quizQuery({ ...currentQuiz(), map: id, codes: [], title: '' }));
+      if (id !== 'counties') return switchMap(id);
+      if (onCounties) return;
+      countyPick.hidden = false;
+      countyState.focus();
+      try {
+        countyState.showPicker(); // open the list straight away where browsers allow it
+      } catch {}
     };
   }
+  // Counties maps have nothing behind "include territories". (Its inline display would override [hidden].)
+  if (WhereIsIt.COUNTRIES.every((c) => ATLAS.core(c))) $('territories-opt').style.display = 'none';
 
   // ---------------------------------------------------------------- quiz type
 
@@ -263,6 +299,7 @@
 
   // The page's own language (header picker) is separate from the quiz's student languages.
   document.addEventListener('langchange', () => {
+    renderCountyStates();
     buildTree();
     $('search').dispatchEvent(new Event('input'));
     map.refreshTooltip(true);
