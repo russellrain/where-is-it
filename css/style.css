@@ -35,6 +35,9 @@
   --tooltip-bg: rgba(31, 41, 51, 0.92);
   --toast-bg: #1f2933;
 
+  /* Dropdown chevron, drawn like the language picker's (an <svg> can't sit inside a <select>, so it's a background). */
+  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231f2933' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9.5l6 6 6-6'/%3E%3C/svg%3E");
+
   --radius: 12px;
   --shadow: 0 6px 24px rgba(31, 41, 51, 0.12);
   color-scheme: light;
@@ -80,6 +83,7 @@
     --tooltip-bg: rgba(10, 13, 16, 0.94);
     --toast-bg: #0b0e11;
     --shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+    --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e6e9ec' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9.5l6 6 6-6'/%3E%3C/svg%3E");
 }
 [data-theme='dark'] .flag { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15); }
 
@@ -88,6 +92,13 @@ html, body { height: 100%; margin: 0; }
 body { background: var(--bg); overflow: hidden; }
 button, input, select { font: inherit; color: inherit; }
 input, select { background: var(--panel); }
+/* Other dropdowns match the language picker: same box, weight, hover and chevron. */
+select:not(.lang-select) {
+  appearance: none; -webkit-appearance: none; height: 40px; padding: 0 34px 0 12px; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--panel) var(--chevron) no-repeat right 11px center / 13px 13px;
+  color: var(--ink); font-size: 0.9rem; font-weight: 600; cursor: pointer;
+}
+select:not(.lang-select):hover { background-color: var(--hover-bg); }
 [hidden] { display: none !important; }
 
 .btn {
@@ -510,9 +521,10 @@ input, select { background: var(--panel); }
 .options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; font-size: 0.9rem; }
 .options label { display: flex; flex-direction: column; gap: 4px; font-weight: 600; }
 .options label.check { flex-direction: row; align-items: center; gap: 8px; font-weight: 500; grid-column: span 2; }
-.options input[type='text'], .options input[type='number'], .options select {
-  padding: 7px 9px; border-radius: 8px; border: 1px solid var(--line); width: 100%; font-weight: 400;
+.options input[type='text'], .options input[type='number'] {
+  height: 40px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); width: 100%; font-weight: 400;
 }
+.options select { width: 100%; }
 .options .wide { grid-column: span 2; }
 .lang-opts .opt-heading { display: block; font-weight: 600; margin-bottom: 4px; }
 /* Map and quiz-type pickers: headings in one column so the switches line up. */
@@ -520,7 +532,7 @@ input, select { background: var(--panel); }
 .pickers .map-pick { display: contents; }
 .pickers .map-pick[hidden] { display: none; }
 .map-pick .opt-heading { font-weight: 600; font-size: 0.9rem; }
-.county-state { padding: 7px 9px; border-radius: 8px; border: 1px solid var(--line); width: 100%; }
+.county-state { width: 100%; }
 .pickers .mode-hint { grid-column: 1 / -1; margin-top: -2px; color: var(--ink-soft); font-size: 0.8rem; }
 .tree .row.country .capital { font-size: 0.8rem; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 0 1 auto; }
 /* Two-way switch between maps; the current one is aria-pressed. */
@@ -689,7 +701,6 @@ body.print-page { overflow: auto; height: auto; min-height: 100%; }
 }
 .print-warning + label { margin-left: auto; }
 .print-toolbar label { display: flex; align-items: center; gap: 6px; font-weight: 600; }
-.print-toolbar select { padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); }
 .print-toolbar input[type='checkbox'] { width: 16px; height: 16px; accent-color: var(--accent); margin: 0; }
 .sheets { display: flex; flex-direction: column; align-items: center; gap: 24px; padding: 24px 16px 48px; overflow-x: auto; }
 .print-empty { padding: 40px 16px; color: var(--ink-soft); }
