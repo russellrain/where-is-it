@@ -44,11 +44,31 @@
     };
   }
   const ATLAS = ATLASES[new URLSearchParams(location.search).get('m')] || ATLASES.world;
-  I18N.setVariant(ATLAS.id); // e.g. "Guesses per state" instead of "per country"
 
   const COUNTRIES = ATLAS.places;
   const byCode = new Map(COUNTRIES.map((c) => [c.code, c]));
   const REGION_ORDER = ATLAS.regionOrder;
+
+  // Quiz modes, picked by the link's `q` parameter: find each place by its name (the default), or, on maps
+  // whose places have capitals (U.S. states), by its capital: "Sacramento" → click California.
+  const HAS_CAPITALS = COUNTRIES.some((c) => c.capital);
+  const MODES = HAS_CAPITALS ? ['places', 'capitals'] : ['places'];
+  const urlMode = new URLSearchParams(location.search).get('q');
+  let mode = MODES.includes(urlMode) ? urlMode : 'places';
+
+  /** Switches the page's mode (setup does this in place). Wording follows, e.g. "Capitals of the West". */
+  function setMode(next) {
+    mode = MODES.includes(next) ? next : 'places';
+    I18N.setVariant(mode === 'capitals' ? [`capitals-${ATLAS.id}`, 'capitals', ATLAS.id] : [ATLAS.id]); // e.g. "Guesses per state"
+    // The page's static text was translated before this script loaded (see I18N.init), so redo it in this wording.
+    I18N.apply();
+  }
+  setMode(mode);
+
+  /** Whether a place can be asked in the current mode (capitals quizzes skip places without one, like D.C.). */
+  function askable(c) {
+    return mode !== 'capitals' || Boolean(c.capital);
+  }
 
   const DEFAULTS = { guesses: 3, dim: true, timer: true };
 
@@ -59,7 +79,7 @@
     const codes = (p.get('c') || '')
       .split(/[\s,]+/)
       .map((s) => s.trim().toUpperCase())
-      .filter((c) => byCode.has(c) && !seen.has(c) && seen.add(c));
+      .filter((c) => byCode.has(c) && askable(byCode.get(c)) && !seen.has(c) && seen.add(c));
     const int = (k) => {
       const v = parseInt(p.get(k), 10);
       return Number.isFinite(v) && v > 0 ? v : null;
@@ -67,6 +87,7 @@
     const bool = (k, d) => (p.has(k) ? p.get(k) !== '0' : d);
     return {
       map: ATLAS.id,
+      mode,
       codes,
       title: (p.get('t') || '').trim().slice(0, 80),
       count: int('n'), // ask this many (random subset); null = all
@@ -82,6 +103,7 @@
     const p = new URLSearchParams();
     const map = q.map || ATLAS.id;
     if (map !== 'world') p.set('m', map);
+    if (q.mode && q.mode !== 'places') p.set('q', q.mode);
     if (q.title) p.set('t', q.title);
     if (q.codes.length) p.set('c', q.codes.join(','));
     if (q.count && q.count < q.codes.length) p.set('n', q.count);
@@ -98,6 +120,21 @@
   /** Place name in the current language (falls back to English). */
   function countryName(code) {
     return ATLAS.names[I18N.lang]?.[code] || byCode.get(code).name;
+  }
+
+  /** The place's capital (capitals quizzes). */
+  function capitalName(code) {
+    return byCode.get(code).capital || '';
+  }
+
+  /** What the game asks for: the place's name, or in a capitals quiz its capital. */
+  function promptName(code) {
+    return mode === 'capitals' ? capitalName(code) : countryName(code);
+  }
+
+  /** The place's name, followed in a capitals quiz by its capital: "California · Sacramento". */
+  function fullName(code) {
+    return mode === 'capitals' && capitalName(code) ? `${countryName(code)} · ${capitalName(code)}` : countryName(code);
   }
 
   /** Title used when a quiz doesn't set one, e.g. "Africa countries" or "Countries of the world" ("U.S. states"). */
@@ -207,6 +244,27 @@
     return s;
   }
 
+  // Five-pointed star centred on 0,0 with 6.5-unit points: capitals on the map and next to capital names.
+  const STAR_PATH = (() => {
+    const pts = [];
+    for (let i = 0; i < 10; i++) {
+      const r = i % 2 ? 2.7 : 6.5;
+      const a = (Math.PI / 5) * i - Math.PI / 2;
+      pts.push(`${(r * Math.cos(a)).toFixed(2)},${(r * Math.sin(a)).toFixed(2)}`);
+    }
+    return `M${pts.join('L')}Z`;
+  })();
+
+  /** A star icon, shown before a capital's name. */
+  function starIcon() {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'capital-star');
+    svg.setAttribute('viewBox', '-6.6 -6.9 13.2 13.2');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.innerHTML = `<path d="${STAR_PATH}"/>`;
+    return svg;
+  }
+
   /** The place's flag, or on maps without flags a badge with its code (e.g. "TX"). */
   function flagImg(code, cls) {
     if (!ATLAS.flags) return el('span', { class: `${cls || 'flag'} code-badge`, 'aria-hidden': 'true' }, code);
@@ -229,6 +287,15 @@
     ATLASES,
     ATLAS,
     COUNTRIES,
+    MODES,
+    get mode() {
+      return mode;
+    },
+    setMode,
+    askable,
+    capitalName,
+    promptName,
+    fullName,
     byCode,
     REGION_ORDER,
     DEFAULTS,
@@ -237,6 +304,8 @@
     pageUrl,
     flagUrl,
     flagImg,
+    STAR_PATH,
+    starIcon,
     features,
     usesExtended,
     wordmark,

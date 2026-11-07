@@ -31,7 +31,9 @@
 
   $('territories').checked = includeTerritories;
 
-  const visible = (c) => includeTerritories || ATLAS.core(c);
+  // Capitals quizzes leave out places without a capital (D.C.).
+  const visible = (c) => (includeTerritories || ATLAS.core(c)) && WhereIsIt.askable(c);
+  const capitalsMode = () => WhereIsIt.mode === 'capitals';
 
   // region -> subregion -> [country]
   const groups = new Map();
@@ -82,6 +84,28 @@
     };
   }
 
+  // ---------------------------------------------------------------- quiz type
+
+  // Find states by name, or by capital. Unlike the map, this switches in place: the places and shapes are the same.
+  const modeButtons = [...document.querySelectorAll('[data-mode]')];
+  $('mode-pick').hidden = WhereIsIt.MODES.length < 2;
+  function renderMode() {
+    for (const btn of modeButtons) btn.setAttribute('aria-pressed', String(btn.dataset.mode === WhereIsIt.mode));
+    $('mode-hint').hidden = !capitalsMode();
+  }
+  for (const btn of modeButtons) {
+    btn.onclick = () => {
+      if (btn.dataset.mode === WhereIsIt.mode) return;
+      WhereIsIt.setMode(btn.dataset.mode); // rewords the page too, e.g. "Guesses per capital"
+      for (const c of [...selected]) if (!WhereIsIt.askable(byCode.get(c))) selected.delete(c);
+      renderMode();
+      map.refreshActive();
+      buildTree();
+      $('search').dispatchEvent(new Event('input'));
+    };
+  }
+  renderMode();
+
   // ---------------------------------------------------------------- tree
 
   const tree = $('tree');
@@ -124,12 +148,20 @@
           const row = el(
             'div',
             { class: 'row country' },
-            el('label', {}, box, flagImg(c.code), el('span', { class: 'name' }, name), ATLAS.core(c) ? null : el('span', { class: 'terr' }, t(c.kind === 'district' ? 'district' : 'territory'))),
+            el(
+              'label',
+              {},
+              box,
+              flagImg(c.code),
+              el('span', { class: 'name' }, name),
+              ATLAS.core(c) ? null : el('span', { class: 'terr' }, t(c.kind === 'district' ? 'district' : 'territory')),
+              capitalsMode() ? el('span', { class: 'capital' }, '· ', c.capital) : null,
+            ),
             zoom,
           );
           // Search matches the English name too, so either works whatever language the page is in,
-          // and the subregion, so "caribbean" lists the Caribbean countries.
-          row.dataset.name = fold([name, c.name, I18N.region(c.subregion), c.subregion].join('|'));
+          // and the subregion, so "caribbean" lists the Caribbean countries. And the capital, if any.
+          row.dataset.name = fold([name, c.name, I18N.region(c.subregion), c.subregion, c.capital || ''].join('|'));
           row.dataset.exact = fold(name);
           target.append(row);
           countryRows.push({ row, box, c });
@@ -379,6 +411,7 @@
     const codes = [...selected].sort();
     const count = parseInt(opt.count.value, 10);
     return {
+      mode: WhereIsIt.mode,
       codes,
       title: opt.title.value.trim(),
       count: Number.isFinite(count) && count > 0 ? count : null,
@@ -415,8 +448,11 @@
     }
     // Keep this page's URL in sync so a refresh (or bookmark) keeps the selection.
     try {
-      const empty = ATLAS.id === 'world' ? '' : `?m=${ATLAS.id}`; // keep the chosen map
-      history.replaceState(null, '', n ? query : location.pathname + empty);
+      // With nothing picked yet, keep just the chosen map and quiz type.
+      const empty = new URLSearchParams();
+      if (ATLAS.id !== 'world') empty.set('m', ATLAS.id);
+      if (q.mode !== 'places') empty.set('q', q.mode);
+      history.replaceState(null, '', n ? query : location.pathname + (empty.size ? `?${empty}` : ''));
     } catch {} // some browsers block this on file://
   }
 

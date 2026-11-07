@@ -1,10 +1,14 @@
 // Student game: find each country (or state) on the map.
 (function () {
   'use strict';
-  const { el, flagImg, formatTime, wordmark, pinIcon, countryName, defaultTitle } = WhereIsIt;
+  const { el, flagImg, formatTime, wordmark, pinIcon, countryName, capitalName, promptName, fullName, starIcon, defaultTitle } = WhereIsIt;
   const { t } = I18N;
+  const text = (s) => document.createTextNode(s);
 
   const quiz = WhereIsIt.parseQuiz(location.search);
+  // Capitals quiz: the prompt is a capital ("Sacramento") and the answer its state. A star stands in for the
+  // state's code badge, which would give the answer away, and answered capitals get a star on the map.
+  const capitals = quiz.mode === 'capitals';
   const pool = new Set(quiz.codes);
   const title = () => quiz.title || defaultTitle(quiz.codes);
 
@@ -47,6 +51,14 @@
     // Once finished, it names whatever is under the pointer so students can explore their results.
     labelFor: (hovered) => (game.state === 'playing' ? game.current : game.state === 'done' ? hovered : null),
     labelCaption: t('find'),
+    // Capitals quizzes test the capitals, not where the places are, so the label also names the place under the pointer.
+    labelContent: capitals
+      ? (code, hovered) =>
+          game.state === 'playing'
+            ? [starIcon(), text(capitalName(code)), hovered ? el('span', { class: 'map-tooltip-hover' }, countryName(hovered)) : null].filter(Boolean)
+            : [flagImg(code), text(fullName(code))]
+      : null,
+    labelHover: capitals,
     onClick: onCountryClick,
   });
   map.focus(quiz.codes);
@@ -94,7 +106,7 @@
     } else if (game.state === 'playing') {
       const c = game.current;
       ui.label.textContent = t('find');
-      ui.target.replaceChildren(flagImg(c), document.createTextNode(countryName(c)));
+      ui.target.replaceChildren(...promptNodes(c));
       renderGuesses();
       if (!game.hint) hideSay(); // a showing hint stays until they click the country
     } else {
@@ -132,8 +144,19 @@
   function showWelcome() {
     ui.stats.classList.add('idle');
     document.title = t('gamePageTitle');
-    // [map, label, filter, random sample size]. Untitled presets get the automatic title, which follows the language.
+    // [map, label, filter, random sample size, button label, mode]. Untitled presets get the automatic title,
+    // which follows the language.
     const { world, us } = WhereIsIt.ATLASES;
+    // Territories stay out of quick play; they're still available in "Create a quiz".
+    // Capitals get a single button alongside the states rather than a section of their own; no random-states
+    // preset, so the six buttons fill two rows.
+    const usPresets = us
+      ? [
+          ...us.regionOrder.filter((r) => r !== 'Territories').map((r) => [us, null, (c) => c.region === r, null, I18N.region(r), 'places']),
+          [us, t('presetUsAll'), () => true, null, null, 'places'],
+          [us, t('presetCapitalsAll'), () => true, null, null, 'capitals'],
+        ]
+      : [];
     const groups = [
       [
         'quickPlayCountries',
@@ -149,29 +172,19 @@
           [world, t('presetAllCountries'), () => true],
         ],
       ],
-      [
-        'quickPlayStates',
-        us
-          ? [
-              // Territories stay out of quick play; they're still available in "Create a quiz".
-              ...us.regionOrder.filter((r) => r !== 'Territories').map((r) => [us, null, (c) => c.region === r, null, I18N.region(r)]),
-              [us, null, () => true, 10, t('presetWorld')],
-              [us, t('presetUsAll'), () => true],
-            ]
-          : [],
-      ],
+      ['quickPlayStates', usPresets],
     ];
     const presetLinks = (presets) =>
-      presets.map(([atlas, title, fn, n, label]) => {
+      presets.map(([atlas, title, fn, n, label, mode]) => {
         const core = atlas.places.filter((c) => atlas.core(c));
         const codes = core.filter(fn).map((c) => c.code);
         // "Random" and "All" draw from the whole map rather than one region, so they get a quieter, distinct look.
         const whole = codes.length === core.length;
         return el(
           'a',
-          { class: whole ? 'btn whole' : 'btn', href: WhereIsIt.quizQuery({ map: atlas.id, codes, title, count: n }) },
+          { class: whole ? 'btn whole' : 'btn', href: WhereIsIt.quizQuery({ map: atlas.id, mode, codes, title, count: n }) },
           el('span', { class: 'preset-name' }, n ? icon('shuffle') : null, label || title),
-          el('small', {}, t(atlas.id === 'us' ? 'nStates' : 'nCountries', { n: n ?? codes.length })),
+          el('small', {}, t(mode === 'capitals' ? 'nCapitals' : atlas.id === 'us' ? 'nStates' : 'nCountries', { n: n ?? codes.length })),
         );
       });
     // In reading order for the one-column layout; wide, short screens move the presets into a
@@ -230,6 +243,7 @@
     map.clearStates();
     map.ring(null);
     map.setLabels([]);
+    map.setCapitals([]);
     map.refreshTooltip();
     map.focus(quiz.codes);
     ui.label.textContent = '';
@@ -247,6 +261,7 @@
     clearTimeout(game.ringTimer);
     hideSay();
     map.setLabels([]);
+    map.setCapitals([]);
     map.opts.labelCaption = t('find');
     Object.assign(game, { state: 'playing', queue, index: -1, results: [], elapsed: 0, advancing: false });
     ui.overlay.hidden = true;
@@ -266,6 +281,7 @@
     if (game.current) map.toggleClass(game.current, 'hint', false);
     map.ring(null);
     map.setLabels([]);
+    if (capitals) map.setCapitals(answered()); // keep the stars, drop the last one's name
     game.index++;
     game.advancing = false;
     if (game.index >= game.queue.length) return finish();
@@ -280,7 +296,7 @@
   function onCountryClick(code) {
     // After the game, tapping a country names it (touch screens have no hover label).
     if (game.state === 'done') {
-      if (ui.overlay.hidden) say('', countryName(code), code);
+      if (ui.overlay.hidden) say('', fullName(code), code);
       return;
     }
     if (game.state !== 'playing' || game.advancing) return;
@@ -295,13 +311,15 @@
       map.ring(null);
       const cls = !found ? 's-missed' : game.wrong === 0 ? 's-first' : 's-ok';
       map.setState(code, cls);
+      // Star the capital, named until the next one so it sinks in.
+      if (capitals) map.setCapitals(answered(), [code], code);
       if (found) {
         map.flash(code, 'flash-right', 800);
         say('good', game.wrong === 0 ? t('correct') : t('correctTries', { n: game.wrong + 1 }), code);
       } else {
         // Leave a missed country on screen, named, long enough to take in where it is.
-        map.setLabels([code]);
-        say('', t('thatsKeepPracticing', { name }), code);
+        if (!capitals) map.setLabels([code]);
+        say('', t('thatsKeepPracticing', { name, capital: capitalName(code) }), code);
       }
       renderStats();
       game.nextTimer = setTimeout(next, found ? 650 : 2400);
@@ -320,7 +338,7 @@
       map.toggleClass(target, 'hint', true);
       map.ring(target);
       map.ensureVisible(target);
-      say('hint', t('thatsHereIs', { name, target: countryName(target) }), code);
+      say('hint', t('thatsHereIs', { name, target: countryName(target), capital: capitalName(target) }), code);
     } else {
       say('bad', t('thatsGuessesLeft', { name, n: quiz.guesses - game.wrong }), code);
     }
@@ -342,7 +360,9 @@
     ui.guesses.replaceChildren();
     renderStats();
     map.opts.labelCaption = null;
-    map.setLabels(summary().missed);
+    // Name what was missed: the places, or in a capitals quiz the missed capitals next to every capital's star.
+    if (capitals) map.setCapitals(answered(), summary().missed);
+    else map.setLabels(summary().missed);
     map.refreshTooltip(true);
     map.resetView();
     showResults();
@@ -364,7 +384,7 @@
       `📍 Where Is It — ${title()}`,
       t('scoreLine', s),
       t('timeLine', { time: formatTime(game.elapsed) }),
-      s.missed.length ? t('missedLine', { list: s.missed.map(countryName).join(', ') }) : t('missedNone'),
+      s.missed.length ? t('missedLine', { list: s.missed.map(missedName).join(', ') }) : t('missedNone'),
       t('completedLine', { date: new Date().toLocaleString(I18N.lang) }),
     ];
     return lines.filter(Boolean).join('\n');
@@ -419,7 +439,7 @@
       ),
     );
 
-    const ordered = game.results.slice().sort((a, b) => I18N.compare(countryName(a.code), countryName(b.code)));
+    const ordered = game.results.slice().sort((a, b) => I18N.compare(promptName(a.code), promptName(b.code)));
     const list = el(
       'ul',
       { class: 'result-list' },
@@ -433,8 +453,10 @@
           el(
             'button',
             { type: 'button', title: `${tip} · ${t('showOnMap')}`, onclick: () => locate(r.code) },
-            flagImg(r.code),
-            el('span', { class: 'name' }, countryName(r.code)),
+            capitals ? starIcon() : flagImg(r.code),
+            capitals
+              ? el('span', { class: 'names' }, el('span', { class: 'name' }, capitalName(r.code)), el('span', { class: 'sub' }, countryName(r.code)))
+              : el('span', { class: 'name' }, countryName(r.code)),
             el('span', { class: 'mark', 'aria-label': tip }, mark),
           ),
         );
@@ -464,11 +486,16 @@
   function renderPrompt() {
     const c = game.current;
     ui.label.textContent = t('find');
-    ui.target.replaceChildren(flagImg(c), document.createTextNode(countryName(c)));
+    ui.target.replaceChildren(...promptNodes(c));
     renderGuesses();
     hideSay();
     map.refreshTooltip();
-    announce(`${t('find')}: ${countryName(c)}`);
+    announce(t('findAnnounce', { name: promptName(c) }));
+  }
+
+  /** The top bar's prompt: flag (or code badge) and name, or in a capitals quiz a star and the capital. */
+  function promptNodes(code) {
+    return [capitals ? starIcon() : flagImg(code), text(promptName(code))];
   }
 
   /** animate: play the "used up" animation on the pip the latest wrong guess took. */
@@ -532,7 +559,7 @@
     map.ring(code);
     clearTimeout(game.ringTimer);
     game.ringTimer = setTimeout(() => map.ring(null), 3000);
-    say('', countryName(code), code);
+    say('', fullName(code), code);
   }
 
   // ---------------------------------------------------------------- helpers
@@ -558,6 +585,16 @@
   /** The About page, linked from the welcome card only (quiz and results cards stay focused on the quiz). */
   function aboutLink() {
     return el('a', { class: 'subtle-link', href: 'about', target: '_blank', rel: 'noopener' }, t('about'));
+  }
+
+  /** Places answered so far (found or missed), for the capital stars. */
+  function answered() {
+    return game.results.map((r) => r.code);
+  }
+
+  /** How a missed place is listed in the copied score: "Sacramento (California)" in a capitals quiz. */
+  function missedName(code) {
+    return capitals ? `${capitalName(code)} (${countryName(code)})` : countryName(code);
   }
 
   function questionCount() {

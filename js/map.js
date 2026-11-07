@@ -7,6 +7,8 @@
 //     isActive: (code) => true,          // can this country be hovered/clicked?
 //     labelFor: (hovered) => hovered,    // country to show next to the cursor (or null)
 //     labelCaption: null,                // optional small caption before the name, e.g. 'Find'
+//     labelContent: null,                // (code, hovered) => [nodes] for the cursor label; default: flag and name
+//     labelHover: false,                 // labelContent also depends on the hovered country, so rebuild as it changes
 //     onClick: (code) => {},
 //   });
 //
@@ -26,7 +28,7 @@
   class GeoMap {
     constructor(container, opts) {
       this.opts = Object.assign(
-        { rotate: 0, extended: false, isActive: () => true, labelFor: (hovered) => hovered, labelCaption: null, onClick: null },
+        { rotate: 0, extended: false, isActive: () => true, labelFor: (hovered) => hovered, labelCaption: null, labelContent: null, labelHover: false, onClick: null },
         opts,
       );
       this.container = container;
@@ -37,6 +39,7 @@
       const features = WhereIsIt.features(this.opts.extended);
       const { path, outline, borders } = GeoMap.projectAtlas(atlas, this.opts.rotate, features, this.opts.extended);
       this.path = path;
+      this.projection = path.projection();
       this.worldBounds = path.bounds(outline); // the whole map (named for the world map, its first use)
 
       const svg = d3.select(container).append('svg').attr('class', 'geomap');
@@ -63,9 +66,12 @@
       const land = vp.append('g').attr('class', 'land');
       const dots = vp.append('g').attr('class', 'dots');
       this.overlay = vp.append('g').attr('class', 'overlay');
+      this.capitalLayer = vp.append('g').attr('class', 'capitals');
       this.labelLayer = vp.append('g').attr('class', 'map-labels');
       this._labels = [];
       this._labelCodes = [];
+      this._capitals = [];
+      this._capitalArgs = [[], []];
 
       for (const f of features) {
         const d = path(f);
@@ -188,6 +194,29 @@
     /** Rebuilds the labels, e.g. after a language change. */
     refreshLabels() {
       this.setLabels(this._labelCodes);
+      this.setCapitals(...this._capitalArgs);
+    }
+
+    /**
+     * Marks capitals with a star (places with a `capital` and `capitalLatlng`). Those in `named` also get the
+     * capital's name. A code in `fresh` pops in. Pass [] to remove them all.
+     */
+    setCapitals(codes, named = [], fresh = null) {
+      this._capitalArgs = [(codes || []).slice(), named.slice()];
+      this.capitalLayer.selectAll('*').remove();
+      this._capitals = [];
+      const withName = new Set(named);
+      for (const code of this._capitalArgs[0]) {
+        const p = WhereIsIt.byCode.get(code);
+        const xy = p?.capitalLatlng && this.projection([p.capitalLatlng[1], p.capitalLatlng[0]]);
+        if (!xy) continue;
+        const g = this.capitalLayer.append('g').attr('class', 'capital');
+        const inner = g.append('g').attr('class', code === fresh ? 'capital-mark pop' : 'capital-mark');
+        inner.append('path').attr('d', WhereIsIt.STAR_PATH);
+        if (withName.has(code)) inner.append('text').attr('dy', '-0.95em').text(p.capital);
+        this._capitals.push({ g, x: xy[0], y: xy[1] });
+      }
+      this._updateOverlay();
     }
     // ---- camera -----------------------------------------------------------
 
@@ -299,7 +328,7 @@
     _updateOverlay() {
       const k = this.transform.k;
       // Labels stay the same size on screen whatever the zoom.
-      for (const { g, x, y } of this._labels) g.attr('transform', `translate(${x},${y}) scale(${1 / k})`);
+      for (const { g, x, y } of this._labels.concat(this._capitals)) g.attr('transform', `translate(${x},${y}) scale(${1 / k})`);
       if (!this._ring) return;
       const { g, cx, cy, r } = this._ring;
       // Ring radius in screen px: around the country, but never smaller than 22px.
@@ -338,10 +367,13 @@
       // The tooltip shows whichever country opts.labelFor(hovered) returns (or nothing).
       const updateTip = () => {
         const code = inside && mouse ? this.opts.labelFor(hovered) : null;
-        if (code !== shown) {
-          shown = code;
+        const key = code && this.opts.labelHover ? `${code}|${hovered}` : code;
+        if (key !== shown) {
+          shown = key;
           if (code) {
-            const parts = [WhereIsIt.flagImg(code), document.createTextNode(WhereIsIt.countryName(code))];
+            const parts = this.opts.labelContent
+              ? this.opts.labelContent(code, hovered)
+              : [WhereIsIt.flagImg(code), document.createTextNode(WhereIsIt.countryName(code))];
             const caption = this.opts.labelCaption;
             if (caption) {
               const c = document.createElement('span');

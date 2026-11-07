@@ -121,6 +121,11 @@ input, select { background: var(--panel); }
   letter-spacing: 0.02em; line-height: 1; background: var(--subtle-bg); color: var(--ink-soft); box-shadow: 0 0 0 1px var(--line);
 }
 .prompt .target .code-badge { font-size: 0.75rem; }
+/* Star before a capital's name (capitals quizzes), in place of the flag or code badge that would give the answer away. */
+.capital-star { width: 1.1em; height: 1.1em; flex: none; vertical-align: -0.15em; fill: var(--accent); }
+.prompt .target .capital-star { width: 1.4rem; height: 1.4rem; }
+.result-list .sub { color: var(--ink-soft); font-size: 0.8rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.result-list .names { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
 
 /* ---------------- Map ---------------- */
 .map-wrap { position: relative; flex: 1; min-height: 0; overflow: hidden; background: var(--ocean); }
@@ -154,6 +159,15 @@ input, select { background: var(--panel); }
   fill: var(--ink); stroke: var(--panel); stroke-width: 3px; stroke-linejoin: round; paint-order: stroke;
 }
 .geomap .s-first.hover, .geomap .s-ok.hover, .geomap .s-missed.hover { fill-opacity: 0.75; }
+/* Capital stars (capitals quizzes), drawn at a fixed screen size; see GeoMap.setCapitals. */
+.geomap .capital { pointer-events: none; }
+.geomap .capital path { fill: var(--ink); stroke: var(--panel); stroke-width: 1.4px; stroke-linejoin: round; paint-order: stroke; }
+.geomap .capital text {
+  font: 700 12px system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; text-anchor: middle;
+  fill: var(--ink); stroke: var(--panel); stroke-width: 3px; stroke-linejoin: round; paint-order: stroke;
+}
+.geomap .capital-mark.pop { animation: capital-pop 0.35s ease-out; }
+@keyframes capital-pop { from { transform: scale(0); } 60% { transform: scale(1.35); } }
 
 /* Map feedback animations are deliberately soft and short, and none of them loops forever (motion sensitivity):
    each plays a few times at most, then settles into a steady colour. */
@@ -196,6 +210,8 @@ input, select { background: var(--panel); }
   padding: 2px 6px; border-radius: 5px; background: rgba(255, 255, 255, 0.22);
   font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
 }
+/* Capitals quizzes: the place under the pointer, after the capital to find. */
+.map-tooltip-hover { padding-left: 8px; border-left: 1px solid rgba(255, 255, 255, 0.4); font-weight: 500; opacity: 0.9; }
 
 .zoom-controls {
   position: absolute; right: 14px; bottom: 14px; display: flex; flex-direction: column; gap: 6px; z-index: 5;
@@ -452,8 +468,13 @@ input, select { background: var(--panel); }
 }
 .options .wide { grid-column: span 2; }
 .lang-opts .opt-heading { display: block; font-weight: 600; margin-bottom: 4px; }
-.map-pick { display: flex; align-items: center; gap: 10px; }
+/* Map and quiz-type pickers: headings in one column so the switches line up. */
+.pickers { display: grid; grid-template-columns: auto 1fr; gap: 8px 10px; align-items: center; }
+.pickers .map-pick { display: contents; }
+.pickers .map-pick[hidden] { display: none; }
 .map-pick .opt-heading { font-weight: 600; font-size: 0.9rem; }
+.pickers .mode-hint { grid-column: 1 / -1; margin-top: -2px; color: var(--ink-soft); font-size: 0.8rem; }
+.tree .row.country .capital { font-size: 0.8rem; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 0 1 auto; }
 /* Two-way switch between maps; the current one is aria-pressed. */
 .segmented { flex: 1; display: flex; padding: 3px; gap: 3px; border-radius: 10px; background: var(--subtle-bg); border: 1px solid var(--line); }
 .segmented button {

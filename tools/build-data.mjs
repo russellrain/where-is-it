@@ -5,7 +5,7 @@
 //   js/data/world.js      window.GEO_WORLD     - TopoJSON country shapes, ids = ISO alpha-2 codes
 //   js/data/countries.js  window.GEO_COUNTRIES - names, regions, sovereignty, capital, lat/lng
 //   js/data/country-names.js  window.GEO_COUNTRY_NAMES - country names in other app languages
-//   js/data/us-states.js  window.GEO_US_STATES - U.S. state shapes (TopoJSON, ids = postal codes), regions, names
+//   js/data/us-states.js  window.GEO_US_STATES - U.S. state shapes (TopoJSON, ids = postal codes), regions, names, capitals
 //   assets/flags/*.svg    flag images for every country on the map
 //   vendor/*.js           d3 + d3-composite-projections + topojson-client + qrcode-generator
 //
@@ -251,6 +251,30 @@ const US_NAMES_I18N = {
   },
 };
 
+// Capitals for the capitals quiz: [name, lat, lng] of the capitol building. D.C. has none (it's a federal
+// district, not a state), so it's left out of capitals quizzes.
+const US_CAPITALS = {
+  AL: ['Montgomery', 32.377, -86.301], AK: ['Juneau', 58.302, -134.411], AZ: ['Phoenix', 33.448, -112.097],
+  AR: ['Little Rock', 34.747, -92.289], CA: ['Sacramento', 38.577, -121.494], CO: ['Denver', 39.739, -104.985],
+  CT: ['Hartford', 41.764, -72.682], DE: ['Dover', 39.157, -75.520], FL: ['Tallahassee', 30.438, -84.281],
+  GA: ['Atlanta', 33.749, -84.388], HI: ['Honolulu', 21.307, -157.857], ID: ['Boise', 43.618, -116.200],
+  IL: ['Springfield', 39.798, -89.655], IN: ['Indianapolis', 39.768, -86.163], IA: ['Des Moines', 41.591, -93.604],
+  KS: ['Topeka', 39.048, -95.678], KY: ['Frankfort', 38.187, -84.875], LA: ['Baton Rouge', 30.457, -91.187],
+  ME: ['Augusta', 44.307, -69.782], MD: ['Annapolis', 38.979, -76.491], MA: ['Boston', 42.358, -71.064],
+  MI: ['Lansing', 42.734, -84.555], MN: ['Saint Paul', 44.955, -93.102], MS: ['Jackson', 32.304, -90.182],
+  MO: ['Jefferson City', 38.579, -92.173], MT: ['Helena', 46.586, -112.018], NE: ['Lincoln', 40.808, -96.700],
+  NV: ['Carson City', 39.164, -119.766], NH: ['Concord', 43.207, -71.538], NJ: ['Trenton', 40.221, -74.770],
+  NM: ['Santa Fe', 35.682, -105.940], NY: ['Albany', 42.653, -73.757], NC: ['Raleigh', 35.780, -78.639],
+  ND: ['Bismarck', 46.821, -100.783], OH: ['Columbus', 39.961, -82.999], OK: ['Oklahoma City', 35.492, -97.503],
+  OR: ['Salem', 44.938, -123.030], PA: ['Harrisburg', 40.264, -76.884], RI: ['Providence', 41.831, -71.415],
+  SC: ['Columbia', 34.000, -81.033], SD: ['Pierre', 44.367, -100.346], TN: ['Nashville', 36.166, -86.784],
+  TX: ['Austin', 30.275, -97.740], UT: ['Salt Lake City', 40.777, -111.888], VT: ['Montpelier', 44.262, -72.581],
+  VA: ['Richmond', 37.539, -77.433], WA: ['Olympia', 47.036, -122.905], WV: ['Charleston', 38.336, -81.612],
+  WI: ['Madison', 43.075, -89.384], WY: ['Cheyenne', 41.140, -104.820],
+  AS: ['Pago Pago', -14.279, -170.701], GU: ['Hagåtña', 13.476, 144.750], MP: ['Saipan', 15.212, 145.754],
+  PR: ['San Juan', 18.466, -66.106], VI: ['Charlotte Amalie', 18.342, -64.932],
+};
+
 const usTopo = readJson(nm('us-atlas', 'states-10m.json'));
 const usGeoms = usTopo.objects.states.geometries.filter((g) => US_STATES[g.id]);
 const usPlaces = usGeoms
@@ -259,7 +283,12 @@ const usPlaces = usGeoms
     const name = US_RENAME[g.properties.name] ?? g.properties.name;
     // kind: 'state', 'district' (D.C.) or 'territory'. Setup lists the last two only when they're included.
     const kind = code === 'DC' ? 'district' : subregion === 'Territories' ? 'territory' : 'state';
-    return { code, name, region: US_REGION_OF[subregion], subregion, kind };
+    const place = { code, name, region: US_REGION_OF[subregion], subregion, kind };
+    if (US_CAPITALS[code]) {
+      const [capital, lat, lng] = US_CAPITALS[code];
+      Object.assign(place, { capital, capitalLatlng: [lat, lng] });
+    }
+    return place;
   })
   .sort((a, b) => a.name.localeCompare(b.name));
 const usStates = {
@@ -275,6 +304,7 @@ const usStates = {
   places: usPlaces,
   names: US_NAMES_I18N,
 };
+if (usPlaces.filter((p) => p.capital).length !== 55) throw new Error('expected a capital for every state and territory');
 if (usPlaces.length !== 56) throw new Error(`expected 50 states, D.C. and 5 territories, got ${usPlaces.length}`);
 fs.writeFileSync(path.join(root, 'js', 'data', 'us-states.js'), `window.GEO_US_STATES=${JSON.stringify(usStates)};\n`);
 

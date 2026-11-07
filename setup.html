@@ -20,12 +20,23 @@
         <a class="wordmark" href="./" aria-label="Where Is It — home"><span class="wm-name">Where Is It<svg class="pin" viewBox="0 0 24 32" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 8.4 10.2 18.6 11.2 19.6a1.1 1.1 0 0 0 1.6 0C13.8 30.6 24 20.4 24 12 24 5.37 18.63 0 12 0z"/><circle cx="12" cy="12" r="4.6"/></svg></span><span class="wm-tag" data-i18n="tagline">The place-finding game</span></a>
         <p data-i18n="setupIntro">Pick regions or individual countries, or click countries on the map, then share the link.</p>
       </header>
-      <div class="section map-pick" role="group" aria-labelledby="map-pick-label">
-        <span class="opt-heading" id="map-pick-label" data-i18n="mapLabel">Map</span>
-        <div class="segmented">
-          <button type="button" data-map="world" data-i18n="mapWorld">World countries</button>
-          <button type="button" data-map="us" data-i18n="mapUs">U.S. states</button>
+      <div class="section pickers">
+        <div class="map-pick" role="group" aria-labelledby="map-pick-label">
+          <span class="opt-heading" id="map-pick-label" data-i18n="mapLabel">Map</span>
+          <div class="segmented">
+            <button type="button" data-map="world" data-i18n="mapWorld">World countries</button>
+            <button type="button" data-map="us" data-i18n="mapUs">U.S. states</button>
+          </div>
         </div>
+        <!-- Shown on maps with capitals (U.S. states); see setup.js. -->
+        <div class="map-pick" id="mode-pick" role="group" aria-labelledby="mode-pick-label" hidden>
+          <span class="opt-heading" id="mode-pick-label" data-i18n="quizType">Quiz type</span>
+          <div class="segmented">
+            <button type="button" data-mode="places" data-i18n="modePlaces">States</button>
+            <button type="button" data-mode="capitals" data-i18n="modeCapitals">Capitals</button>
+          </div>
+        </div>
+        <small class="mode-hint" id="mode-hint" data-i18n="modeHint" hidden>Learners see each country’s capital and find the country.</small>
       </div>
       <div class="section">
         <div class="tree-tools">

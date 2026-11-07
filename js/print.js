@@ -5,7 +5,7 @@
 // the map is drawn after layout so it can fill whatever space the word bank leaves.
 (function () {
   'use strict';
-  const { el, countryName } = WhereIsIt;
+  const { el, promptName, fullName } = WhereIsIt;
   const { t } = I18N;
   const $ = (id) => document.getElementById(id);
   const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -65,7 +65,9 @@
     return list.map((x, i) => ({ ...x, n: i + 1 }));
   })();
   let crowded = 0; // how many numbers ended up far from their country on the last map drawn
-  const byName = () => numbered.slice().sort((a, b) => I18N.compare(countryName(a.code), countryName(b.code)));
+  // The word bank lists what the game would ask for: place names, or in a capitals quiz the capitals
+  // (students write each capital's state number). The answer key gives both.
+  const byName = () => numbered.slice().sort((a, b) => I18N.compare(promptName(a.code), promptName(b.code)));
 
   // ---------------------------------------------------------------- layout
 
@@ -129,13 +131,13 @@
     const scale = drawMap(mapBox);
 
     if ($('answer-key').checked) {
-      const keyItems = numbered.map(({ code, n }) => el('li', {}, el('b', {}, String(n)), countryName(code)));
+      const keyItems = numbered.map(({ code, n }) => el('li', {}, el('b', {}, String(n)), fullName(code)));
       flowList(newSheet, t('answerKeyHeading', { title }), () => el('ol', { class: 'key-list' }), keyItems);
     }
     return scale;
   }
 
-  const bankItems = () => byName().map(({ code }) => el('li', {}, el('span', { class: 'blank' }), countryName(code)));
+  const bankItems = () => byName().map(({ code }) => el('li', {}, el('span', { class: 'blank' }), promptName(code)));
 
   function wordBank(items = bankItems()) {
     return el(

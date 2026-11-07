@@ -59,6 +59,8 @@
       quickPlayCountries: 'Countries',
       quickPlayStates: 'U.S. states',
       presetUsAll: 'All 50 states',
+      presetCapitalsAll: 'All 50 capitals',
+      nCapitals: ({ n }) => `${n} ${plural(n, 'capital', 'capitals')}`,
       presetAfrica: 'Africa',
       presetEurope: 'Europe',
       presetAsia: 'Asia',
@@ -76,6 +78,7 @@
       introControls: 'Scroll or pinch to zoom, drag to move the map.',
       start: 'Start',
       find: 'Find',
+      findAnnounce: 'Find: {name}',
       correct: 'Correct!',
       correctTries: 'Correct! ({n} tries)',
       thatsKeepPracticing: 'That’s {name}. Keep practicing!',
@@ -115,6 +118,10 @@
       mapLabel: 'Map',
       mapWorld: 'World countries',
       mapUs: 'U.S. states',
+      quizType: 'Quiz type',
+      modePlaces: 'Countries',
+      modeCapitals: 'Capitals',
+      modeHint: 'Learners see each country’s capital and find the country.',
       confirmSwitchMap: 'Switch maps? The places you’ve picked will be cleared.',
       searchCountries: 'Search countries…',
       clear: 'Clear',
@@ -207,6 +214,8 @@
       quickPlayCountries: 'Países',
       quickPlayStates: 'Estados de EE. UU.',
       presetUsAll: 'Los 50 estados',
+      presetCapitalsAll: 'Las 50 capitales',
+      nCapitals: ({ n }) => `${n} ${plural(n, 'capital', 'capitales')}`,
       presetAfrica: 'África',
       presetEurope: 'Europa',
       presetAsia: 'Asia',
@@ -224,6 +233,7 @@
       introControls: 'Usa la rueda o pellizca para acercar, y arrastra para mover el mapa.',
       start: 'Empezar',
       find: 'Busca',
+      findAnnounce: 'Busca: {name}',
       correct: '¡Correcto!',
       correctTries: '¡Correcto! ({n} intentos)',
       thatsKeepPracticing: 'Eso es {name}. ¡Sigue practicando!',
@@ -262,6 +272,10 @@
       mapLabel: 'Mapa',
       mapWorld: 'Países del mundo',
       mapUs: 'Estados de EE. UU.',
+      quizType: 'Tipo de cuestionario',
+      modePlaces: 'Países',
+      modeCapitals: 'Capitales',
+      modeHint: 'Los alumnos ven la capital de cada país y buscan el país.',
       confirmSwitchMap: '¿Cambiar de mapa? Se borrarán los lugares que has elegido.',
       searchCountries: 'Buscar países…',
       clear: 'Borrar',
@@ -353,6 +367,8 @@
       quickPlayCountries: 'Pays',
       quickPlayStates: 'États américains',
       presetUsAll: 'Les 50 États',
+      presetCapitalsAll: 'Les 50 capitales',
+      nCapitals: ({ n }) => `${n} ${plural(n, 'capitale', 'capitales')}`,
       presetAfrica: 'Afrique',
       presetEurope: 'Europe',
       presetAsia: 'Asie',
@@ -370,6 +386,7 @@
       introControls: 'Fais défiler ou pince pour zoomer, et fais glisser pour déplacer la carte.',
       start: 'Commencer',
       find: 'Trouve',
+      findAnnounce: 'Trouve : {name}',
       correct: 'Bravo !',
       correctTries: 'Bravo ! ({n} essais)',
       thatsKeepPracticing: 'Ça, c’est : {name}. Continue à t’entraîner !',
@@ -408,6 +425,10 @@
       mapLabel: 'Carte',
       mapWorld: 'Pays du monde',
       mapUs: 'États américains',
+      quizType: 'Type de quiz',
+      modePlaces: 'Pays',
+      modeCapitals: 'Capitales',
+      modeHint: 'Les élèves voient la capitale de chaque pays et doivent trouver le pays.',
       confirmSwitchMap: 'Changer de carte ? Les lieux choisis seront effacés.',
       searchCountries: 'Rechercher des pays…',
       clear: 'Effacer',
@@ -498,6 +519,8 @@
       quickPlayCountries: 'Países',
       quickPlayStates: 'Estados dos EUA',
       presetUsAll: 'Os 50 estados',
+      presetCapitalsAll: 'As 50 capitais',
+      nCapitals: ({ n }) => `${n} ${plural(n, 'capital', 'capitais')}`,
       presetAfrica: 'África',
       presetEurope: 'Europa',
       presetAsia: 'Ásia',
@@ -515,6 +538,7 @@
       introControls: 'Role ou faça pinça para dar zoom, e arraste para mover o mapa.',
       start: 'Começar',
       find: 'Encontre',
+      findAnnounce: 'Encontre: {name}',
       correct: 'Certo!',
       correctTries: 'Certo! ({n} tentativas)',
       thatsKeepPracticing: 'Esse é: {name}. Continue praticando!',
@@ -553,6 +577,10 @@
       mapLabel: 'Mapa',
       mapWorld: 'Países do mundo',
       mapUs: 'Estados dos EUA',
+      quizType: 'Tipo de quiz',
+      modePlaces: 'Países',
+      modeCapitals: 'Capitais',
+      modeHint: 'Os alunos veem a capital de cada país e encontram o país.',
       confirmSwitchMap: 'Trocar de mapa? Os lugares escolhidos serão apagados.',
       searchCountries: 'Buscar países…',
       clear: 'Limpar',
@@ -616,6 +644,7 @@
       en: {
         zoomToFit: 'Zoom to the quiz states',
         statCountry: 'State',
+        modePlaces: 'States',
         introFind: ({ n }) => `Find ${n} ${plural(n, 'state', 'states')} on the map.`,
         introGuesses: ({ n }) =>
           `You get ${n} ${plural(n, 'guess', 'guesses')} before getting a hint. States you need a hint for are marked as missed.`,
@@ -641,6 +670,7 @@
       es: {
         zoomToFit: 'Ajustar a los estados del cuestionario',
         statCountry: 'Estado',
+        modePlaces: 'Estados',
         introFind: ({ n }) => `Encuentra ${n} ${plural(n, 'estado', 'estados')} en el mapa.`,
         introGuesses: ({ n }) =>
           `Tienes ${n} ${plural(n, 'intento', 'intentos')} antes de recibir una pista. Los estados para los que necesites una pista cuentan como fallados.`,
@@ -666,6 +696,7 @@
       fr: {
         zoomToFit: 'Ajuster aux États du quiz',
         statCountry: 'État',
+        modePlaces: 'États',
         introFind: ({ n }) => `Trouve ${n} ${plural(n, 'État', 'États')} sur la carte.`,
         introGuesses: ({ n }) =>
           `Tu as ${n} ${plural(n, 'essai', 'essais')} avant de recevoir un indice. Les États pour lesquels tu as besoin d’un indice comptent comme manqués.`,
@@ -691,6 +722,7 @@
       pt: {
         zoomToFit: 'Ajustar aos estados do quiz',
         statCountry: 'Estado',
+        modePlaces: 'Estados',
         introFind: ({ n }) => `Encontre ${n} ${plural(n, 'estado', 'estados')} no mapa.`,
         introGuesses: ({ n }) =>
           `Você tem ${n} ${plural(n, 'tentativa', 'tentativas')} antes de receber uma dica. Os estados em que você precisar de dica contam como errados.`,
@@ -712,6 +744,151 @@
         wordBankInstructions: 'Escreva ao lado de cada estado o número correspondente no mapa.',
         printEmpty: 'Nenhum estado selecionado.',
         printEmptyLink: 'Escolha alguns estados',
+      },
+    },
+    // Capitals quizzes: the prompt is a capital, the answer its place. common.js applies these ahead of the map's
+    // own wording, most specific first: 'capitals-us' (states), then 'capitals' (countries, and anything shared).
+    capitals: {
+      en: {
+        find: 'Capital of which country?',
+        findAnnounce: 'Which country has the capital {name}?',
+        statCountry: 'Capital',
+        introFind: ({ n }) => `You’ll see ${n} ${plural(n, 'capital', 'capitals')}, one at a time. Click the country each one belongs to.`,
+        introGuesses: ({ n }) =>
+          `You get ${n} ${plural(n, 'guess', 'guesses')} before getting a hint. Capitals you need a hint for are marked as missed.`,
+        thatsKeepPracticing: '{capital} is the capital of {name}. Keep practicing!',
+        thatsHereIs: 'That’s {name}. {capital} is in {target}. Click it to continue.',
+        countriesHeading: 'Capitals',
+        resultsHint: 'Click a capital to see it on the map.',
+        regionTitle: 'Capitals of {region}',
+        worldTitle: 'Capitals of the world',
+        quizTitlePlaceholder: 'e.g. Capitals of Africa',
+        guessesPerCountry: 'Guesses per capital',
+        noneSelected: 'No capitals selected',
+        nSelected: ({ n }) => `${n} ${plural(n, 'capital', 'capitals')} selected`,
+        findTheCountries: 'Capital Cities',
+        wordBankInstructions: 'Write the number of each capital’s country next to it.',
+        printEmpty: 'No capitals selected.',
+        modeHint: 'Learners see each country’s capital and find the country.',
+      },
+      es: {
+        find: '¿Capital de qué país?',
+        findAnnounce: '¿De qué país es capital {name}?',
+        statCountry: 'Capital',
+        introFind: ({ n }) => `Verás ${n} ${plural(n, 'capital', 'capitales')}, una a una. Haz clic en el país al que pertenece cada una.`,
+        introGuesses: ({ n }) =>
+          `Tienes ${n} ${plural(n, 'intento', 'intentos')} antes de recibir una pista. Las capitales para las que necesites una pista cuentan como falladas.`,
+        thatsKeepPracticing: '{capital} es la capital de {name}. ¡Sigue practicando!',
+        thatsHereIs: 'Eso es {name}. {capital} está en {target}. Haz clic para continuar.',
+        countriesHeading: 'Capitales',
+        resultsHint: 'Haz clic en una capital para verla en el mapa.',
+        regionTitle: 'Capitales de {region}',
+        worldTitle: 'Capitales del mundo',
+        quizTitlePlaceholder: 'p. ej., Capitales de África',
+        guessesPerCountry: 'Intentos por capital',
+        noneSelected: 'No hay capitales seleccionadas',
+        nSelected: ({ n }) => `${n} ${plural(n, 'capital seleccionada', 'capitales seleccionadas')}`,
+        findTheCountries: 'Capitales',
+        wordBankInstructions: 'Escribe junto a cada capital el número de su país en el mapa.',
+        printEmpty: 'No hay capitales seleccionadas.',
+        modeHint: 'Los alumnos ven la capital de cada país y buscan el país.',
+      },
+      fr: {
+        find: 'Capitale de quel pays ?',
+        findAnnounce: 'De quel pays {name} est-elle la capitale ?',
+        statCountry: 'Capitale',
+        introFind: ({ n }) => `Tu vas voir ${n} ${plural(n, 'capitale', 'capitales')}, une par une. Clique sur le pays de chacune.`,
+        introGuesses: ({ n }) =>
+          `Tu as ${n} ${plural(n, 'essai', 'essais')} avant de recevoir un indice. Les capitales pour lesquelles tu as besoin d’un indice comptent comme manquées.`,
+        thatsKeepPracticing: 'Capitale du pays « {name} » : {capital}. Continue à t’entraîner !',
+        thatsHereIs: 'Ça, c’est : {name}. {capital} se trouve ici : {target}. Clique dessus pour continuer.',
+        countriesHeading: 'Capitales',
+        resultsHint: 'Clique sur une capitale pour la voir sur la carte.',
+        regionTitle: 'Capitales : {region}',
+        worldTitle: 'Les capitales du monde',
+        quizTitlePlaceholder: 'p. ex. Les capitales d’Afrique',
+        guessesPerCountry: 'Essais par capitale',
+        noneSelected: 'Aucune capitale sélectionnée',
+        nSelected: ({ n }) => `${n} ${plural(n, 'capitale sélectionnée', 'capitales sélectionnées')}`,
+        findTheCountries: 'Les capitales',
+        wordBankInstructions: 'Écris à côté de chaque capitale le numéro de son pays sur la carte.',
+        printEmpty: 'Aucune capitale sélectionnée.',
+        modeHint: 'Les élèves voient la capitale de chaque pays et doivent trouver le pays.',
+      },
+      pt: {
+        find: 'Capital de qual país?',
+        findAnnounce: '{name} é a capital de qual país?',
+        statCountry: 'Capital',
+        introFind: ({ n }) => `Você verá ${n} ${plural(n, 'capital', 'capitais')}, uma de cada vez. Clique no país de cada uma.`,
+        introGuesses: ({ n }) =>
+          `Você tem ${n} ${plural(n, 'tentativa', 'tentativas')} antes de receber uma dica. As capitais em que você precisar de dica contam como erradas.`,
+        thatsKeepPracticing: 'Capital do país “{name}”: {capital}. Continue praticando!',
+        thatsHereIs: 'Esse é: {name}. {capital} fica aqui: {target}. Clique nele para continuar.',
+        countriesHeading: 'Capitais',
+        resultsHint: 'Clique em uma capital para vê-la no mapa.',
+        regionTitle: 'Capitais: {region}',
+        worldTitle: 'Capitais do mundo',
+        quizTitlePlaceholder: 'ex.: Capitais da África',
+        guessesPerCountry: 'Tentativas por capital',
+        noneSelected: 'Nenhuma capital selecionada',
+        nSelected: ({ n }) => `${n} ${plural(n, 'capital selecionada', 'capitais selecionadas')}`,
+        findTheCountries: 'Capitais',
+        wordBankInstructions: 'Escreva ao lado de cada capital o número do seu país no mapa.',
+        printEmpty: 'Nenhuma capital selecionada.',
+        modeHint: 'Os alunos veem a capital de cada país e encontram o país.',
+      },
+    },
+    // U.S. state capitals: only what differs from 'capitals' above.
+    'capitals-us': {
+      en: {
+        find: 'Capital of which state?',
+        findAnnounce: 'Which state has the capital {name}?',
+        introFind: ({ n }) => `You’ll see ${n} state ${plural(n, 'capital', 'capitals')}, one at a time. Click the state each one belongs to.`,
+        regionTitle: ({ region, key }) => (key === 'Territories' ? 'Capitals of the U.S. territories' : `State capitals of the ${region}`),
+        worldTitle: 'U.S. state capitals',
+        quizTitlePlaceholder: 'e.g. State capitals of the West',
+        includeTerritories: 'Include territories (e.g. Puerto Rico, Guam)',
+        findTheCountries: 'State Capitals',
+        wordBankInstructions: 'Write the number of each capital’s state next to it.',
+        modeHint: 'Learners see each state’s capital and find the state.',
+      },
+      es: {
+        find: '¿Capital de qué estado?',
+        findAnnounce: '¿De qué estado es capital {name}?',
+        introFind: ({ n }) => `Verás ${n} ${plural(n, 'capital', 'capitales')} de estado, una a una. Haz clic en el estado al que pertenece cada una.`,
+        regionTitle: ({ region, key }) => (key === 'Territories' ? 'Capitales de los territorios de EE. UU.' : `Capitales de los estados del ${region}`),
+        worldTitle: 'Capitales de los estados de EE. UU.',
+        quizTitlePlaceholder: 'p. ej., Capitales del Oeste',
+        includeTerritories: 'Incluir territorios (p. ej., Puerto Rico, Guam)',
+        findTheCountries: 'Capitales de los estados',
+        wordBankInstructions: 'Escribe junto a cada capital el número de su estado en el mapa.',
+        modeHint: 'Los alumnos ven la capital de cada estado y buscan el estado.',
+      },
+      fr: {
+        find: 'Capitale de quel État ?',
+        findAnnounce: 'De quel État {name} est-elle la capitale ?',
+        introFind: ({ n }) => `Tu vas voir ${n} ${plural(n, 'capitale', 'capitales')} d’État, une par une. Clique sur l’État de chacune.`,
+        thatsKeepPracticing: 'Capitale de l’État « {name} » : {capital}. Continue à t’entraîner !',
+        regionTitle: ({ region, key }) => (key === 'Territories' ? 'Capitales des territoires des États-Unis' : `Capitales des États : ${region}`),
+        worldTitle: 'Capitales des États américains',
+        quizTitlePlaceholder: 'p. ex. Les capitales de l’Ouest',
+        includeTerritories: 'Inclure les territoires (p. ex. Porto Rico, Guam)',
+        findTheCountries: 'Capitales des États',
+        wordBankInstructions: 'Écris à côté de chaque capitale le numéro de son État sur la carte.',
+        modeHint: 'Les élèves voient la capitale de chaque État et doivent trouver l’État.',
+      },
+      pt: {
+        find: 'Capital de qual estado?',
+        findAnnounce: '{name} é a capital de qual estado?',
+        introFind: ({ n }) => `Você verá ${n} ${plural(n, 'capital', 'capitais')} de estado, uma de cada vez. Clique no estado de cada uma.`,
+        thatsKeepPracticing: 'Capital do estado “{name}”: {capital}. Continue praticando!',
+        regionTitle: ({ region, key }) => (key === 'Territories' ? 'Capitais dos territórios dos EUA' : `Capitais dos estados: ${region}`),
+        worldTitle: 'Capitais dos estados dos EUA',
+        quizTitlePlaceholder: 'ex.: Capitais do Oeste',
+        includeTerritories: 'Incluir territórios (ex.: Porto Rico, Guam)',
+        findTheCountries: 'Capitais dos estados',
+        wordBankInstructions: 'Escreva ao lado de cada capital o número do seu estado no mapa.',
+        modeHint: 'Os alunos veem a capital de cada estado e encontram o estado.',
       },
     },
   };
@@ -891,15 +1068,21 @@
   let lang = (allowed.includes(saved()) && saved()) || fromDevice() || allowed[0];
   root.lang = lang;
 
-  let variant = null; // map id with its own wording (VARIANTS), set by common.js
+  let variants = []; // VARIANTS in effect, most specific first, e.g. ['capitals', 'us']; set by common.js
 
-  function setVariant(id) {
-    variant = VARIANTS[id] ? id : null;
+  function setVariant(ids) {
+    variants = [].concat(ids || []).filter((id) => VARIANTS[id]).map((id) => VARIANTS[id]);
+  }
+
+  function lookup(key) {
+    for (const alt of variants) if (alt[lang]?.[key] != null) return alt[lang][key];
+    if (STRINGS[lang][key] != null) return STRINGS[lang][key];
+    for (const alt of variants) if (alt.en?.[key] != null) return alt.en[key];
+    return STRINGS.en[key];
   }
 
   function t(key, vars) {
-    const alt = variant && VARIANTS[variant];
-    const v = alt?.[lang]?.[key] ?? STRINGS[lang][key] ?? alt?.en?.[key] ?? STRINGS.en[key];
+    const v = lookup(key);
     if (v == null) return key;
     if (typeof v === 'function') return v(vars || {});
     return vars ? v.replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m)) : v;
