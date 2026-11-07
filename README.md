@@ -52,7 +52,7 @@ about.html               about page and privacy policy (linked from both footers
 privacy.html             redirect to about.html#privacy for old links
 css/style.css            all styles
 js/common.js             URL parsing, helpers
-js/i18n.js               translations (English, Spanish, French), language picker
+js/i18n.js               translations (English, Spanish, French, Portuguese), language picker
 js/map.js                GeoMap: D3 map with pan/zoom, cursor label, tiny-country dots
 js/game.js               student game
 js/setup.js              teacher setup
@@ -67,7 +67,7 @@ To regenerate data (for example after upgrading a package): `npm install && npm 
 
 ## Languages
 
-The game, setup page and worksheet are available in English, Spanish and French. Students start in the language they last picked, or their device language, as long as the quiz allows it (`l` above). The setup page's own language is separate from the quiz's student languages. The About page (including the privacy policy) is English only.
+The game, setup page and worksheet are available in English, Spanish, French and Portuguese. Students start in the language they last picked, or their device language, as long as the quiz allows it (`l` above). The setup page's own language is separate from the quiz's student languages. The About page (including the privacy policy) is English only.
 
 To add a language: add it to `LANGUAGES` in `js/i18n.js` along with its `STRINGS` and `REGIONS` tables, add it to `TRANSLATIONS` in `tools/build-data.mjs` (and any name fixes to `RENAME_I18N`), then run `npm run build-data` to regenerate `js/data/country-names.js`. For the U.S. states map, also add the language's `VARIANTS.us` wording in `js/i18n.js`, the U.S. region names to its `REGIONS` table, and any state names that differ from English to `US_NAMES_I18N` in `tools/build-data.mjs`.
 

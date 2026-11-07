@@ -84,7 +84,7 @@ const countries = [...groups.keys()]
   .sort((a, b) => a.name.localeCompare(b.name));
 
 // Country names in other app languages: app language code -> world-countries translation key.
-const TRANSLATIONS = { es: 'spa', fr: 'fra' };
+const TRANSLATIONS = { es: 'spa', fr: 'fra', pt: 'por' };
 // Fixes for translated names that are awkward, outdated or too long for the game (by country code).
 const RENAME_I18N = {
   es: {
@@ -127,6 +127,51 @@ const RENAME_I18N = {
     TL: 'Timor-Leste',
     VA: 'Vatican',
     VN: 'Vietnam',
+  },
+  // The source data mixes in European Portuguese spellings; the app uses Brazilian Portuguese.
+  pt: {
+    AM: 'Armênia',
+    AX: 'Ilhas Åland',
+    AZ: 'Azerbaijão',
+    BW: 'Botsuana',
+    BY: 'Bielorrússia',
+    CG: 'República do Congo',
+    CW: 'Curaçao',
+    CZ: 'Tchéquia',
+    DJ: 'Djibuti',
+    EE: 'Estônia',
+    GL: 'Groenlândia',
+    GS: 'Geórgia do Sul',
+    HM: 'Ilhas Heard e McDonald',
+    IR: 'Irã',
+    KE: 'Quênia',
+    KY: 'Ilhas Cayman',
+    LV: 'Letônia',
+    MC: 'Mônaco',
+    MF: 'São Martinho (França)',
+    MG: 'Madagascar',
+    MK: 'Macedônia do Norte',
+    MP: 'Ilhas Marianas do Norte',
+    NC: 'Nova Caledônia',
+    NL: 'Países Baixos',
+    PE: 'Peru',
+    PL: 'Polônia',
+    RO: 'Romênia',
+    SH: 'Santa Helena',
+    SI: 'Eslovênia',
+    SX: 'São Martinho (Países Baixos)',
+    SZ: 'Essuatíni',
+    TF: 'Terras Austrais Francesas',
+    TJ: 'Tadjiquistão',
+    TM: 'Turcomenistão',
+    TT: 'Trinidad e Tobago',
+    TW: 'Taiwan',
+    VC: 'São Vicente e Granadinas',
+    VG: 'Ilhas Virgens Britânicas',
+    VI: 'Ilhas Virgens Americanas',
+    VN: 'Vietnã',
+    YE: 'Iêmen',
+    ZW: 'Zimbábue',
   },
 };
 const countryNames = {};
@@ -197,6 +242,12 @@ const US_NAMES_I18N = {
     DC: 'District de Columbia', FL: 'Floride', GA: 'Géorgie', HI: 'Hawaï', LA: 'Louisiane', NM: 'Nouveau-Mexique',
     PA: 'Pennsylvanie', VA: 'Virginie', WV: 'Virginie-Occidentale',
     AS: 'Samoa américaines', MP: 'Îles Mariannes du Nord', PR: 'Porto Rico', VI: 'Îles Vierges des États-Unis',
+  },
+  pt: {
+    CA: 'Califórnia', NC: 'Carolina do Norte', SC: 'Carolina do Sul', ND: 'Dakota do Norte', SD: 'Dakota do Sul',
+    DC: 'Distrito de Colúmbia', FL: 'Flórida', GA: 'Geórgia', HI: 'Havaí', LA: 'Luisiana', NM: 'Novo México',
+    NJ: 'Nova Jérsei', NY: 'Nova York', PA: 'Pensilvânia', VA: 'Virgínia', WV: 'Virgínia Ocidental',
+    AS: 'Samoa Americana', MP: 'Ilhas Marianas do Norte', PR: 'Porto Rico', VI: 'Ilhas Virgens Americanas',
   },
 };
 
