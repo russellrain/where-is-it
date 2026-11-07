@@ -16,6 +16,7 @@
     progress: $('stat-progress'),
     score: $('stat-score'),
     time: $('stat-time'),
+    stats: document.querySelector('.topbar .stats'),
     bar: $('progress-bar'),
     feedback: $('feedback'),
     overlay: $('overlay'),
@@ -120,6 +121,7 @@
   }
 
   function showWelcome() {
+    ui.stats.classList.add('idle');
     document.title = t('gamePageTitle');
     // [map, label, filter, random sample size]. Untitled presets get the automatic title, which follows the language.
     const { world, us } = WhereIsIt.ATLASES;
@@ -188,6 +190,7 @@
 
   function showIntro() {
     homeBtn.hidden = true;
+    ui.stats.classList.add('idle');
     document.title = `${title()} · Where Is It`;
     const total = questionCount();
     const playIcon = el('span', { class: 'btn-icon', 'aria-hidden': 'true' });
@@ -230,6 +233,7 @@
 
   function start(queue) {
     homeBtn.hidden = false;
+    ui.stats.classList.remove('idle');
     clearTimeout(game.nextTimer);
     clearTimeout(game.ringTimer);
     hideSay();

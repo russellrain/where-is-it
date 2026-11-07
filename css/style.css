@@ -207,6 +207,8 @@ input, select { background: var(--panel); }
 }
 .zoom-controls svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .zoom-controls button:hover { background: var(--hover-bg); }
+/* Hidden (and out of the tab order) while a card covers the map, since the overlay blocks them anyway. */
+.map-wrap:has(> .overlay:not([hidden])) .zoom-controls { visibility: hidden; }
 
 /* Map credit and About link in the setup page's map corner. */
 .attribution {
@@ -250,6 +252,11 @@ input, select { background: var(--panel); }
 .guesses span { width: 12px; height: 12px; border-radius: 50%; background: var(--first); }
 .guesses span.used { background: var(--pip-used); }
 .stats { display: flex; gap: 18px; align-items: center; }
+/* Before a quiz starts the stats are only placeholders. visibility (not display) keeps the header from shifting when they appear. */
+.stats.idle { visibility: hidden; }
+/* The animation is only on the non-idle state, so it plays each time a quiz starts (when idle comes off). */
+.stats:not(.idle) { animation: fade-in 0.2s ease-out; }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 .stat { text-align: center; min-width: 54px; }
 .stat b { display: block; font-size: 1.2rem; font-variant-numeric: tabular-nums; }
 .stat small { color: var(--ink-soft); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
@@ -519,6 +526,8 @@ input, select { background: var(--panel); }
   .topbar { gap: 10px; padding: 8px 12px; }
   .prompt .target { font-size: 1.25rem; }
   .stats { gap: 10px; width: 100%; justify-content: space-between; order: 1; }
+  /* Here the stats take a row of their own, so reserving their space would leave an empty band; drop them instead. */
+  .stats.idle { display: none; }
   .card { padding: 20px; }
 }
 
@@ -619,6 +628,7 @@ body.print-page { overflow: auto; height: auto; min-height: 100%; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0.01ms !important; }
   .feedback.pop { animation: none; }
+  .stats:not(.idle) { animation: none; }
   .geomap .hint { animation: none; fill: var(--hint); }
   .geomap .ring circle { animation: none; }
   .geomap .flash-wrong { animation: none; fill: var(--missed); }
