@@ -4,6 +4,35 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Where Is It · The place-finding game</title>
+  <meta name="description" content="A free geography game: find countries, U.S. states, capitals and counties on the map. Build your own quiz and share it with a link. No accounts, no sign-ups.">
+  <link rel="canonical" href="https://whereisit.earth/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Where Is It">
+  <meta property="og:url" content="https://whereisit.earth/">
+  <meta property="og:title" content="Where Is It · The place-finding game">
+  <meta property="og:description" content="Find countries, U.S. states, capitals and counties on the map. Free, no sign-up.">
+  <meta property="og:image" content="https://whereisit.earth/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="A world map with some countries colored in, and the Where Is It logo">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Where Is It",
+    "alternateName": "The place-finding game",
+    "url": "https://whereisit.earth/",
+    "description": "A free geography game: find countries, U.S. states, capitals and counties on the map. Build your own quiz and share it with a link.",
+    "applicationCategory": "EducationalApplication",
+    "genre": "Geography quiz",
+    "operatingSystem": "Any (web browser)",
+    "isAccessibleForFree": true,
+    "inLanguage": ["en", "es", "fr", "pt"],
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "image": "https://whereisit.earth/assets/og-image.png"
+  }
+  </script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 0 32 32'><path fill='%23e0483e' d='M12 0C5.37 0 0 5.37 0 12c0 8.4 10.2 18.6 11.2 19.6a1.1 1.1 0 0 0 1.6 0C13.8 30.6 24 20.4 24 12 24 5.37 18.63 0 12 0z'/><circle cx='12' cy='12' r='4.6' fill='white'/></svg>">
   <link rel="stylesheet" href="css/style.css">
   <link rel="manifest" href="manifest.webmanifest">
@@ -43,7 +72,18 @@
         <button type="button" id="zoom-reset" title="Zoom to the quiz countries" aria-label="Zoom to the quiz countries" data-i18n-title="zoomToFit" data-i18n-aria-label="zoomToFit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
       </div>
       <button type="button" class="btn primary show-results" id="show-results" data-i18n="showResults" hidden>Show results</button>
-      <div class="overlay" id="overlay"><div class="card" id="card"></div></div>
+      <div class="overlay" id="overlay"><div class="card" id="card"><noscript>
+        <h1>Where Is It: the place-finding game</h1>
+        <p>A free geography game. Find countries, U.S. states, state capitals and counties on the map, one at a time. Build your own quiz and share it with a link. No accounts, no sign-ups.</p>
+        <p><strong>Where Is It needs JavaScript to run.</strong> Turn it on in your browser to play.</p>
+        <ul>
+          <li><a href="?c=all">All countries of the world</a></li>
+          <li><a href="?m=us&amp;c=all">All 50 U.S. states</a></li>
+          <li><a href="?m=us&amp;q=capitals&amp;c=all">All 50 state capitals</a></li>
+          <li><a href="setup">Make your own map quiz</a></li>
+          <li><a href="about">About</a></li>
+        </ul>
+      </noscript></div></div>
     </div>
   </div>
 

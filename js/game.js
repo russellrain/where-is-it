@@ -212,7 +212,7 @@
     // In reading order for the one-column layout; wide, short screens move the presets into a
     // second column via grid areas (see .card.welcome in the CSS).
     showCard(
-      el('div', { class: 'card-head welcome-head' }, wordmark({ large: true, tagline: true }), aboutLink()),
+      el('div', { class: 'card-head welcome-head' }, wordmark({ large: true, tagline: true, heading: true }), aboutLink()),
       el('p', { class: 'welcome-text' }, t('welcome', { n: WhereIsIt.DEFAULTS.guesses })),
       el(
         'div',
