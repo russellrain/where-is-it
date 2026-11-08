@@ -19,14 +19,6 @@ To serve it locally (closer to how it behaves when hosted):
 npm run serve   # http://localhost:8080
 ```
 
-### Hosting on GitHub Pages
-
-Push the repo to GitHub, then go to **Settings → Pages → Deploy from branch → `main` / root**. Everything is static and uses relative paths, so it works as-is.
-
-### Electron later
-
-All libraries, map data and flags are bundled locally. Nothing uses ES modules or `fetch()`, so the pages load fine from `file://` inside an Electron `BrowserWindow`.
-
 ## Quiz link format
 
 `?t=Africa&c=NG,KE,EG&n=10&g=3&d=1&s=1` or, for U.S. states, `?m=us&c=CA,TX,NY`, or for their capitals `?m=us&q=capitals&c=CA,TX,NY`, or for a state's counties `?m=counties-tx&c=all`
