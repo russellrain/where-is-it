@@ -563,7 +563,6 @@
     showCard(
       el('div', { class: 'logo' }, pinIcon(), title()),
       el('h1', {}, praise),
-      game.name ? el('p', {}, game.name) : null,
       el(
         'div',
         { class: 'score-big' },

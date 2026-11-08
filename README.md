@@ -41,15 +41,16 @@ npm run serve   # http://localhost:8080
 
 ```
 index.html, setup.html   pages
+print.html               printable worksheet for a quiz
 about.html               about page and privacy policy (linked from both footers)
-privacy.html             redirect to about.html#privacy for old links
 css/style.css            all styles
-js/common.js             URL parsing, helpers
+js/common.js             URL parsing, helpers, the maps (ATLASES): world countries, U.S. states and counties, and the quiz types (names, capitals)
 js/i18n.js               translations (English, Spanish, French, Portuguese), language picker
+js/theme.js              light/dark theme, clean URLs
 js/map.js                GeoMap: D3 map with pan/zoom, cursor label, tiny-country dots
 js/game.js               the game
 js/setup.js              quiz setup
-js/common.js             also defines the maps (ATLASES): world countries, U.S. states, and the quiz types (names, capitals)
+js/print.js              the worksheet
 js/data/*.js             generated data (do not edit by hand)
 assets/flags/            generated SVG flags
 vendor/                  d3, d3-composite-projections, topojson-client, qrcode-generator, third-party licenses
