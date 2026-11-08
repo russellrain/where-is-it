@@ -2,16 +2,16 @@
 
 *The place-finding game.*
 
-A find-it-on-the-map game for classrooms.
+A free find-it-on-the-map game. No accounts, no sign-ups.
 
-**Play it at [whereisit.earth](https://whereisit.earth)**. Teachers can build a quiz at [whereisit.earth/setup](https://whereisit.earth/setup).
+**Play it at [whereisit.earth](https://whereisit.earth)**. Build your own quiz at [whereisit.earth/setup](https://whereisit.earth/setup).
 
-- **Teachers** open `/setup`, pick a map (world countries or U.S. states) and a quiz type (find each place by name or by its capital), and choose regions, subregions, or individual places (from the list or by clicking the map). Then they copy a link to share.
-- **Students** open the link and get one country at a time, with its name and flag, to find on the map. Each country allows 3 guesses (configurable). After that the answer is revealed and the student clicks it to continue, but it counts as missed. A timer runs and a score screen with **Copy score** appears at the end.
+- **Build a quiz** at `/setup`: pick a map (world countries or U.S. states) and a quiz type (find each place by name or by its capital), and choose regions, subregions, or individual places (from the list or by clicking the map). Then copy a link to share it.
+- **Play** by opening the link: you get one place at a time, with its name and flag, to find on the map. Each place allows 3 guesses (configurable). After that the answer is revealed and you click it to continue, but it counts as missed. A timer runs and a score screen with **Copy score** appears at the end.
 
 ## Running it
 
-There's no build step and no server needed. Open `/` (student) or `/setup` (teacher) in a browser.
+There's no build step and no server needed. Open `/` (the game) or `/setup` (quiz setup) in a browser.
 
 To serve it locally (closer to how it behaves when hosted):
 
@@ -33,7 +33,7 @@ npm run serve   # http://localhost:8080
 | `g` | Guesses per country before the hint | 3 |
 | `d` | Grey out and disable countries that aren't in the quiz | 1 |
 | `s` | Show the running timer while playing (`0` hides it; the time still appears on the results) | 1 |
-| `l` | Languages students may use, e.g. `es` or `en,es,fr`. With more than one, students get a language picker. The setup page always sets it, starting from the teacher's own page language. | all |
+| `l` | Languages players may use, e.g. `es` or `en,es,fr`. With more than one, players get a language picker. The setup page always sets it, starting from the setup page's own language. | all |
 
 `/setup` accepts the same parameters. The **✎ Customize** link on a quiz's start and results screens opens it in `/setup` so anyone can change it and get their own link.
 
@@ -47,8 +47,8 @@ css/style.css            all styles
 js/common.js             URL parsing, helpers
 js/i18n.js               translations (English, Spanish, French, Portuguese), language picker
 js/map.js                GeoMap: D3 map with pan/zoom, cursor label, tiny-country dots
-js/game.js               student game
-js/setup.js              teacher setup
+js/game.js               the game
+js/setup.js              quiz setup
 js/common.js             also defines the maps (ATLASES): world countries, U.S. states, and the quiz types (names, capitals)
 js/data/*.js             generated data (do not edit by hand)
 assets/flags/            generated SVG flags
@@ -60,7 +60,7 @@ To regenerate data (for example after upgrading a package): `npm install && npm 
 
 ## Languages
 
-The game, setup page and worksheet are available in English, Spanish, French and Portuguese. Students start in the language they last picked, or their device language, as long as the quiz allows it (`l` above). The setup page's own language is separate from the quiz's student languages. The About page (including the privacy policy) is English only.
+The game, setup page and worksheet are available in English, Spanish, French and Portuguese. Players start in the language they last picked, or their device language, as long as the quiz allows it (`l` above). The setup page's own language is separate from the quiz's player languages. The About page (including the privacy policy) is English only.
 
 To add a language: add it to `LANGUAGES` in `js/i18n.js` along with its `STRINGS` and `REGIONS` tables, add it to `TRANSLATIONS` in `tools/build-data.mjs` (and any name fixes to `RENAME_I18N`, and capitals whose names differ from English to `CAPITALS_I18N`), then run `npm run build-data` to regenerate `js/data/country-names.js`. Add its capitals-quiz wording to `VARIANTS.capitals` in `js/i18n.js`. For the U.S. maps, also add the language's `VARIANTS.us`, `VARIANTS['capitals-us']` and `VARIANTS.counties` wording, the U.S. region names to its `REGIONS` table, and any state names that differ from English to `US_NAMES_I18N` in `tools/build-data.mjs`.
 
