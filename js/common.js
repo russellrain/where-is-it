@@ -312,7 +312,9 @@
     // Nothing to show (counties): an empty element, so callers can still put it in a list of nodes.
     if (ATLAS.badge === false) return el('span', { class: 'no-badge', 'aria-hidden': 'true' });
     if (!ATLAS.flags) return el('span', { class: `${cls || 'flag'} code-badge`, 'aria-hidden': 'true' }, code);
-    return el('img', { class: cls || 'flag', src: flagUrl(code), alt: '', draggable: 'false' });
+    // Offline, a flag that was never shown online isn't saved (see sw.js): leave its space blank, not a broken image.
+    const hide = (e) => (e.target.style.visibility = 'hidden');
+    return el('img', { class: cls || 'flag', src: flagUrl(code), alt: '', draggable: 'false', onerror: hide });
   }
 
   /** Whether a quiz of these places needs the extended layout (e.g. it includes a U.S. territory). */
@@ -327,7 +329,47 @@
     return all.filter((f) => !byCode.has(f.id) || !ATLAS.inset(byCode.get(f.id)));
   }
 
+  /**
+   * When this page's map shapes didn't load (offline, and the map was never opened online, see sw.js), replaces the
+   * page with a note saying so and returns true; the page's script should then stop. `back` is the page to offer
+   * instead, on the world map (always saved).
+   */
+  function mapUnavailable(back) {
+    if (ATLAS.topo) return false;
+    document.title = I18N.t('mapMissingTitle');
+    document.body.replaceChildren(
+      el(
+        'main',
+        { class: 'map-missing' },
+        el('h1', {}, I18N.t('mapMissingTitle')),
+        el('p', {}, I18N.t('mapMissingText')),
+        el(
+          'p',
+          { class: 'map-missing-actions' },
+          el('button', { class: 'btn primary', type: 'button', onclick: () => location.reload() }, I18N.t('tryAgain')),
+          el('a', { class: 'btn', href: pageUrl(back) }, I18N.t('mapMissingBack')),
+        ),
+      ),
+    );
+    return true;
+  }
+
+  /**
+   * Whether map `id` can be opened: online, or its shapes are saved for offline use. Setup checks this before
+   * switching maps, so going offline can't strand the page on a map it can't draw.
+   */
+  async function mapSaved(id) {
+    if (navigator.onLine || !window.caches || !window.GEO_SHAPES_FILE) return true;
+    try {
+      return Boolean(await caches.match(new URL(GEO_SHAPES_FILE(id), document.baseURI).href));
+    } catch {
+      return true;
+    }
+  }
+
   window.WhereIsIt = {
+    mapUnavailable,
+    mapSaved,
     ATLASES,
     ATLAS,
     COUNTRIES,

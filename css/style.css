@@ -766,3 +766,10 @@ body.print-page { overflow: auto; height: auto; min-height: 100%; }
   .geomap .flash-wrong { animation: none; fill: var(--missed); }
   .geomap .flash-right { animation: none; }
 }
+
+/* A page whose map isn't saved for offline use (WhereIsIt.mapUnavailable) */
+.map-missing { max-width: 30rem; margin: 12vh auto 0; padding: 0 16px; text-align: center; }
+.map-missing h1 { font-size: 1.5rem; margin-bottom: 0.5em; }
+.map-missing p { line-height: 1.5; }
+.map-missing-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 1.5em; }
+.map-missing-actions .btn { text-decoration: none; }

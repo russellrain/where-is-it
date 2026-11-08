@@ -5,6 +5,7 @@
 // the map is drawn after layout so it can fill whatever space the word bank leaves.
 (function () {
   'use strict';
+  if (WhereIsIt.mapUnavailable('./')) return;
   const { el, promptName, fullName } = WhereIsIt;
   const { t } = I18N;
   const $ = (id) => document.getElementById(id);

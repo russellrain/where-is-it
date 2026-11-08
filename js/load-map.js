@@ -5,12 +5,14 @@
 (function () {
   'use strict';
   const m = (new URLSearchParams(location.search).get('m') || '').toLowerCase();
-  const county = /^counties-([a-z]{2})$/.exec(m);
-  const src =
-    m === 'us'
-      ? 'js/data/us-shapes.js'
-      : county && window.GEO_US_COUNTY_STATES && GEO_US_COUNTY_STATES[county[1].toUpperCase()]
-        ? `js/data/counties/${county[1]}.js`
-        : 'js/data/world.js';
-  document.write(`<script src="${src}"><\/script>`);
+  document.write(`<script src="${shapesFile(m)}"><\/script>`);
+
+  /** The shapes file of a map id ('us', 'counties-tx', anything else is the world). Setup uses it too (mapSaved). */
+  function shapesFile(id) {
+    const county = /^counties-([a-z]{2})$/.exec(id);
+    if (id === 'us') return 'js/data/us-shapes.js';
+    if (county && window.GEO_US_COUNTY_STATES && GEO_US_COUNTY_STATES[county[1].toUpperCase()]) return `js/data/counties/${county[1]}.js`;
+    return 'js/data/world.js';
+  }
+  window.GEO_SHAPES_FILE = shapesFile;
 })();

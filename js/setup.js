@@ -1,6 +1,7 @@
 // Teacher setup: choose a map, then countries (or states) and options, and produce a shareable quiz link.
 (function () {
   'use strict';
+  if (WhereIsIt.mapUnavailable('setup')) return;
   const { ATLAS, byCode, el, flagImg, countryName, fold } = WhereIsIt;
   const { t } = I18N;
   const $ = (id) => document.getElementById(id);
@@ -75,8 +76,14 @@
 
   // Each map is its own page load (?m=us), since places, shapes and wording all change with it.
   // The quiz options carry over; the picked places and the title don't.
-  const switchMap = (id) => {
-    if (id === ATLAS.id || (selected.size && !confirm(t('confirmSwitchMap')))) return false;
+  // Offline, only maps saved on this device can be opened (WhereIsIt.mapSaved).
+  const switchMap = async (id) => {
+    if (id === ATLAS.id) return false;
+    if (!(await WhereIsIt.mapSaved(id))) {
+      alert(t('mapNotSaved'));
+      return false;
+    }
+    if (selected.size && !confirm(t('confirmSwitchMap'))) return false;
     location.href = WhereIsIt.pageUrl('setup', WhereIsIt.quizQuery({ ...currentQuiz(), map: id, codes: [], title: '' }));
     return true;
   };
@@ -101,14 +108,14 @@
   }
   renderCountyStates();
   countyPick.hidden = !onCounties;
-  countyState.onchange = () => {
-    if (!switchMap(`counties-${countyState.value.toLowerCase()}`)) countyState.value = onCounties ? ATLAS.state : '';
+  countyState.onchange = async () => {
+    if (!(await switchMap(`counties-${countyState.value.toLowerCase()}`))) countyState.value = onCounties ? ATLAS.state : '';
   };
   for (const btn of document.querySelectorAll('[data-map]')) {
     const id = btn.dataset.map;
     btn.setAttribute('aria-pressed', String(id === 'counties' ? onCounties : id === ATLAS.id));
     btn.onclick = () => {
-      if (id !== 'counties') return switchMap(id);
+      if (id !== 'counties') return void switchMap(id);
       if (onCounties) return;
       countyPick.hidden = false;
       countyState.focus();

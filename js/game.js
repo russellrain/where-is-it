@@ -1,6 +1,7 @@
 // Student game: find each country (or state) on the map.
 (function () {
   'use strict';
+  if (WhereIsIt.mapUnavailable('./')) return;
   const { el, flagImg, formatTime, wordmark, pinIcon, countryName, capitalName, promptName, fullName, starIcon, defaultTitle } = WhereIsIt;
   const { t } = I18N;
   const text = (s) => document.createTextNode(s);

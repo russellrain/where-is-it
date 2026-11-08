@@ -4,9 +4,10 @@
 // network fails, or is so slow (TIMEOUT) that a saved copy is better than waiting. So a new deploy shows up on the
 // next load, as without a service worker, and nothing here needs bumping when the site changes.
 //
-// The pages and code are saved up front (SHELL), so any page opens offline once the site has been visited. Map
-// shapes and flags are saved as they're used: a quiz played once can be played again offline, without every
-// visitor downloading the world map and all 50 states' counties.
+// The pages, code and the world and U.S. states maps are saved up front (SHELL), so any page and either main map
+// opens offline once the site has been visited. A state's counties and flags are saved as they're used: a quiz
+// played once can be played again offline, without every visitor downloading all 50 states' counties. A page whose
+// map isn't saved says so (WhereIsIt.mapUnavailable), and setup won't switch to one while offline (mapSaved).
 'use strict';
 
 const CACHE = 'whereisit-v1'; // bump only to change how things are cached (old caches are deleted)
@@ -32,6 +33,8 @@ const SHELL = [
   'js/data/country-names.js',
   'js/data/us-states.js',
   'js/data/us-counties.js',
+  'js/data/world.js',
+  'js/data/us-shapes.js',
   'vendor/d3.min.js',
   'vendor/d3-composite-projections.min.js',
   'vendor/topojson-client.min.js',
