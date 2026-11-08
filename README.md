@@ -13,6 +13,8 @@ A free find-it-on-the-map game. No accounts, no sign-ups.
 
 There's no build step and no server needed. Open `/` (the game) or `/setup` (quiz setup) in a browser.
 
+Once a page has been visited it also works offline (see `sw.js`): every page and the code are saved on the first visit, and each map's shapes and flags as they're used. Online, files always come from the network, so a deploy shows up on the next load with nothing to bump.
+
 To serve it locally (closer to how it behaves when hosted):
 
 ```sh
@@ -51,8 +53,11 @@ js/map.js                GeoMap: D3 map with pan/zoom, cursor label, tiny-countr
 js/game.js               the game
 js/setup.js              quiz setup
 js/print.js              the worksheet
+js/load-map.js           loads only the shapes of the page's map (world, U.S. states, or one state's counties)
 js/data/*.js             generated data (do not edit by hand)
 assets/flags/            generated SVG flags
+assets/icons/            app icons (home screen, manifest.webmanifest)
+sw.js                    service worker: works offline once visited (network first, saved copies as fallback)
 vendor/                  d3, d3-composite-projections, topojson-client, qrcode-generator, third-party licenses
 tools/build-data.mjs     regenerates js/data, assets/flags, vendor from npm packages
 ```
@@ -67,7 +72,7 @@ To add a language: add it to `LANGUAGES` in `js/i18n.js` along with its `STRINGS
 
 ## Adding another map
 
-Maps are defined in `ATLASES` in `js/common.js`. To add, say, Canadian provinces: generate a data file in `tools/build-data.mjs` like `js/data/us-states.js` (TopoJSON shapes with short ids, plus `places` with `code`, `name`, `region` and `subregion`), add an entry to `ATLASES` with its projection, add a button to the map picker in `setup.html`, add a `VARIANTS` entry in `js/i18n.js` for its wording ("province" instead of "country"), and add quick-play presets in `showWelcome()` in `js/game.js`.
+Maps are defined in `ATLASES` in `js/common.js`. To add, say, Canadian provinces: generate data files in `tools/build-data.mjs` like `js/data/us-states.js` (`places` with `code`, `name`, `region` and `subregion`) and `js/data/us-shapes.js` (TopoJSON shapes with short ids), load the shapes for its `m` value in `js/load-map.js`, add an entry to `ATLASES` with its projection, add a button to the map picker in `setup.html`, add a `VARIANTS` entry in `js/i18n.js` for its wording ("province" instead of "country"), and add quick-play presets in `showWelcome()` in `js/game.js`.
 
 ## Credits & licenses
 

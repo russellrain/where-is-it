@@ -1,4 +1,5 @@
-// Light/dark theme. Loaded in <head> so the theme is applied before the page paints.
+// Light/dark theme, clean URLs and the offline service worker: the one script every page loads.
+// Loaded in <head> so the theme is applied before the page paints.
 // Follows the device setting until someone presses a .theme-toggle button; that choice
 // (just "light" or "dark") is remembered in this browser's localStorage.
 (function () {
@@ -22,6 +23,13 @@
       else return;
       a.href = url.href;
     }, true);
+  }
+
+  // Offline support (see sw.js). Not under file://, where service workers don't exist.
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register(new URL('sw.js', document.baseURI)).catch(() => {});
+    });
   }
 
   const KEY = 'whereisit-theme';

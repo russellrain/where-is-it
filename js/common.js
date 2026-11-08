@@ -27,10 +27,12 @@
       projection: (rotate) => d3.geoNaturalEarth1().rotate([rotate || 0, 0]),
     },
   };
+  // The places and names are always loaded (the home screen lists them); the shapes only for a ?m=us page (js/load-map.js).
+  // The world map's shapes are likewise only there when it's the page's map.
   if (window.GEO_US_STATES) {
     ATLASES.us = {
       id: 'us',
-      topo: GEO_US_STATES.topo,
+      topo: window.GEO_US_SHAPES,
       object: 'states',
       places: GEO_US_STATES.places,
       names: GEO_US_STATES.names,
@@ -44,7 +46,7 @@
       projection: (rotate, extended) => (extended ? d3.geoAlbersUsaTerritories() : d3.geoAlbersUsa()),
     };
   }
-  // A state's counties (?m=counties-tx). js/data/us-counties.js loads the one state's shapes the link names.
+  // A state's counties (?m=counties-tx). js/load-map.js loads the one state's shapes the link names.
   if (window.GEO_US_COUNTIES && window.GEO_US_STATES) {
     const d = GEO_US_COUNTIES;
     const state = GEO_US_STATES.places.find((p) => p.code === d.state);
