@@ -50,8 +50,8 @@
           <label class="opt-heading" for="county-state" data-i18n="countiesState">State</label>
           <select id="county-state" class="county-state"></select>
         </div>
-        <!-- Shown on maps whose places have capitals; see setup.js. The labels follow the map (States/Countries). -->
-        <div class="map-pick" id="mode-pick" role="group" aria-labelledby="mode-pick-label" hidden>
+        <!-- Hidden by setup.js on maps without capitals (counties). Visible in the HTML so the heading column doesn't widen (and shift the map switch) once the script runs. The labels follow the map (States/Countries). -->
+        <div class="map-pick" id="mode-pick" role="group" aria-labelledby="mode-pick-label">
           <span class="opt-heading" id="mode-pick-label" data-i18n="quizType">Quiz type</span>
           <div class="segmented">
             <button type="button" data-mode="places" data-i18n="modePlaces">States</button>
