@@ -670,10 +670,16 @@ h1.wordmark { margin: 0; font-weight: inherit; }
   .lang-picker .lang-select { width: 70px; padding: 0; color: transparent; }
   .lang-picker .lang-select option { color: var(--ink); background: var(--panel); }
   .lang-picker .i-chevron { display: none; }
-  .lang-picker .lang-code {
-    display: block; position: absolute; left: 34px; top: 50%; transform: translateY(-50%); pointer-events: none;
-    font-size: 0.85rem; font-weight: 700; letter-spacing: 0.02em; color: var(--ink);
-  }
+  .lang-picker .lang-code { display: block; }
+}
+/* The setup sidebar is always narrow (and loses width to a scrollbar on short screens), so its picker is always compact. */
+.sidebar .lang-picker .lang-select { width: 70px; padding: 0; color: transparent; }
+.sidebar .lang-picker .lang-select option { color: var(--ink); background: var(--panel); }
+.sidebar .lang-picker .i-chevron { display: none; }
+.sidebar .lang-picker .lang-code { display: block; }
+.lang-picker .lang-code {
+  position: absolute; left: 34px; top: 50%; transform: translateY(-50%); pointer-events: none;
+  font-size: 0.85rem; font-weight: 700; letter-spacing: 0.02em; color: var(--ink);
 }
 
 /* Small phones: a long place name can't share a row with the logo, back button, language and theme controls,
