@@ -488,6 +488,8 @@ h1.wordmark { margin: 0; font-weight: inherit; }
 .sidebar {
   width: 380px; flex: none; display: flex; flex-direction: column; background: var(--panel);
   border-right: 1px solid var(--line); min-height: 0;
+  /* On short screens the tree bottoms out at its min-height; scroll the sidebar so the options and share bar stay reachable. */
+  overflow-y: auto;
 }
 .sidebar header {
   display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 8px; align-items: start; padding: 14px 16px 8px;
