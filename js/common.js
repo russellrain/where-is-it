@@ -73,7 +73,9 @@
     for (const [lang, names] of Object.entries(GEO_US_STATES.names)) if (names[d.state]) regionNames[lang] = { [state.name]: names[d.state] };
     I18N.addRegions(regionNames);
   }
-  const ATLAS = ATLASES[(new URLSearchParams(location.search).get('m') || '').toLowerCase()] || ATLASES.world;
+  const mapId = (new URLSearchParams(location.search).get('m') || '').toLowerCase();
+  // hasOwn, so ?m=constructor or ?m=__proto__ falls back to the world instead of picking up a built-in object.
+  const ATLAS = Object.hasOwn(ATLASES, mapId) ? ATLASES[mapId] : ATLASES.world;
 
   const COUNTRIES = ATLAS.places;
   const byCode = new Map(COUNTRIES.map((c) => [c.code, c]));
