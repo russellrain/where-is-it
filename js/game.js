@@ -192,11 +192,9 @@
       presets.map(([atlas, title, fn, n, label, mode]) => {
         const core = atlas.places.filter((c) => atlas.core(c));
         const codes = core.filter(fn).map((c) => c.code);
-        // "Random" and "All" draw from the whole map rather than one region, so they get a quieter, distinct look.
-        const whole = codes.length === core.length;
         return el(
           'a',
-          { class: whole ? 'btn whole' : 'btn', href: WhereIsIt.quizQuery({ map: atlas.id, mode, codes, title, count: n }) },
+          { class: 'btn', href: WhereIsIt.quizQuery({ map: atlas.id, mode, codes, title, count: n }) },
           el('span', { class: 'preset-name' }, n ? icon('shuffle') : null, label || title),
           el('small', {}, t(mode === 'capitals' ? 'nCapitals' : atlas.id === 'us' ? 'nStates' : 'nCountries', { n: n ?? codes.length })),
         );

@@ -459,9 +459,6 @@ h1.wordmark { margin: 0; font-weight: inherit; }
 }
 .preset-list .preset-name { display: inline-flex; align-items: center; gap: 6px; }
 .preset-list small { color: var(--ink-soft); font-weight: 500; font-size: 0.8rem; white-space: nowrap; }
-.preset-list a.whole { background: var(--subtle-bg); border-style: dashed; }
-/* The resting fill is already near --hover-bg, so hover lifts to the panel color and firms up the border instead. */
-.preset-list a.whole:hover { background: var(--panel); border-style: solid; border-color: color-mix(in srgb, var(--ink-soft) 45%, var(--line)); }
 .preset-list .preset-name .ico { width: 0.95em; height: 0.95em; opacity: 0.6; }
 
 /* Counties sub-menu: a back button and a searchable grid of the 50 states. Single-line names, so the
