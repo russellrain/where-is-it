@@ -176,6 +176,8 @@ select:not(.lang-select):hover { background-color: var(--hover-bg); }
 .geomap .map-hover-label text { font-weight: 500; }
 /* A greyed-out place outside the quiz: muted, like its shape, since it's never an answer. */
 .geomap .map-peek-label text { font-style: italic; fill: var(--ink-soft); }
+/* Already answered during a game: not clickable again until the results. */
+.geomap .locked { cursor: default; }
 .geomap .s-first.hover, .geomap .s-ok.hover, .geomap .s-missed.hover { fill-opacity: 0.75; }
 /* Capital stars (capitals quizzes), drawn at a fixed screen size; see GeoMap.setCapitals. */
 .geomap .capital { pointer-events: none; }

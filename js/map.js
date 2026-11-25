@@ -5,6 +5,7 @@
 //     rotate: 0,                         // central meridian offset in degrees
 //     extended: false,                   // the atlas's extended layout (U.S. territories)
 //     isActive: (code) => true,          // can this country be hovered/clicked?
+//     isPickable: (code) => true,        // active but temporarily not hoverable/clickable (e.g. already answered)
 //     labelFor: (hovered) => hovered,    // country to show next to the cursor (or null)
 //     labelCaption: null,                // optional small caption before the name, e.g. 'Find'
 //     labelContent: null,                // (code, hovered) => [nodes] for the cursor label; default: flag and name
@@ -31,7 +32,7 @@
   class GeoMap {
     constructor(container, opts) {
       this.opts = Object.assign(
-        { rotate: 0, extended: false, isActive: () => true, labelFor: (hovered) => hovered, labelCaption: null, labelContent: null, labelHover: false, peekInactive: false, hoverName: () => false, onClick: null },
+        { rotate: 0, extended: false, isActive: () => true, isPickable: () => true, labelFor: (hovered) => hovered, labelCaption: null, labelContent: null, labelHover: false, peekInactive: false, hoverName: () => false, onClick: null },
         opts,
       );
       this.container = container;
@@ -387,7 +388,7 @@
       };
       const codeAt = (e) => {
         const code = rawCodeAt(e);
-        return code && this.opts.isActive(code) ? code : null;
+        return code && this.opts.isActive(code) && this.opts.isPickable(code) ? code : null;
       };
       const place = () => {
         if (tip.hidden || !last) return;

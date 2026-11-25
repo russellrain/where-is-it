@@ -32,6 +32,8 @@
     status: $('sr-status'),
   };
 
+  const done = new Set(); // places answered this game (found or missed)
+
   const game = {
     state: 'intro', // intro | playing | done
     queue: [],
@@ -50,6 +52,8 @@
     rotate: WhereIsIt.rotationFor(quiz.codes),
     extended: WhereIsIt.usesExtended(quiz.codes),
     isActive: (code) => !quiz.dim || pool.has(code) || !pool.size,
+    // Places already answered can't come up again, so while playing a click on one is just a slip: ignore it.
+    isPickable: (code) => game.state !== 'playing' || !done.has(code),
     // While playing, the cursor label shows the country to find, never the one under the pointer.
     // Once finished, it names whatever is under the pointer so students can explore their results.
     labelFor: (hovered) => (game.state === 'playing' ? game.current : game.state === 'done' ? hovered : null),
@@ -332,6 +336,7 @@
   function backToIntro() {
     if (game.current) map.toggleClass(game.current, 'hint', false);
     Object.assign(game, { state: 'intro', queue: [], index: -1, current: null, results: [], elapsed: 0, advancing: false });
+    unlockAnswered();
     clearInterval(game.timer);
     clearTimeout(game.nextTimer);
     clearTimeout(game.ringTimer);
@@ -360,6 +365,7 @@
     map.setCapitals([]);
     map.opts.labelCaption = t('find');
     Object.assign(game, { state: 'playing', queue, index: -1, results: [], elapsed: 0, advancing: false });
+    unlockAnswered();
     ui.overlay.hidden = true;
     ui.showResults.hidden = true;
     map.clearStates();
@@ -403,6 +409,8 @@
       game.advancing = true;
       const found = !game.hint;
       game.results.push({ code, wrong: game.wrong, found });
+      done.add(code);
+      map.toggleClass(code, 'locked', true);
       map.toggleClass(code, 'hint', false);
       map.ring(null);
       const cls = !found ? 's-missed' : game.wrong === 0 ? 's-first' : 's-ok';
@@ -448,6 +456,7 @@
   function finish() {
     game.state = 'done';
     game.current = null;
+    unlockAnswered();
     tick();
     clearInterval(game.timer);
     hideSay();
@@ -703,6 +712,12 @@
   /** The About page, linked from the welcome card only (quiz and results cards stay focused on the quiz). */
   function aboutLink() {
     return el('a', { class: 'subtle-link', href: 'about', target: '_blank', rel: 'noopener' }, t('about'));
+  }
+
+  /** Makes answered places clickable again (game over or restarted). */
+  function unlockAnswered() {
+    for (const code of done) map.toggleClass(code, 'locked', false);
+    done.clear();
   }
 
   /** Places answered so far (found or missed), for the capital stars. */
