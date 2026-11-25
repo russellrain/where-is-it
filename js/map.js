@@ -457,30 +457,55 @@
         setHover(codeAt(e));
       };
 
-      const node = this.svg.node();
-      node.addEventListener('pointermove', (e) => {
-        clearTimeout(hideTimer);
-        track(e);
-      });
-      node.addEventListener('pointerleave', () => {
+      // Touch/pen: a highlight under a finger that's panning or pinching the map is just noise, so once the
+      // gesture moves past the click threshold (or a second finger joins), clear it until all fingers lift.
+      const touches = new Map(); // pointerId -> start position, for touch/pen pointers that are down
+      let dragging = false;
+      const clearHover = () => {
         inside = false;
         setPeek(null);
         setHover(null);
-      });
-      node.addEventListener('pointerdown', (e) => {
-        if (e.pointerType !== 'mouse') track(e);
-      });
-      node.addEventListener('pointerup', (e) => {
-        // Touch has no hover: briefly highlight where the finger lands, then clear it.
+      };
+
+      const node = this.svg.node();
+      node.addEventListener('pointermove', (e) => {
+        clearTimeout(hideTimer);
         if (e.pointerType !== 'mouse') {
-          clearTimeout(hideTimer);
-          hideTimer = setTimeout(() => {
-            inside = false;
-            setPeek(null);
-            setHover(null);
-          }, 1200);
+          if (dragging) return;
+          const start = touches.get(e.pointerId);
+          if (start && Math.hypot(e.clientX - start.x, e.clientY - start.y) > 6) {
+            dragging = true;
+            clearHover();
+            return;
+          }
+        }
+        track(e);
+      });
+      node.addEventListener('pointerleave', clearHover);
+      node.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'mouse') return;
+        clearTimeout(hideTimer);
+        touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (touches.size > 1) {
+          dragging = true;
+          clearHover();
+        } else {
+          dragging = false;
+          track(e);
         }
       });
+      const touchEnd = (e) => {
+        if (e.pointerType === 'mouse' || !touches.delete(e.pointerId)) return;
+        if (dragging) {
+          if (!touches.size) dragging = false;
+          return;
+        }
+        // Touch has no hover: briefly highlight where the finger lands, then clear it.
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(clearHover, 1200);
+      };
+      node.addEventListener('pointerup', touchEnd);
+      node.addEventListener('pointercancel', touchEnd);
       node.addEventListener('click', (e) => {
         const code = codeAt(e);
         if (code && this.opts.onClick) this.opts.onClick(code, e);
